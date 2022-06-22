@@ -84,3 +84,4 @@ class DPO2024B:
         rms = float(self.osc1.query('MEASUREMENT:IMMED:VALUE?'))
 
         return rms
+    

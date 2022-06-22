@@ -1,6 +1,9 @@
 from OMEGA_Library import OM_USB_Thermo, OM_USB_ADC
 from csv import writer
 from NI_DAQ_Library import NIDAQ
+from Tektronix_Library import DPO2024B
+import pyvisa
+
 
 def OMEGA_DAQ():
     # OM_USB_numb is 0 by default
@@ -47,5 +50,17 @@ def writeToCSV():
 
         # Close the file object
         f_object.close()
+
+
+def tek_scope():
+    rm = pyvisa.ResourceManager()
+    list_dev = rm.list_resources()
+    # Set device
+    p1 = DPO2024B(list_dev[0])
+    # Get device ID
+    p1.oscilloscope_ID()
+    Channel_number = 1
+    # retrieve rms from the waveform and return it
+    return p1.waveform_rms(Channel_number)
 
 
