@@ -1,5 +1,6 @@
 import ctypes
 import XSCore90
+import pandas as pd
 
 result = XSCore90.XS_InitLibrary(0)
 
@@ -131,6 +132,10 @@ while sensorIndex < nbrSensors:
 
 # before opening the connection, set a frame rate. Its in terms of frames per minute. So a 100 Hz rate means (100 x 60 => 6000 frames per minute)
 
+#buffer variable
+data_buff = []
+data_out = pd.DataFrame()
+
 # Open a connection to the configured sensor(s) - we'll ask for 100 Hz or 6000 frames per minute
 if XSCore90.XS_OpenConnection(6000) == 1:
 
@@ -181,7 +186,14 @@ if XSCore90.XS_OpenConnection(6000) == 1:
                             sMesg = '{:0.2f}, '.format(pressure.value)
                             print(sMesg, end='')
 
+                            data_buff.append(pressure.value)
+
                         print('')  # line break for end of row
+                        data_out[('col ' + str(row))] = data_buff
+                        data_buff = []
+                        print('pandas: /n' + str(data_out))
+
+                    data_out.to_csv(str('Output_' + str(frameCount) + '.csv'))
 
     #  finished with the demonstration. Close the connection
     XSCore90.XS_CloseConnection()
