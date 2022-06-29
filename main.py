@@ -1,66 +1,95 @@
-from OMEGA_Library import OM_USB_Thermo, OM_USB_ADC
 from csv import writer
-from NI_DAQ_Library import NIDAQ
-from Tektronix_Library import DPO2024B
+from datetime import datetime
+
+import numpy as np
 import pyvisa
+import threading
+
+from NI_DAQ_Library import NIDAQ
+from OMEGA_Library import OM_USB_ADC
+from Tektronix_Library import DPO2024B
 
 
-def OMEGA_DAQ():
-    # OM_USB_numb is 0 by default
-    insert_number = 0
-    # CHx_Init = OM_USB_Thermo(OM_USB_numb=insert_number)
-    CHx_Init = OM_USB_ADC(OM_USB_numb=insert_number)
+# Function to acquire Microphone inputs
+def NI_DAQ_Mic():
+    # Mics are using the 3rd module on our DAQ and there are 4 of them
+    arr = np.array([])
+    np.append(arr, NIDAQ.readVoltage("cDAQ1Mod3", "Ai0"))
+    np.append(arr, NIDAQ.readVoltage("cDAQ1Mod3", "Ai1"))
+    np.append(arr, NIDAQ.readVoltage("cDAQ1Mod3", 'Ai2'))
+    np.append(arr, NIDAQ.readVoltage("cDAQ1Mod3", 'Ai3'))
+    return arr
+
+
+# This function acquires the Load Cell(Omega Daq), Accelerometer(NI Daq), and Tektronix Scope data
+# and adds them to an array with a timestamp. This array will be written to the csv in main loop
+def acquire_data(Tek, Omega):
+    # get current timestamp
+    dt = datetime.now()
+    ts = datetime.timestamp(dt)
+
+    # Create array to hold a row of data and put timestamp in index 0
+    dataRow = np.array([ts])
 
     # insert_channel from 0 up to 7
-    insert_channel = 0
-    # CH0_data = CHx_Init.temp_reading(channel=insert_channel)
-    CH0_data = CHx_Init.voltage_reading(channel=insert_channel)
-    #print(CH0_data)
+    np.append(dataRow, Omega.voltage_reading(channel=0))
+    np.append(dataRow, Omega.voltage_reading(channel=1))
+    np.append(dataRow, Omega.voltage_reading(channel=2))
+    np.append(dataRow, Omega.voltage_reading(channel=3))
+    np.append(dataRow, Omega.voltage_reading(channel=4))
+    np.append(dataRow, Omega.voltage_reading(channel=5))
+    np.append(dataRow, Omega.voltage_reading(channel=6))
+    np.append(dataRow, Omega.voltage_reading(channel=7))
 
-    CH1_data = CHx_Init.voltage_reading(channel=1)
-    CH2_data = CHx_Init.voltage_reading(channel=2)
-    CH3_data = CHx_Init.voltage_reading(channel=3)
-    CH4_data = CHx_Init.voltage_reading(channel=4)
-    CH5_data = CHx_Init.voltage_reading(channel=5)
-    CH6_data = CHx_Init.voltage_reading(channel=6)
-    CH7_data = CHx_Init.voltage_reading(channel=7)
+    # Get Accelerometer data from NI DAQ and append to array
+    dataRow = np.append(dataRow, NIDAQ.readVoltage("cDAQ1Mod4", "ai0"))
+    dataRow = np.append(dataRow, NIDAQ.readVoltage("cDAQ1Mod4", "ai1"))
+    dataRow = np.append(dataRow, NIDAQ.readVoltage("cDAQ1Mod4", "ai2"))
 
-    print("Channel 0: " + str(CH0_data))
-    print("Channel 1: " + str(CH1_data))
-    print("Channel 2: " + str(CH2_data))
-    print("Channel 3: " + str(CH3_data))
-    print("Channel 4: " + str(CH4_data))
-    print("Channel 5: " + str(CH5_data))
-    print("Channel 6: " + str(CH6_data))
-    print("Channel 7: " + str(CH7_data))
+    # Get waveform RMS from the scope channel 1 and append to the array
+    rms = Tek.waveform_rms(1)
+    dataRow = np.append(dataRow, str(rms))
 
-def writeToCSV():
-    Header = ['CH0_data', 'CH1_data', 'CH2_data', 'CH3_data', 'CH4_data', 'CH5_data', 'CH6_data', 'CH7_data']
-    Data = [CH0_data, CH1_data, CH2_data, CH3_data, CH4_data, CH5_data, CH6_data, CH7_data]
-
-    with open('event.csv', 'w', newline='') as f_object:
-        # Pass this file object to csv.writer()
-        # and get a writer object
-        writer_object = writer(f_object)
-
-        # Pass the list as an argument into
-        # the writerow()
-        writer_object.writerow(Header)
-        writer_object.writerow(Data)
-
-        # Close the file object
-        f_object.close()
+    return dataRow
 
 
-def tek_scope():
+#  Function used to end the program by taking a keystroke. Called as a separate thread
+def task():
+    value = input("Press a key to end:\n")
+    global log
+    log = False
+    return
+
+
+# Main Start. Create the csv writer
+with open('event.csv', 'w', newline='') as f_object:
+    # Pass this file object to csv.writer()
+    # and get a writer object
+    writer_object = writer(f_object)
+
+    # Set up the Visa resource for the Tektronix Scope
     rm = pyvisa.ResourceManager()
     list_dev = rm.list_resources()
-    # Set device
-    p1 = DPO2024B(list_dev[0])
-    # Get device ID
-    p1.oscilloscope_ID()
-    Channel_number = 1
-    # retrieve rms from the waveform and return it
-    return p1.waveform_rms(Channel_number)
+    Tek_scope = DPO2024B(list_dev[0])
 
+    # Set up the Omega object
+    Omega_Daq = OM_USB_ADC(OM_USB_numb=0)
 
+    # Set up the loop and exit variable
+    log = True
+
+    #  Run the exit function as a separate thread
+    thread = threading.Thread(target=task)
+    thread.start()
+    # write the header to CSV
+    header = ['TS', 'LC1', 'LC2', 'LC3', 'LC4', 'LC5', 'LC6', 'LC7', 'LC8', 'Accel1', 'Accel2', 'Accel3', 'RMS']
+    writer_object.writerow(header)
+    while log:
+        #  Read all inputs and return an array.
+        newline = acquire_data(Tek_scope, Omega_Daq)
+
+        # Write the array to a newline in CSV
+        writer_object.writerow(newline)
+
+    # Close the file object
+    f_object.close()

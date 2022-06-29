@@ -12,7 +12,9 @@ class NIDAQ:
         :return: voltage reading from device/channel
         '''
         with nidaqmx.Task() as task:
-            task.ai_channels.add_ai_voltage_chan(device + "/" + channel)    #read voltage channel
+            task.ai_channels.add_ai_voltage_chan(device + "/" + channel)
+            task.timing.cfg_samp_clk_timing(2000)
+            #read voltage channel
             output = task.read()    #voltage reading
             #print(output)
             return output

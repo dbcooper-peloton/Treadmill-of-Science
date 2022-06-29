@@ -10,7 +10,7 @@ class DPO2024B:
 
         # Time and Date Connected
         self.curr_time = datetime.now()
-        print(self.curr_time.strftime('%Y-%m-%d %H:%M:%S') + " Oscilloscope Connected")
+        #print(self.curr_time.strftime('%Y-%m-%d %H:%M:%S') + " Oscilloscope Connected")
 
     '''
     Retrieve Connected Oscilloscope ID
@@ -84,4 +84,3 @@ class DPO2024B:
         rms = float(self.osc1.query('MEASUREMENT:IMMED:VALUE?'))
 
         return rms
-    
