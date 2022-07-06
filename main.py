@@ -2,40 +2,33 @@ from csv import writer
 from datetime import datetime
 import time
 import pandas as pd
-
 import numpy as np
 import pyvisa
 import threading
-
 from NI_DAQ_Library import NIDAQ
 from OMEGA_Library import OM_USB_ADC
 from Tektronix_Library import DPO2024B
-
 import multiprocessing
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # This function acquires Accelerometer(NI Daq) data
 # and adds them to an array with a timestamp. This array will be written to a csv in main loop
-"""
-#def acquire_Tek(Tek):
+def acquire_Tek(Tek):
     # get current timestamp
-    now = datetime.now()  # current date and time
-
+    now = datetime.now()
+    # current date and time
     dt = now.strftime("%m/%d/%Y, %H:%M:%S.%f")[:-3]
-    #dt = now.strftime("%H:%M:%S.%f")[:-3]
-
-    #print(dt)
 
     # Create array to hold a row of data and put timestamp in index 0
     dataRow = np.array([dt])
     
     # Get waveform RMS from the scope channel 1 and append to the array
     rms = Tek.waveform_rms(1)
-    #print(rms)
-    #dataRow = np.append(dataRow, str(rms))
+    dataRow = np.append(dataRow, str(rms))
     
     return dataRow
-"""
 
 
 # This function acquires Accelerometer(NI Daq) data
@@ -67,7 +60,7 @@ def acquire_data_Accel(channelNum):
     dataRow = np.array([dt])
 
     # Get Accelerometer data from NI DAQ and append 1000 samples to array
-    dataRow = np.append(dataRow, NIDAQ.readVoltage("cDAQ1Mod4", channelNum, 1000))
+    dataRow = np.append(dataRow, NIDAQ.readVoltage("cDAQ1Mod4", channelNum, 1000, 1000))
 
     return dataRow
 
@@ -83,7 +76,7 @@ def acquire_data_mic(channelNum):
     data_list = np.array([dt])
 
     # Get mic data from NI DAQ and append 20000 samples to array
-    data_list = np.append(data_list, NIDAQ.readVoltage("cDAQ1Mod3", channelNum, 20000))
+    data_list = np.append(data_list, NIDAQ.readVoltage("cDAQ1Mod3", channelNum, 40000, 10000))
 
     return data_list
     #print(data_list)
@@ -95,22 +88,29 @@ mic2 = pd.DataFrame()
 mic3 = pd.DataFrame()
 
 #creating DataFrame for each accel channel
-accel0 = pd.DataFrame()
-accel1 = pd.DataFrame()
+accel0 = pd.DataFrame(columns=['timestamp','accel0'])
+accel1 = pd.DataFrame(columns=['timestamp','accel1'])
 #accel2 = pd.DataFrame()
 
 # Set up the Omega object
 Omega_Daq = OM_USB_ADC(OM_USB_numb=0)
 
 #creating DataFrames for each load cell
-LC0 = pd.DataFrame(columns=['ts','lc0'])
-LC1 = pd.DataFrame(columns=['ts','lc1'])
-LC2 = pd.DataFrame(columns=['ts','lc2'])
-LC3 = pd.DataFrame(columns=['ts','lc3'])
-LC4 = pd.DataFrame(columns=['ts','lc4'])
-LC5 = pd.DataFrame(columns=['ts','lc5'])
-LC6 = pd.DataFrame(columns=['ts','lc6'])
-LC7 = pd.DataFrame(columns=['ts','lc7'])
+LC0 = pd.DataFrame(columns=['timestamp','lc0'])
+LC1 = pd.DataFrame(columns=['timestamp','lc1'])
+LC2 = pd.DataFrame(columns=['timestamp','lc2'])
+LC3 = pd.DataFrame(columns=['timestamp','lc3'])
+LC4 = pd.DataFrame(columns=['timestamp','lc4'])
+LC5 = pd.DataFrame(columns=['timestamp','lc5'])
+LC6 = pd.DataFrame(columns=['timestamp','lc6'])
+LC7 = pd.DataFrame(columns=['timestamp','lc7'])
+
+# Set up the Visa resource for the Tektronix Scope
+rm = pyvisa.ResourceManager()
+list_dev = rm.list_resources()
+Tek_scope = DPO2024B(list_dev[0])
+
+scope = pd.DataFrame(columns=['timestamp','rms'])
 
 
 #function to record mic data
@@ -119,22 +119,25 @@ def record_mic():
     try:
         #setting the index of the first sample
         column = 0
+
         while True:
             #add mic data to array
             mic0[str(column)] = acquire_data_mic('ai0').tolist()
-            mic1[str(column)] = acquire_data_mic('ai1').tolist()
-            mic2[str(column)] = acquire_data_mic('ai2').tolist()
-            mic3[str(column)] = acquire_data_mic('ai3').tolist()
+            mic0[str(column+1)] = acquire_data_mic('ai1').tolist()
+            mic0[str(column+2)] = acquire_data_mic('ai2').tolist()
+            mic0[str(column+3)] = acquire_data_mic('ai3').tolist()
 
             #print(mic0)
             #Change index of mic data sample
-            column += 1
+            column += 4
+
+            #time.sleep(max(0, t - time.time()))
     except KeyboardInterrupt:
         #write dataframe to csv file at the end of the program when it has been terminated
         mic0.to_csv('mic0.csv')
-        mic1.to_csv('mic1.csv')
-        mic2.to_csv('mic2.csv')
-        mic3.to_csv('mic3.csv')
+        #mic1.to_csv('mic1.csv')
+        #mic2.to_csv('mic2.csv')
+        #mic3.to_csv('mic3.csv')
         print('done')
 
 
@@ -142,20 +145,26 @@ def record_mic():
 def record_accel0():
     # try and catch a keyboard interrupt to end the program
     try:
-        # setting the index of the first sample
-        column = 0
-        while True:
-            # add mic data to array
-            accel0[str(column)] = acquire_data_Accel('ai0').tolist()
-            accel1[str(column)] = acquire_data_Accel('ai1').tolist()
+        # create the starting index of the array that will be stored in the dataframe
+        # sample at 2khz
+        period = 0.0005
+        t = time.time()
+        accel0 = pd.DataFrame(columns=np.arange(1001))
 
-            #print(accel0)
-            # Change index of mic data sample
-            column += 1
+        while True:
+            t += period
+            # take load cell data sample
+            #accel0.loc[len(accel0)] = acquire_data_Accel('ai0')
+            new = acquire_data_Accel('ai0')
+            accel0 = accel0.append(pd.Series(new, index=accel0.columns[:len(new)]), ignore_index=True)
+
+            time.sleep(max(0, t - time.time()))
+            # change the index for the next data sample
+    # print to csv file when over
     except KeyboardInterrupt:
         #write dataframe to csv file at the end of the program when it has been terminated
         accel0.to_csv('accel0.csv')
-        accel1.to_csv('accel1.csv')
+        #accel1.to_csv('accel1.csv')
 
 
 # function to record Omega Daq - creating one for each specific channel
@@ -285,6 +294,24 @@ def record_Omega7():
     except KeyboardInterrupt:
         LC7.to_csv('LC7.csv')
 
+def record_Scope():
+    try:
+        # create the starting index of the array that will be stored in the dataframe
+        column = 0
+        # sample at 2khz
+        period = 0.0005
+        t = time.time()
+        while True:
+            t += period
+            # take load cell data sample
+            scope.loc[len(scope)] = acquire_Tek(Tek_scope)
+            time.sleep(max(0, t - time.time()))
+            # change the index for the next data sample
+            column += 1
+    # print to csv file when over
+    except KeyboardInterrupt:
+        scope.to_csv('scope.csv')
+
 
 if __name__ == "__main__":
     # creating processes
@@ -302,6 +329,7 @@ if __name__ == "__main__":
     p7 = multiprocessing.Process(target=record_Omega7)
     p8 = multiprocessing.Process(target=record_mic)
     p9 = multiprocessing.Process(target=record_accel0)
+    p10 = multiprocessing.Process(target=record_Scope)
 
     # starting process
     p0.start()
@@ -314,6 +342,7 @@ if __name__ == "__main__":
     p7.start()
     p8.start()
     p9.start()
+    p10.start()
 
     # wait until process is finished
     p0.join()
@@ -326,6 +355,7 @@ if __name__ == "__main__":
     p7.join()
     p8.start()
     p9.start()
+    p10.start()
 
     # both processes finished
     print("Done!")
