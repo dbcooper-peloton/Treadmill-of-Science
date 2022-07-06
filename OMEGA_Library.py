@@ -35,3 +35,4 @@ class OM_USB_ADC: #use this class for voltage outputs
         #Read analog data from selected channel:
         value_in = ul.v_in(self.board_numb, channel, ULRange.BIP10VOLTS)
         return value_in
+

@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pyvisa
 from pyvisa import ResourceManager
 from datetime import datetime
 
@@ -10,7 +11,7 @@ class DPO2024B:
 
         # Time and Date Connected
         self.curr_time = datetime.now()
-        print(self.curr_time.strftime('%Y-%m-%d %H:%M:%S') + " Oscilloscope Connected")
+        #print(self.curr_time.strftime('%Y-%m-%d %H:%M:%S') + " Oscilloscope Connected")
 
     '''
     Retrieve Connected Oscilloscope ID
