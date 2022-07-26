@@ -79,7 +79,8 @@ class EPressureUnit(Enum):
 # ===========================================================================
 
 # import the 64 bit dll
-libXSC = ctypes.cdll.LoadLibrary("C:/Users/JoshuaLeonardo/Documents/xscore90-TimeTrialX4/libs/XSCore90x64.dll")
+
+libXSC = ctypes.cdll.LoadLibrary(r"C:\Users\DanielCooper\Downloads\XSCore90x64.dll")
 
 # import the 32 bit dll
 # libXSC = ctypes.cdll.LoadLibrary("XSCore90.dll")
@@ -651,7 +652,7 @@ XS_GetSampleTimestampUTC.restype = ctypes.c_ubyte
 # XS_GetSampleTimestampExUTC
 # includes microseconds when supported by the sensor hardware. This version allows conversion of the timestamp to the local timezone.
 # XBOOL XS_GetSampleTimestampExUTC(
-#	uint16_t& year, uint8_t& month, uint8_t& day, 
+#	uint16_t& year, uint8_t& month, uint8_t& day,
 #	uint8_t& hour, uint8_t& minute, uint8_t& second, uint16_t& millisecond, uint16_t& microsecond, bool bAsLocalTime);
 XS_GetSampleTimestampExUTC = libXSC.XS_GetSampleTimestampExUTC
 XS_GetSampleTimestampExUTC.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_ubyte]

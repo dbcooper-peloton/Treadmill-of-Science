@@ -1,6 +1,10 @@
 import ctypes
 import XSCore90
 import pandas as pd
+from datetime import datetime
+
+
+path = r'C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\XSensor_output.csv'
 
 result = XSCore90.XS_InitLibrary(0)
 
@@ -132,71 +136,100 @@ while sensorIndex < nbrSensors:
 
 # before opening the connection, set a frame rate. Its in terms of frames per minute. So a 100 Hz rate means (100 x 60 => 6000 frames per minute)
 
-#buffer variable
+# buffer variable
 data_buff = []
 data_out = pd.DataFrame()
 
 # Open a connection to the configured sensor(s) - we'll ask for 100 Hz or 6000 frames per minute
 if XSCore90.XS_OpenConnection(6000) == 1:
-
-    # For demo purposes, we're requesting just 10 frames of data
-    for frameCount in range(10):
-        sMesg = '\nRequesting Sample...'
-        print(sMesg)
-
-        # request the sample - this call blocks until the samples are buffered
-        if XSCore90.XS_Sample() == 1:
-
-            # fetch the sample timestamp
-            XSCore90.XS_GetSampleTimestampUTC(ctypes.byref(sampleYear), ctypes.byref(sampleMonth),
-                                              ctypes.byref(sampleDay), ctypes.byref(sampleHour),
-                                              ctypes.byref(sampleMinute), ctypes.byref(sampleSecond),
-                                              ctypes.byref(sampleMillisecond))
-
-            sMesg = 'Timestamp: ' + str(sampleYear.value) + '-{:02d}'.format(sampleMonth.value) + '-{:02d}'.format(
-                sampleDay.value) + 'T{:02d}'.format(sampleHour.value) + ':{:02d}'.format(
-                sampleMinute.value) + ':{:02d}'.format(sampleSecond.value) + '.{:03d}'.format(sampleMillisecond.value)
+    try:
+        while True:
+        # For demo purposes, we're requesting just 10 frames of data
+        # for frameCount in range(10):
+            sMesg = '\nRequesting Sample...'
             print(sMesg)
 
-            # each configured sensor has its own frame buffer
-            sensorIndex = 0
-            while sensorIndex < nbrSensors:
+            # request the sample - this call blocks until the samples are buffered
+            if XSCore90.XS_Sample() == 1:
 
-                # fetch the sensor Product ID (PID)
-                sensorPID = XSCore90.XS_ConfigSensorPID(sensorIndex)
-                sensorIndex = sensorIndex + 1
+                # fetch the sample timestamp
+                XSCore90.XS_GetSampleTimestampUTC(ctypes.byref(sampleYear), ctypes.byref(sampleMonth),
+                                                  ctypes.byref(sampleDay), ctypes.byref(sampleHour),
+                                                  ctypes.byref(sampleMinute), ctypes.byref(sampleSecond),
+                                                  ctypes.byref(sampleMillisecond))
 
-                # need the sensor dimensions to pre-allocate some buffer space
-                XSCore90.XS_GetSensorDimensions(sensorPID, ctypes.byref(senselRows), ctypes.byref(senselColumns))
+                timestamp_msg = '{:02d}'.format(sampleHour.value - 7) + ':{:02d}'.format(
+                    sampleMinute.value) + ':{:02d}'.format(sampleSecond.value) + '.{:03d}'.format(sampleMillisecond.value)
 
-                # construct a frame buffer for this sensor
-                frameBuffer = (ctypes.c_float * (senselRows.value * senselColumns.value))()
+                """
+                timestamp_msg = 'Timestamp: ' + str(sampleYear.value) + '-{:02d}'.format(sampleMonth.value) + '-{:02d}'.format(
+                    sampleDay.value) + 'T{:02d}'.format(sampleHour.value) + ':{:02d}'.format(
+                    sampleMinute.value) + ':{:02d}'.format(sampleSecond.value) + '.{:03d}'.format(sampleMillisecond.value)
+                """
+                # print(timestamp_msg)
 
-                print('Calling XS_GetPressure')
+                # each configured sensor has its own frame buffer
+                sensorIndex = 0
+                while sensorIndex < nbrSensors:
 
-                # retrieve the recorded frame
-                if XSCore90.XS_GetPressure(sensorPID, ctypes.byref(frameBuffer)) == 1:
+                    # fetch the sensor Product ID (PID)
+                    sensorPID = XSCore90.XS_ConfigSensorPID(sensorIndex)
+                    sensorIndex = sensorIndex + 1
 
-                    print('Got pressure frame')
+                    # convert to datetime
+                    final_time = datetime.strptime(timestamp_msg, '%H:%M:%S.%f')
 
-                    # now dump the frame to the console window
-                    for row in range(senselRows.value):
-                        for column in range(senselColumns.value):
-                            pressure.value = frameBuffer[row * senselColumns.value + column]
-                            sMesg = '{:0.2f}, '.format(pressure.value)
-                            print(sMesg, end='')
+                    # convert timestamp to seconds
+                    a_timedelta = final_time - datetime(1900, 1, 1)
+                    timestamp_seconds = a_timedelta.total_seconds()
 
-                            data_buff.append(pressure.value)
+                    # create timestamp and PID in csv file
+                    data_out[('Time_Stamp')] = timestamp_seconds
 
-                        print('')  # line break for end of row
-                        data_out[('col ' + str(row))] = data_buff
-                        data_buff = []
-                        print('pandas: /n' + str(data_out))
+                    # get sensor ID and assign LEFT(foot) or RIGHT(foot) based on the ID #
+                    modPID = sensorPID % 1000
+                    # if it ends with 425 then it is the LEFT foot
+                    if modPID == 425:
+                        data_out[('ID')] = 'LEFT'
+                    # if it ends with 681 then it is the RIGHT foot
+                    elif modPID == 681:
+                        data_out[('ID')] = 'RIGHT'
 
-                    data_out.to_csv(str('Output_' + str(frameCount) + '.csv'))
+                    # data_out[('PID')] = modPID
 
-    #  finished with the demonstration. Close the connection
-    XSCore90.XS_CloseConnection()
+                    # need the sensor dimensions to pre-allocate some buffer space
+                    XSCore90.XS_GetSensorDimensions(sensorPID, ctypes.byref(senselRows), ctypes.byref(senselColumns))
+
+                    # construct a frame buffer for this sensor
+                    frameBuffer = (ctypes.c_float * (senselRows.value * senselColumns.value))()
+
+                    print('Calling XS_GetPressure')
+
+                    # retrieve the recorded frame
+                    if XSCore90.XS_GetPressure(sensorPID, ctypes.byref(frameBuffer)) == 1:
+
+                        print('Got pressure frame')
+                        print(sensorPID)
+
+                        # now dump the frame to the console window
+                        for row in range(senselRows.value):
+                            for column in range(senselColumns.value):
+                                pressure.value = frameBuffer[row * senselColumns.value + column]
+                                sMesg = '{:0.2f}, '.format(pressure.value)
+                                print(sMesg, end='')
+
+                                data_buff.append(pressure.value)
+
+                            print('')  # line break for end of row
+                            data_out[('col ' + str(row))] = data_buff
+                            data_buff = []
+
+                        # data_out.to_csv((str('XSensor_output.csv')), mode='ab')
+                        data_out.to_csv(path, mode='ab')
+
+    except KeyboardInterrupt:
+        #  finished with the demonstration. Close the connection
+        XSCore90.XS_CloseConnection()
 
 # call ExitLibrary to free any resources used by the DLL
 XSCore90.XS_ExitLibrary()
