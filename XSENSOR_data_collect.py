@@ -84,6 +84,7 @@ if nbrSensors > 0:
 # Tell the DLL we want all pressure values in the following units
 XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_KGCM2.value))
 
+
 # Inspect the configured sensor(s) - this is for reference only
 while sensorIndex < nbrSensors:
     # fetch the sensors product ID - this is needed by some functions
@@ -191,8 +192,6 @@ if XSCore90.XS_OpenConnection(6000) == 1:
                         print('')  # line break for end of row
                         data_out[('col ' + str(row))] = data_buff
                         data_buff = []
-                        print('pandas: /n' + str(data_out))
-
                     data_out.to_csv(str('Output_' + str(frameCount) + '.csv'))
 
     #  finished with the demonstration. Close the connection
