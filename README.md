@@ -1,6 +1,6 @@
-# Project Orchid
+# Treadmill of Science
 
-This is the repository for Project Orchid.
+This is the repository for the TOS.
 
 Python Libraries sourced for the projects:
   - Pandas
