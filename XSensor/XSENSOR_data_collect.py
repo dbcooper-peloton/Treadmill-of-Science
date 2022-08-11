@@ -14,6 +14,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # path to save file to
 path = r'C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\XSensor_output.csv'
+# path = r'C:\TOS_Data\Xsensor\XSensor_output.csv'
 
 XSCore90.XS_InitLibrary(1)
 # result = XSCore90.XS_InitLibrary(90000)
@@ -58,7 +59,7 @@ print(sVersion)
 # This call is optional, but recommended. You must also supply a valid path, or more specifically
 # a path with WRITE permissions.
 
-XSCore90.XS_SetCalibrationFolder("e:\CalCache")
+XSCore90.XS_SetCalibrationFolder(r"C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor_Calibration")
 
 # Tell the DLL to find any wired (USB) X4 sensors - only do this if you are using wired - slow otherwise)
 # 1 = true, 0 = false
@@ -67,7 +68,8 @@ XSCore90.XS_SetCalibrationFolder("e:\CalCache")
 # Tell the DLL to find any Bluetooth X4 sensors - only do this if you are using Bluetooth - slow otherwise)
 XSCore90.XS_SetAllowX4Wireless(1);
 
-# Tell the DLL use 8 bit mode for X4.  This can improve the reliability of Bluetooth transmission speeds. Has no impact on actual recording speed.
+# Tell the DLL use 8 bit mode for X4.  This can improve the reliability of Bluetooth transmission speeds. Has no
+# impact on actual recording speed.
 XSCore90.XS_SetX4Mode8Bit(1);
 
 # Use streaming mode if you are retrieving frames as fast as the sensor can deliver them.
@@ -76,7 +78,6 @@ XSCore90.XS_SetStreamingMode(1);
 
 b = ctypes.c_ubyte()
 b = XSCore90.XS_GetStreamingMode()
-print(b)
 
 # XSCore90.XS_SetAllowFastEnum(1);
 
@@ -102,7 +103,7 @@ date_of_acquisition = ['DATE:', date_time_str]
 newline = ['']
 
 # create header in log file
-with open(path, 'a', newline='') as f:
+with open(path, 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerow(file_version)
     writer.writerow(name)
@@ -113,13 +114,10 @@ with open(path, 'a', newline='') as f:
 
 def write_to_csv(junk):
     junk_writer = [junk]
-    with open(path, 'a', newline='') as f:
+    with open(path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(junk_writer)
 
-
-cpath = r'C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\XSensor_output.xsn'
-c_cpath = cpath.encode('utf-8')
 
 # Build a sensor configuration. The DLL must be told which sensors to use.
 if nbrSensors > 0:
@@ -128,17 +126,17 @@ if nbrSensors > 0:
     nbrSensors = 0
 
     # This will automatically configure all sensors on the computer
-    if XSCore90.XS_AutoConfigByDefaultXSN(c_cpath) == 1:
+    if XSCore90.XS_AutoConfigByDefault() == 1:
         nbrSensors = XSCore90.XS_ConfigSensorCount()
         sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
         print(sMesg)
 
 # Tell the DLL we want all pressure values in the following units
-XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_KGCM2.value))
+XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value))
 
 # Inspect the configured sensor(s) - this is for reference only
 while sensorIndex < nbrSensors:
-    # fetch the sensors product ID - this is needed by some functions
+    # fetch the sensors' product ID - this is needed by some functions
     sensorPID = XSCore90.XS_ConfigSensorPID(sensorIndex)
 
     # fetch the sensor serial number. This is for reference only
@@ -162,25 +160,25 @@ while sensorIndex < nbrSensors:
 
     sMesg = '\tSensor Info PID ' + str(sensorPID) + '; Serial S' + str(serialNbr) + '; [' + sName.value + ']'
     write_to_csv(sMesg)
-    print(sMesg)
+    # print(sMesg)
     sMesg = '\tRows ' + str(senselRows.value) + '; Columns ' + str(senselColumns.value)
     write_to_csv(sMesg)
-    print(sMesg)
+    # print(sMesg)
     sMesg = '\tWidth(cm) {:0.3f}'.format(
         float(senselColumns.value) * senselDimWidth.value) + '; Height(cm) {:0.3f}'.format(
         float(senselRows.value) * senselDimHeight.value) + '\n'
     write_to_csv(sMesg)
-    print(sMesg)
+    # print(sMesg)
 
     # fetch the current calibration range of the sensor (calibrated min/max pressures)
-    XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_KGCM2.value),
+    XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value),
                               ctypes.byref(minPressureRange), ctypes.byref(maxPressureRange))
 
     sMesg = '\tMin pressure {:0.4f} '.format(float(minPressureRange.value)) + str(
-        XSCore90.EPressureUnit.ePRESUNIT_KGCM2) + ' Max pressure {:0.4f} '.format(float(maxPressureRange.value)) + str(
-        XSCore90.EPressureUnit.ePRESUNIT_KGCM2)
+        XSCore90.EPressureUnit.ePRESUNIT_PSI) + ' Max pressure {:0.4f} '.format(float(maxPressureRange.value)) + str(
+        XSCore90.EPressureUnit.ePRESUNIT_PSI)
     write_to_csv(sMesg)
-    print(sMesg)
+    # print(sMesg)
 
     write_to_csv('')
 
@@ -188,7 +186,8 @@ while sensorIndex < nbrSensors:
 
 # Okay time to retrieve some frames of data
 
-# before opening the connection, set a frame rate. Its in terms of frames per minute. So a 100 Hz rate means (100 x 60 => 6000 frames per minute)
+# before opening the connection, set a frame rate.
+# It's in terms of frames per minute. So a 100 Hz rate means (100 x 60 => 6000 frames per minute)
 
 # buffer variable
 data_buff = []
@@ -196,7 +195,7 @@ data_out = pd.DataFrame()
 data_out2 = pd.DataFrame()
 
 # Open a connection to the configured sensor(s) - we'll ask for 100 Hz or 6000 frames per minute
-if XSCore90.XS_OpenConnection(12000) == 1:
+if XSCore90.XS_OpenConnection(9000) == 1:
 
     # print(XSCore90.XS_GetStreamingMode)
 
@@ -242,17 +241,31 @@ if XSCore90.XS_OpenConnection(12000) == 1:
                     timestamp_seconds = a_timedelta.total_seconds()
 
                     # create timestamp and PID in csv file
-                    data_out[('Time_Stamp')] = timestamp_seconds
+                    data_out['Time_Stamp'] = timestamp_seconds
 
                     # get sensor ID and assign LEFT(foot) or RIGHT(foot) based on the ID #
+
                     modPID = sensorPID % 1000
+                    data_out['ID'] = modPID
+
                     # if it ends with 425 then it is the LEFT foot
+                    """ 
                     if modPID == 425:
+                        data_out[('ID')] = 'LEFT'
+                    elif modPID == 617:
+                        data_out[('ID')] = 'LEFT'
+                    elif modPID == 721:
                         data_out[('ID')] = 'LEFT'
                     # if it ends with 681 then it is the RIGHT foot
                     elif modPID == 681:
                         data_out[('ID')] = 'RIGHT'
-
+                    elif modPID == 997:
+                        data_out[('ID')] = 'RIGHT'
+                    elif modPID == 873:
+                        data_out[('ID')] = 'RIGHT'
+                    else:
+                        data_out[('ID')] = 'NO ID ASSIGNED'
+                    """
                     # data_out[('PID')] = modPID
 
                     # need the sensor dimensions to pre-allocate some buffer space
@@ -297,7 +310,7 @@ if XSCore90.XS_OpenConnection(12000) == 1:
         data_out2.dropna(subset=['Time_Stamp'], inplace=True)
 
         # convert dataframe into a csv file
-        data_out2.to_csv(path, mode='ab', index=False)
+        data_out2.to_csv(path, mode='wb', index=False)
         # close the connection
         XSCore90.XS_CloseConnection()
 
