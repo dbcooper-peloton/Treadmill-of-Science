@@ -1,0 +1,11 @@
+changlog
+
+Version 1.0 - 8/11/22
+For Dev
+1. Added a new vi for power DAQ: 1 loop to aquire 2 channels and write them to file in loop. Alt method included in "DAQ_Power_postwrite_Ch.vi" writes
+   to 2 separate outputfiles (one for each channel) after data acquisition has completed.
+2. Added a new vi called "DAQ_Tach.vi" which includes several options for writting the digital waveform to file.
+
+For Tony
+1. Changed the Tach sensor output filename to "C:\TOS_Data\Tach\Tach_Data.tdms"
+2. Added a 2 new output files for the power data named: "<TBD>"
