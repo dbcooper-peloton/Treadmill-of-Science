@@ -5,8 +5,10 @@ from datetime import datetime
 import warnings
 import csv
 import numpy as np
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 # pre-define some variables to hold data from XCore90 DLL
+
 sensorPID = 0
 sensorIndex = 0
 senselRows = ctypes.c_ushort()
@@ -60,11 +62,13 @@ nMilliseconds = ctypes.c_ushort()
 frameBufferSize = ctypes.c_uint()
 
 
-path = r'C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\XSensor_output.csv'
+path = r'C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\XSensor_output.csv'
+
+
 # Use this to write header and other non-frame info to the csv
 def write_to_csv(junk):
     junk_writer = [junk]
-    with open(path, 'w', newline='') as f:
+    with open(path, 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(junk_writer)
 
@@ -76,14 +80,14 @@ xwMajor = XSNReader.XSN_GetLibraryMajorVersion()
 xwMinor = XSNReader.XSN_GetLibraryMinorVersion()
 
 # buffer variables
-data_buff = np.empty()
+data_buff = []
 data_out = pd.DataFrame()
 data_out2 = pd.DataFrame()
 
 sVersion = 'DLL Version ' + str(xwMajor) + '.' + str(xwMinor) + '\n'
 print(sVersion)
 
-if XSNReader.XSN_LoadSessionU(r"C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\X_log.xsn"):
+if XSNReader.XSN_LoadSessionU(r"C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\X_log.XSN"):
     # fetch information about the session and write to csv
     sMesg = 'Session contains ' + str(XSNReader.XSN_FrameCount()) + ' frames'
     write_to_csv(sMesg)
@@ -183,10 +187,10 @@ if XSNReader.XSN_LoadSessionU(r"C:\Users\AndyKind\Documents\GitHub\Project-Orchi
                 for row in range(senselRows):
                     for column in range(senselColumns):
                         pressure.value = frameBuffer[row * senselColumns + column]
-                        # sMesg = '{:0.2f}, '.format(pressure.value)
-                        # print(sMesg, end='')
+                        sMesg = '{:0.2f}, '.format(pressure.value)
+                        print(sMesg, end='')
                         # save pressure into an array
-                        dataBuffer = np.array(pressure.value)
+                        data_buff.append(pressure.value)
 
                     # print('')  # line break for end of row
                     # place array in the dataframe and flush
@@ -202,7 +206,7 @@ if XSNReader.XSN_LoadSessionU(r"C:\Users\AndyKind\Documents\GitHub\Project-Orchi
     data_out2.dropna(subset=['Time_Stamp'], inplace=True)
 
     # convert dataframe into a csv file
-    data_out2.to_csv(path, mode='wb', index=False)
+    data_out2.to_csv(path, mode='ab', index=False)
     XSNReader.XSN_CloseSession()
 
 # call ExitLibrary to free any resources used by the DLL
