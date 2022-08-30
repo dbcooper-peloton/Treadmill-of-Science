@@ -8,12 +8,11 @@ import csv
 import numpy as np
 
 # csv file path
-path = r'C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\XSensor_output.csv'
+path = r"C:\TOS_Data\XSensor\XSensor_output.csv"
 # XSN file path
-path2 = r'C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\X_log.XSN'
+path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
 # calibration file path
-path3 = r"C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor_Calibration"
-
+path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -96,29 +95,30 @@ print(sMesg)
 now = datetime.now()
 date_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
-# log file header
-file_version = ['LogFileVersion:', 'v1.0']
-name = ['NAME:', 'X_Sensor Data Logger']
-value = ['DESCRIPTION:', 'PSI']
-date_of_acquisition = ['DATE:', date_time_str]
-newline = ['']
-
-# create header in log file
-with open(path, 'w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow(file_version)
-    writer.writerow(name)
-    writer.writerow(value)
-    writer.writerow(date_of_acquisition)
-    #writer.writerow(newline)
+#moved this into the main acquisition section. Now writes the whole header at once
+# # log file header
+# file_version = ['LogFileVersion:', 'v1.0']
+# name = ['NAME:', 'X_Sensor Data Logger']
+# value = ['DESCRIPTION:', 'PSI']
+# date_of_acquisition = ['DATE:', date_time_str]
+# newline = ['']
+#
+# # create header in log file
+# with open(path, 'w', newline='') as f:
+#     writer = csv.writer(f)
+#     writer.writerow(file_version)
+#     writer.writerow(name)
+#     writer.writerow(value)
+#     writer.writerow(date_of_acquisition)
+#     # writer.writerow(newline)
 
 
 # Use this to write header and other non-frame info to the csv
 def write_to_csv(junk):
-    # junk_writer = [junk]
+    junk_writer = [junk]
     with open(path, 'a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(junk)
+        writer.writerow(junk_writer)
 
 
 # Use this post acquisition to read from the XSN log and write to CSV
@@ -139,9 +139,9 @@ def XSN_to_CSV():
     if XSNReader.XSN_LoadSessionU(path2):
         # fetch information about the session and write to csv
         sMesg = 'Session contains ' + str(XSNReader.XSN_FrameCount()) + ' frames'
-        #write_to_csv(sMesg)
+        # write_to_csv(sMesg)
         sMesg = 'Session contains ' + str(XSNReader.XSN_PadCount()) + ' pads'
-        #write_to_csv(sMesg)
+        # write_to_csv(sMesg)
 
         # This gets sensor and session info and writes it to csv - may not need this
         padCount = XSNReader.XSN_PadCount()
@@ -206,7 +206,9 @@ def XSN_to_CSV():
 
             for pad in range(padCount):
 
-                # convert to datetime
+                # convert
+                # to
+                # datetime
                 final_time = datetime.strptime(timestamp_msg, '%H:%M:%S.%f')
 
                 # convert timestamp to seconds
@@ -235,7 +237,7 @@ def XSN_to_CSV():
                 # determine the measurement dimensions of a single sensor cell (called a Sensel)
                 XSNReader.XSN_GetPadSenselDims(pad, ctypes.byref(widthCM), ctypes.byref(heightCM))
 
-                #modPID = sProductID.value % 1000
+                # modPID = sProductID.value % 1000
                 data_out['ID'] = sModel.value[-2]
 
                 senselColumns = XSNReader.XSN_Columns(pad);
@@ -284,13 +286,13 @@ if nbrSensors > 0:
     nbrSensors = 0
 
     # This will automatically configure all sensors on the computer
-    if XSCore90.XS_AutoConfigByDefaultXSN(path2) == 1:
+    if XSCore90.XS_AutoConfigXSN(path2, 9, -1.0) == 1:
         nbrSensors = XSCore90.XS_ConfigSensorCount()
         sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
         print(sMesg)
 
 # Tell the DLL we want all pressure values in the following units
-XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value))
+XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_GCM2.value))
 
 # Inspect the configured sensor(s) - then write sensor info to file
 while sensorIndex < nbrSensors:
@@ -308,19 +310,39 @@ while sensorIndex < nbrSensors:
     # retrieve the name
     XSCore90.XS_GetSensorName(sensorPID, ctypes.byref(nameBufferSize), ctypes.byref(sName))
 
-    sMesg = '\tSensor Info PID ' + str(sensorPID) + '; Serial S' + str(serialNbr) + '; [' + sName.value + ']'
+    # sMesg = '\tSensor Info PID ' + str(sensorPID) + '; Serial S' + str(serialNbr) + '; [' + sName.value + ']'
     # write_to_csv(sMesg)
 
     if sensorIndex == 0:
         # Write some sensor info to the CSV header
-        sMesg = '\tRows ' + str(senselRows.value) + '; Columns ' + str(senselColumns.value)
+        # sMesg = '\tRows ' + str(senselRows.value) + '; Columns ' + str(senselColumns.value)
         # write_to_csv(sMesg)
-        sMesg = '\tWidth(cm) {:0.3f}'.format(
-            float(senselColumns.value) * senselDimWidth.value) + '; Height(cm) {:0.3f}'.format(
-            float(senselRows.value) * senselDimHeight.value) + '\n'
-        sMesgMod = ['DIMENSIONS:', sMesg]
-        write_to_csv(sMesgMod)
+        sMesg = ['DIMENSIONS:', 'Width(cm)', '{:0.3f}'.format(
+            float(senselColumns.value) * senselDimWidth.value), 'Height(cm)', '{:0.3f}'.format(
+            float(senselRows.value) * senselDimHeight.value)]
 
+        # log file header
+        file_version = ['LogFileVersion:', 'v1.0']
+        name = ['NAME:', 'X_Sensor Data Logger']
+        value = ['DESCRIPTION:', 'g/cm^2']
+        XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_GCM2.value))
+        print(XSCore90.EPressureUnit.ePRESUNIT_GCM2.value)
+        test = ctypes.c_ubyte()
+        XSCore90.XS_GetPressureUnit(ctypes.byref(test))
+        print(test.value)
+        date_of_acquisition = ['DATE:', date_time_str]
+        newline = [' ']
+
+        # create header in log file
+        with open(path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(file_version)
+            writer.writerow(name)
+            writer.writerow(value)
+            writer.writerow(str(test.value))
+            writer.writerow(date_of_acquisition)
+            writer.writerow(sMesg)
+            writer.writerow(newline)
     # fetch the current calibration range of the sensor (calibrated min/max pressures)
     XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value),
                               ctypes.byref(minPressureRange), ctypes.byref(maxPressureRange))
@@ -329,10 +351,8 @@ while sensorIndex < nbrSensors:
         XSCore90.EPressureUnit.ePRESUNIT_PSI) + ' Max pressure {:0.4f} '.format(
         float(maxPressureRange.value)) + str(
         XSCore90.EPressureUnit.ePRESUNIT_PSI)
-    # write_to_csv(sMesg)
-    # print(sMesg)
-
-    write_to_csv('')
+    write_to_csv(sMesg)
+    print(sMesg)
     sensorIndex = sensorIndex + 1
 
 # buffer variables - do we need all of these?
@@ -352,6 +372,3 @@ if XSCore90.XS_OpenConnection(9000) == 1:
         XSCore90.XS_CloseConnection()
         XSCore90.XS_ExitLibrary()
         XSN_to_CSV()
-
-
-
