@@ -16,8 +16,6 @@ path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-XSCore90.XS_InitLibrary(1)
-
 # pre-define some variables to hold data from XCore90 DLL
 sensorPID = 0
 sensorIndex = 0
@@ -71,6 +69,7 @@ nMilliseconds = ctypes.c_ushort()
 
 frameBufferSize = ctypes.c_uint()
 
+XSCore90.XS_InitLibrary(1)
 # query the DLL version (for XSENSOR support reference)
 XSCore90.XS_GetVersion(ctypes.byref(wMajor), ctypes.byref(wMinor), ctypes.byref(wBuild), ctypes.byref(wRevision))
 
@@ -94,24 +93,6 @@ print(sMesg)
 # creating time stamp for when test started
 now = datetime.now()
 date_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
-
-#moved this into the main acquisition section. Now writes the whole header at once
-# # log file header
-# file_version = ['LogFileVersion:', 'v1.0']
-# name = ['NAME:', 'X_Sensor Data Logger']
-# value = ['DESCRIPTION:', 'PSI']
-# date_of_acquisition = ['DATE:', date_time_str]
-# newline = ['']
-#
-# # create header in log file
-# with open(path, 'w', newline='') as f:
-#     writer = csv.writer(f)
-#     writer.writerow(file_version)
-#     writer.writerow(name)
-#     writer.writerow(value)
-#     writer.writerow(date_of_acquisition)
-#     # writer.writerow(newline)
-
 
 # Use this to write header and other non-frame info to the csv
 def write_to_csv(junk):
@@ -174,9 +155,8 @@ def XSN_to_CSV():
             sMesg = 'Pad dims: {:0.3f}'.format(padWidth) + 'cm width x {:0.3f}'.format(padHeight) + 'cm length\n'
             # write_to_csv(sMesg)
 
-        sMesg = 'Session base pressure units is ' + str(XSNReader.XSN_GetPressureUnits())
-        # write_to_csv(sMesg)
-        XSNReader.XSN_SetPressureUnits(XSNReader.EXSNPressureUnit.eXSNPRESUNIT_KGCM2.value);
+        sMesg = 'XSN pressure units is ' + str(XSNReader.XSN_GetPressureUnits())
+        write_to_csv(sMesg)
 
         frameCount = XSNReader.XSN_FrameCount()
         frame = 1
@@ -240,6 +220,7 @@ def XSN_to_CSV():
                 # modPID = sProductID.value % 1000
                 data_out['ID'] = sModel.value[-2]
 
+
                 senselColumns = XSNReader.XSN_Columns(pad);
                 senselRows = XSNReader.XSN_Rows(pad);
 
@@ -286,13 +267,29 @@ if nbrSensors > 0:
     nbrSensors = 0
 
     # This will automatically configure all sensors on the computer
-    if XSCore90.XS_AutoConfigXSN(path2, 9, -1.0) == 1:
+    # set unit of measurement
+
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_MMHG.value # millimeters of mercury
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_INH2O.value # inches of water
+    pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_PSI.value  # pounds/sq.inch
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_KPA.value # kilopascals
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_KGCM2.value # kgf/cm^2
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_ATM.value # atmospheres
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_NCM2.value # newtons/cm^2
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_MBAR.value # millibars
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_NM2.value # Newton/meter^2
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_GCM2.value # grams/cm^2
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_RAW.value # non-calibrated readings from the sensors - 16 bit integers
+
+
+    if XSCore90.XS_AutoConfigXSN(path2, pressure_unit, -1.0) == 1:
         nbrSensors = XSCore90.XS_ConfigSensorCount()
         sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
         print(sMesg)
 
 # Tell the DLL we want all pressure values in the following units
-XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_GCM2.value))
+XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(pressure_unit))
+print(str(XSCore90.XS_GetPressureUnit()))
 
 # Inspect the configured sensor(s) - then write sensor info to file
 while sensorIndex < nbrSensors:
@@ -321,15 +318,17 @@ while sensorIndex < nbrSensors:
             float(senselColumns.value) * senselDimWidth.value), 'Height(cm)', '{:0.3f}'.format(
             float(senselRows.value) * senselDimHeight.value)]
 
+        # checking what the units of measurements is in the XSN file
+        if str(XSCore90.XS_GetPressureUnit()) == '2':
+            sMesg = 'PSI'
+        else:
+            sMesg = 'ERROR not in PSI'
+
+
         # log file header
         file_version = ['LogFileVersion:', 'v1.0']
         name = ['NAME:', 'X_Sensor Data Logger']
-        value = ['DESCRIPTION:', 'g/cm^2']
-        XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_GCM2.value))
-        print(XSCore90.EPressureUnit.ePRESUNIT_GCM2.value)
-        test = ctypes.c_ubyte()
-        XSCore90.XS_GetPressureUnit(ctypes.byref(test))
-        print(test.value)
+        value = ['DESCRIPTION:', str(sMesg)]
         date_of_acquisition = ['DATE:', date_time_str]
         newline = [' ']
 
@@ -339,12 +338,10 @@ while sensorIndex < nbrSensors:
             writer.writerow(file_version)
             writer.writerow(name)
             writer.writerow(value)
-            writer.writerow(str(test.value))
             writer.writerow(date_of_acquisition)
-            writer.writerow(sMesg)
             writer.writerow(newline)
     # fetch the current calibration range of the sensor (calibrated min/max pressures)
-    XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value),
+    XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(pressure_unit),
                               ctypes.byref(minPressureRange), ctypes.byref(maxPressureRange))
 
     sMesg = '\tMin pressure {:0.4f} '.format(float(minPressureRange.value)) + str(

@@ -6,7 +6,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 XSCore90.XS_InitLibrary(1)
 
-XSNfp = r'C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\testScripts\X_log.xsn'
+XSNfp = r'C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\testScripts\X_Log.XSN'
 Calfp = r'C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\Calibration'
 
 pressure = ctypes.c_float()
@@ -35,25 +35,36 @@ if nbrSensors > 0:
     nbrSensors = 0
 
     # This will automatically configure all sensors on the computer
-    if XSCore90.XS_AutoConfigXSN(XSNfp, XSCore90.EPressureUnit.ePRESUNIT_KGCM2.value, -1.0) == 1:
+    if XSCore90.XS_AutoConfigXSN(XSNfp, XSCore90.EPressureUnit.ePRESUNIT_PSI.value, -1.0) == 1:
         nbrSensors = XSCore90.XS_ConfigSensorCount()
         sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
         print(sMesg)
 
-if XSCore90.XS_OpenConnection(9000) == 1:
-    XSCore90.XS_GetPressureUnit(ctypes.byref(units))
-    print('Unit Code 1: ' + str(units.value))
+XSCore90.XS_GetPressureUnit(ctypes.byref(units))
+print('Unit Code 1: ' + str(units.value))
+XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_KGCM2.value))
+XSCore90.XS_GetPressureUnit(ctypes.byref(units))
+print('Unit Code 2: ' + str(units.value))
+XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value))
+XSCore90.XS_GetPressureUnit(ctypes.byref(units))
+print('Unit Code 3: ' + str(units.value) +'\n')
 
-    sMesg = '\nLogging'
-    for x in range(5000):
-        print(sMesg)
+if XSCore90.XS_OpenConnection(9000) == 1:
+    for x in range(10):
+        if x % 2 == 1:
+            XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_KGCM2.value))
+        else:
+            XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value))
+        print(str(XSCore90.XS_GetPressureUnit()))
     XSCore90.XS_CloseConnection()
     XSCore90.XS_ExitLibrary()
     XSNReader.XSN_InitLibrary()
     if XSNReader.XSN_LoadSessionU(XSNfp):
         sMesg = 'Session base pressure units is ' + str(XSNReader.XSN_GetPressureUnits())
         print(sMesg)
+        sMesg = 'Session base force units is ' + str(XSNReader.XSN_GetForceUnits())
+        print(sMesg)
         XSNReader.XSN_CloseSession()
         XSNReader.XSN_ExitLibrary()
     else:
-        print('failed to open XSN')
+        print("failed to open XSN file")

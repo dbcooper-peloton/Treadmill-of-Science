@@ -61,8 +61,7 @@ class EXSNReaderErrorCodes(Enum):
 # libXSN = ctypes.cdll.LoadLibrary("XSNReader64.dll")
 
 # import the 32 bit dll
-# libXSN = ctypes.cdll.LoadLibrary(r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\XSNReader64.dll")
-libXSN = ctypes.cdll.LoadLibrary(r"C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\XSNReader64.dll")
+libXSN = ctypes.cdll.LoadLibrary(r"C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\testScripts\XSNReader64.dll")
 
 
 # ===========================================================================
