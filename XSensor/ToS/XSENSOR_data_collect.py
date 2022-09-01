@@ -155,8 +155,8 @@ def XSN_to_CSV():
             sMesg = 'Pad dims: {:0.3f}'.format(padWidth) + 'cm width x {:0.3f}'.format(padHeight) + 'cm length\n'
             # write_to_csv(sMesg)
 
-        sMesg = 'XSN pressure units is ' + str(XSNReader.XSN_GetPressureUnits())
-        write_to_csv(sMesg)
+        # sMesg = 'XSN pressure units is ' + str(XSNReader.XSN_GetPressureUnits())
+        # write_to_csv(sMesg)
 
         frameCount = XSNReader.XSN_FrameCount()
         frame = 1
@@ -289,7 +289,7 @@ if nbrSensors > 0:
 
 # Tell the DLL we want all pressure values in the following units
 XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(pressure_unit))
-print(str(XSCore90.XS_GetPressureUnit()))
+print('Pressure unit code:' + str(XSCore90.XS_GetPressureUnit()))
 
 # Inspect the configured sensor(s) - then write sensor info to file
 while sensorIndex < nbrSensors:
@@ -314,22 +314,30 @@ while sensorIndex < nbrSensors:
         # Write some sensor info to the CSV header
         # sMesg = '\tRows ' + str(senselRows.value) + '; Columns ' + str(senselColumns.value)
         # write_to_csv(sMesg)
-        sMesg = ['DIMENSIONS:', 'Width(cm)', '{:0.3f}'.format(
-            float(senselColumns.value) * senselDimWidth.value), 'Height(cm)', '{:0.3f}'.format(
-            float(senselRows.value) * senselDimHeight.value)]
+        # Dims = ['DIMENSIONS:', 'Width(cm)', '{:0.3f}'.format(
+        #     float(senselColumns.value) * senselDimWidth.value), 'Height(cm)', '{:0.3f}'.format(
+        #     float(senselRows.value) * senselDimHeight.value)]
 
         # checking what the units of measurements is in the XSN file
         if str(XSCore90.XS_GetPressureUnit()) == '2':
-            sMesg = 'PSI'
+            units = 'PSI'
         else:
-            sMesg = 'ERROR not in PSI'
+            units = 'ERROR not in PSI'
 
-
+        # fetch the current calibration range of the sensor (calibrated min/max pressures)
+        XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(pressure_unit),
+                                  ctypes.byref(minPressureRange), ctypes.byref(maxPressureRange))
         # log file header
         file_version = ['LogFileVersion:', 'v1.0']
         name = ['NAME:', 'X_Sensor Data Logger']
-        value = ['DESCRIPTION:', str(sMesg)]
+        value = ['DESCRIPTION:', units]
         date_of_acquisition = ['DATE:', date_time_str]
+        Dims = ['DIMENSIONS:', 'Width(cm)', '{:0.3f}'.format(
+            float(senselColumns.value) * senselDimWidth.value), 'Height(cm)', '{:0.3f}'.format(
+            float(senselRows.value) * senselDimHeight.value)]
+        MinMax = ['MINMAX:', 'Min', '{:0.4f} '.format(
+            float(minPressureRange.value)), 'Max', '{:0.4f} '.format(
+            float(maxPressureRange.value))]
         newline = [' ']
 
         # create header in log file
@@ -339,17 +347,9 @@ while sensorIndex < nbrSensors:
             writer.writerow(name)
             writer.writerow(value)
             writer.writerow(date_of_acquisition)
+            writer.writerow(Dims)
+            writer.writerow(MinMax)
             writer.writerow(newline)
-    # fetch the current calibration range of the sensor (calibrated min/max pressures)
-    XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(pressure_unit),
-                              ctypes.byref(minPressureRange), ctypes.byref(maxPressureRange))
-
-    sMesg = '\tMin pressure {:0.4f} '.format(float(minPressureRange.value)) + str(
-        XSCore90.EPressureUnit.ePRESUNIT_PSI) + ' Max pressure {:0.4f} '.format(
-        float(maxPressureRange.value)) + str(
-        XSCore90.EPressureUnit.ePRESUNIT_PSI)
-    write_to_csv(sMesg)
-    print(sMesg)
     sensorIndex = sensorIndex + 1
 
 # buffer variables - do we need all of these?
