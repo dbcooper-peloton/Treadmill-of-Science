@@ -8,16 +8,13 @@ import csv
 import numpy as np
 
 # csv file path
-path = r'C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\XSensor_output.csv'
+csvpath = r"C:\TOS_Data\XSensor\XSensor_output.csv"
 # XSN file path
-path2 = r'C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor Data\X_log.XSN'
+xsnpath = r"C:\TOS_Data\XSensor\X_log.XSN"
 # calibration file path
-path3 = r"C:\Users\DanielCooper\Documents\Deck Sense Project\Xsensor_Calibration"
-
+calpath = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
-
-XSCore90.XS_InitLibrary(1)
 
 # pre-define some variables to hold data from XCore90 DLL
 sensorPID = 0
@@ -72,6 +69,7 @@ nMilliseconds = ctypes.c_ushort()
 
 frameBufferSize = ctypes.c_uint()
 
+XSCore90.XS_InitLibrary(1)
 # query the DLL version (for XSENSOR support reference)
 XSCore90.XS_GetVersion(ctypes.byref(wMajor), ctypes.byref(wMinor), ctypes.byref(wBuild), ctypes.byref(wRevision))
 
@@ -79,7 +77,7 @@ sVersion = 'DLL Version ' + str(wMajor.value) + '.' + repr(wMinor.value) + ' bui
 print(sVersion)
 
 # Need cali folder
-XSCore90.XS_SetCalibrationFolder(path3)
+XSCore90.XS_SetCalibrationFolder(calpath)
 
 # Tell the DLL to find any Bluetooth X4 sensors - only do this if you are using Bluetooth - slow otherwise)
 XSCore90.XS_SetAllowX4Wireless(1);
@@ -96,29 +94,13 @@ print(sMesg)
 now = datetime.now()
 date_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
-# log file header
-file_version = ['LogFileVersion:', 'v1.0']
-name = ['NAME:', 'X_Sensor Data Logger']
-value = ['DESCRIPTION:', 'PSI']
-date_of_acquisition = ['DATE:', date_time_str]
-newline = ['']
-
-# create header in log file
-with open(path, 'w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow(file_version)
-    writer.writerow(name)
-    writer.writerow(value)
-    writer.writerow(date_of_acquisition)
-    #writer.writerow(newline)
-
 
 # Use this to write header and other non-frame info to the csv
 def write_to_csv(junk):
-    # junk_writer = [junk]
-    with open(path, 'a', newline='') as f:
+    junk_writer = [junk]
+    with open(csvpath, 'a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(junk)
+        writer.writerow(junk_writer)
 
 
 # Use this post acquisition to read from the XSN log and write to CSV
@@ -136,12 +118,12 @@ def XSN_to_CSV():
     sVersion = 'DLL Version ' + str(wMajor) + '.' + str(wMinor) + '\n'
     print(sVersion)
 
-    if XSNReader.XSN_LoadSessionU(path2):
+    if XSNReader.XSN_LoadSessionU(xsnpath):
         # fetch information about the session and write to csv
         sMesg = 'Session contains ' + str(XSNReader.XSN_FrameCount()) + ' frames'
-        #write_to_csv(sMesg)
+        # write_to_csv(sMesg)
         sMesg = 'Session contains ' + str(XSNReader.XSN_PadCount()) + ' pads'
-        #write_to_csv(sMesg)
+        # write_to_csv(sMesg)
 
         # This gets sensor and session info and writes it to csv - may not need this
         padCount = XSNReader.XSN_PadCount()
@@ -174,9 +156,8 @@ def XSN_to_CSV():
             sMesg = 'Pad dims: {:0.3f}'.format(padWidth) + 'cm width x {:0.3f}'.format(padHeight) + 'cm length\n'
             # write_to_csv(sMesg)
 
-        sMesg = 'Session base pressure units is ' + str(XSNReader.XSN_GetPressureUnits())
+        # sMesg = 'XSN pressure units is ' + str(XSNReader.XSN_GetPressureUnits())
         # write_to_csv(sMesg)
-        XSNReader.XSN_SetPressureUnits(XSNReader.EXSNPressureUnit.eXSNPRESUNIT_KGCM2.value);
 
         frameCount = XSNReader.XSN_FrameCount()
         frame = 1
@@ -206,7 +187,9 @@ def XSN_to_CSV():
 
             for pad in range(padCount):
 
-                # convert to datetime
+                # convert
+                # to
+                # datetime
                 final_time = datetime.strptime(timestamp_msg, '%H:%M:%S.%f')
 
                 # convert timestamp to seconds
@@ -235,7 +218,7 @@ def XSN_to_CSV():
                 # determine the measurement dimensions of a single sensor cell (called a Sensel)
                 XSNReader.XSN_GetPadSenselDims(pad, ctypes.byref(widthCM), ctypes.byref(heightCM))
 
-                #modPID = sProductID.value % 1000
+                # modPID = sProductID.value % 1000
                 data_out['ID'] = sModel.value[-2]
 
                 senselColumns = XSNReader.XSN_Columns(pad);
@@ -249,12 +232,14 @@ def XSN_to_CSV():
 
                     # now dump the frame to the console window
                     for row in range(senselRows):
-                        for column in range(senselColumns):
-                            pressure.value = frameBuffer[row * senselColumns + column]
-                            sMesg = '{:0.2f}, '.format(pressure.value)
-                            print(sMesg, end='')
-                            # save pressure into an array
-                            data_buff.append(pressure.value)
+
+                        data_buff =
+                        # for column in range(senselColumns):
+                        #     pressure.value = frameBuffer[row * senselColumns + column]
+                        #     sMesg = '{:0.2f}, '.format(pressure.value)
+                        #     print(sMesg, end='')
+                        #     # save pressure into an array
+                        #     data_buff.append(pressure.value)
 
                         print('')  # line break for end of row
                         # place array in the dataframe and flush
@@ -270,7 +255,7 @@ def XSN_to_CSV():
         data_out2.dropna(subset=['Time_Stamp'], inplace=True)
 
         # convert dataframe into a csv file
-        data_out2.to_csv(path, mode='ab', index=False)
+        data_out2.to_csv(csvpath, mode='ab', index=False)
         XSNReader.XSN_CloseSession()
 
     # call ExitLibrary to free any resources used by the DLL
@@ -284,13 +269,28 @@ if nbrSensors > 0:
     nbrSensors = 0
 
     # This will automatically configure all sensors on the computer
-    if XSCore90.XS_AutoConfigByDefaultXSN(path2) == 1:
+    # set unit of measurement
+
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_MMHG.value # millimeters of mercury
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_INH2O.value # inches of water
+    pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_PSI.value  # pounds/sq.inch
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_KPA.value # kilopascals
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_KGCM2.value # kgf/cm^2
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_ATM.value # atmospheres
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_NCM2.value # newtons/cm^2
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_MBAR.value # millibars
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_NM2.value # Newton/meter^2
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_GCM2.value # grams/cm^2
+    # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_RAW.value # non-calibrated readings from the sensors - 16 bit integers
+
+    if XSCore90.XS_AutoConfigXSN(xsnpath, pressure_unit, -1.0) == 1:
         nbrSensors = XSCore90.XS_ConfigSensorCount()
         sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
         print(sMesg)
 
 # Tell the DLL we want all pressure values in the following units
-XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value))
+XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(pressure_unit))
+print('Pressure unit code:' + str(XSCore90.XS_GetPressureUnit()))
 
 # Inspect the configured sensor(s) - then write sensor info to file
 while sensorIndex < nbrSensors:
@@ -308,31 +308,49 @@ while sensorIndex < nbrSensors:
     # retrieve the name
     XSCore90.XS_GetSensorName(sensorPID, ctypes.byref(nameBufferSize), ctypes.byref(sName))
 
-    sMesg = '\tSensor Info PID ' + str(sensorPID) + '; Serial S' + str(serialNbr) + '; [' + sName.value + ']'
+    # sMesg = '\tSensor Info PID ' + str(sensorPID) + '; Serial S' + str(serialNbr) + '; [' + sName.value + ']'
     # write_to_csv(sMesg)
 
     if sensorIndex == 0:
         # Write some sensor info to the CSV header
-        sMesg = '\tRows ' + str(senselRows.value) + '; Columns ' + str(senselColumns.value)
+        # sMesg = '\tRows ' + str(senselRows.value) + '; Columns ' + str(senselColumns.value)
         # write_to_csv(sMesg)
-        sMesg = '\tWidth(cm) {:0.3f}'.format(
-            float(senselColumns.value) * senselDimWidth.value) + '; Height(cm) {:0.3f}'.format(
-            float(senselRows.value) * senselDimHeight.value) + '\n'
-        sMesgMod = ['DIMENSIONS:', sMesg]
-        write_to_csv(sMesgMod)
+        # Dims = ['DIMENSIONS:', 'Width(cm)', '{:0.3f}'.format(
+        #     float(senselColumns.value) * senselDimWidth.value), 'Height(cm)', '{:0.3f}'.format(
+        #     float(senselRows.value) * senselDimHeight.value)]
 
-    # fetch the current calibration range of the sensor (calibrated min/max pressures)
-    XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(XSCore90.EPressureUnit.ePRESUNIT_PSI.value),
-                              ctypes.byref(minPressureRange), ctypes.byref(maxPressureRange))
+        # checking what the units of measurements is in the XSN file
+        if str(XSCore90.XS_GetPressureUnit()) == '2':
+            units = 'PSI'
+        else:
+            units = 'ERROR not in PSI'
 
-    sMesg = '\tMin pressure {:0.4f} '.format(float(minPressureRange.value)) + str(
-        XSCore90.EPressureUnit.ePRESUNIT_PSI) + ' Max pressure {:0.4f} '.format(
-        float(maxPressureRange.value)) + str(
-        XSCore90.EPressureUnit.ePRESUNIT_PSI)
-    # write_to_csv(sMesg)
-    # print(sMesg)
+        # fetch the current calibration range of the sensor (calibrated min/max pressures)
+        XSCore90.XS_GetConfigInfo(ctypes.c_ubyte(pressure_unit),
+                                  ctypes.byref(minPressureRange), ctypes.byref(maxPressureRange))
+        # log file header
+        file_version = ['LogFileVersion:', 'v1.0']
+        name = ['NAME:', 'X_Sensor Data Logger']
+        value = ['DESCRIPTION:', units]
+        date_of_acquisition = ['DATE:', date_time_str]
+        Dims = ['DIMENSIONS:', 'Width(cm)', '{:0.3f}'.format(
+            float(senselColumns.value) * senselDimWidth.value), 'Height(cm)', '{:0.3f}'.format(
+            float(senselRows.value) * senselDimHeight.value)]
+        MinMax = ['MINMAX:', 'Min', '{:0.4f} '.format(
+            float(minPressureRange.value)), 'Max', '{:0.4f} '.format(
+            float(maxPressureRange.value))]
+        newline = [' ']
 
-    write_to_csv('')
+        # create header in log file
+        with open(csvpath, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(file_version)
+            writer.writerow(name)
+            writer.writerow(value)
+            writer.writerow(date_of_acquisition)
+            writer.writerow(Dims)
+            writer.writerow(MinMax)
+            writer.writerow(newline)
     sensorIndex = sensorIndex + 1
 
 # buffer variables - do we need all of these?
@@ -352,6 +370,3 @@ if XSCore90.XS_OpenConnection(9000) == 1:
         XSCore90.XS_CloseConnection()
         XSCore90.XS_ExitLibrary()
         XSN_to_CSV()
-
-
-

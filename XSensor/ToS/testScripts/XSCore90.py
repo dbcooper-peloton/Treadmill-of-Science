@@ -85,8 +85,7 @@ class EPressureUnit(Enum):
 
 # import the 32 bit dll
 # usage example: libXSC = ctypes.cdll.LoadLibrary("E:\\xsource\\xsensor.libs\\Xsensor.Libraries.X3\\XSCore90\\bin\\Win32\\Debug\\XSCore90.dll")
-#libXSC = ctypes.cdll.LoadLibrary(r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\XSCore90x64.dll")
-libXSC = ctypes.cdll.LoadLibrary(r"C:\pypy3.9-v7.3.9-win64\pypy3.9-v7.3.9-win64\XSCore90x64.dll")
+libXSC = ctypes.cdll.LoadLibrary(r"C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\testScripts\XSCore90x64.dll")
 
 # ===========================================================================
 #	Library initialization/deinitialization
