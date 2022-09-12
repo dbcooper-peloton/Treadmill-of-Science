@@ -8,11 +8,11 @@ import csv
 import numpy as np
 
 # csv file path
-csvpath = r"C:\TOS_Data\XSensor\XSensor_output.csv"
+path = r"C:\TOS_Data\XSensor\XSensor_output.csv"
 # XSN file path
-xsnpath = r"C:\TOS_Data\XSensor\X_log.XSN"
+path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
 # calibration file path
-calpath = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
+path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -77,7 +77,7 @@ sVersion = 'DLL Version ' + str(wMajor.value) + '.' + repr(wMinor.value) + ' bui
 print(sVersion)
 
 # Need cali folder
-XSCore90.XS_SetCalibrationFolder(calpath)
+XSCore90.XS_SetCalibrationFolder(path3)
 
 # Tell the DLL to find any Bluetooth X4 sensors - only do this if you are using Bluetooth - slow otherwise)
 XSCore90.XS_SetAllowX4Wireless(1);
@@ -94,11 +94,10 @@ print(sMesg)
 now = datetime.now()
 date_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
-
 # Use this to write header and other non-frame info to the csv
 def write_to_csv(junk):
     junk_writer = [junk]
-    with open(csvpath, 'a', newline='') as f:
+    with open(path, 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(junk_writer)
 
@@ -118,7 +117,7 @@ def XSN_to_CSV():
     sVersion = 'DLL Version ' + str(wMajor) + '.' + str(wMinor) + '\n'
     print(sVersion)
 
-    if XSNReader.XSN_LoadSessionU(xsnpath):
+    if XSNReader.XSN_LoadSessionU(path2):
         # fetch information about the session and write to csv
         sMesg = 'Session contains ' + str(XSNReader.XSN_FrameCount()) + ' frames'
         # write_to_csv(sMesg)
@@ -221,6 +220,7 @@ def XSN_to_CSV():
                 # modPID = sProductID.value % 1000
                 data_out['ID'] = sModel.value[-2]
 
+
                 senselColumns = XSNReader.XSN_Columns(pad);
                 senselRows = XSNReader.XSN_Rows(pad);
 
@@ -232,14 +232,12 @@ def XSN_to_CSV():
 
                     # now dump the frame to the console window
                     for row in range(senselRows):
-
-                        data_buff =
-                        # for column in range(senselColumns):
-                        #     pressure.value = frameBuffer[row * senselColumns + column]
-                        #     sMesg = '{:0.2f}, '.format(pressure.value)
-                        #     print(sMesg, end='')
-                        #     # save pressure into an array
-                        #     data_buff.append(pressure.value)
+                        for column in range(senselColumns):
+                            pressure.value = frameBuffer[row * senselColumns + column]
+                            sMesg = '{:0.2f}, '.format(pressure.value)
+                            print(sMesg, end='')
+                            # save pressure into an array
+                            data_buff.append(pressure.value)
 
                         print('')  # line break for end of row
                         # place array in the dataframe and flush
@@ -255,7 +253,7 @@ def XSN_to_CSV():
         data_out2.dropna(subset=['Time_Stamp'], inplace=True)
 
         # convert dataframe into a csv file
-        data_out2.to_csv(csvpath, mode='ab', index=False)
+        data_out2.to_csv(path, mode='ab', index=False)
         XSNReader.XSN_CloseSession()
 
     # call ExitLibrary to free any resources used by the DLL
@@ -283,7 +281,8 @@ if nbrSensors > 0:
     # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_GCM2.value # grams/cm^2
     # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_RAW.value # non-calibrated readings from the sensors - 16 bit integers
 
-    if XSCore90.XS_AutoConfigXSN(xsnpath, pressure_unit, -1.0) == 1:
+
+    if XSCore90.XS_AutoConfigXSN(path2, pressure_unit, -1.0) == 1:
         nbrSensors = XSCore90.XS_ConfigSensorCount()
         sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
         print(sMesg)
@@ -342,7 +341,7 @@ while sensorIndex < nbrSensors:
         newline = [' ']
 
         # create header in log file
-        with open(csvpath, 'w', newline='') as f:
+        with open(path, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(file_version)
             writer.writerow(name)
