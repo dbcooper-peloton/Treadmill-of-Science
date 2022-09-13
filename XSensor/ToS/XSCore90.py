@@ -8,71 +8,85 @@
 import ctypes
 from enum import Enum
 
+# path for importing 64 bit DLL
+
+# Path for Daniel's PC
+path = r"C:\Users\DanielCooper\PycharmProjects\pythonProject2\XSCore90x64.dll"
+
+
+# Path for TOS PC
+# path = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\XSCore90x64.dll"
+
+# path = r"C:\pypy3.9-v7.3.9-win64\pypy3.9-v7.3.9-win64\XSCore90x64.dll"
+
+
 class EXSErrorCodes(Enum):
-	eXS_ERRORCODE_OK							= 0	# Function ran normally
-	eXS_ERRORCODE_BADPARAMETER_OUTOFRANGE		= 1 # a parameter is out of range
-	eXS_ERRORCODE_BADPARAMETER_NULL				= 2 # null parameter - pass in a variable/buffers address
-	eXS_ERRORCODE_BADPARAMETER_INVALID_SENSOR_PID = 3 # either the PID is bad or the sensor was not configured
-	eXS_ERRORCODE_CALFILE_LOADFAILED			= 4 # calibration file failed to load - likely the file wasn't found
-	eXS_ERRORCODE_CALFILE_DOESNOTMATCHSENSOR	= 5 # the calibration file does not match the sensor
-	eXS_ERRORCODE_CONFIGURATION_NOTCOMPLETE		= 6 # Call XS_ConfigComplete() to complete the sensor configuration.
-	eXS_ERRORCODE_CONFIGURATION_NOSENSORS		= 7 # no sensors have been added to the sample config via XS_AddSensorToConfig() or could not be added
-	eXS_ERRORCODE_CONFIGURATION_FAILCREATEXSN   = 8 # Could not create the XSN file. Check that the path is valid and the location can be written too.
-	eXS_ERRORCODE_SENSORS_SENSORNOTFOUND		= 9 # either the sensor isn't enumerated or the PID is invalid
-	eXS_ERRORCODE_SENSORS_RAWONLY				= 10 # XS_GetPressure() called but no calibration files have been loaded.  Only raw data is available.
-	eXS_ERRORCODE_SENSORS_NOSAMPLE				= 11 # XS_Sample() has not been called yet or it has not succeeded in retrieving a sample
-	eXS_ERRORCODE_SENSORS_CONNECTIONLOST		= 12 # XS_Sample failed because a sensor was disconnected or USB power reset
-	eXS_ERRORCODE_SENSORS_SAMPLETIMEOUT			= 13 # XS_Sample failed because the sensor timed out while reading
-	eXS_ERRORCODE_SENSORS_SAMPLEFAILED			= 14 # XS_Sample failed for reasons unknown
-	eXS_ERRORCODE_SENSORS_NOCONNECTION			= 15 # Calling XS_Sample() without first calling to XS_OpenConnection()?
-	eXS_ERRORCODE_SENSORS_CONNECTFAILED			= 16 # It's possible that one of the sensors has become disconnected.  Check connections.
-	eXS_ERRORCODE_MEMORYALLOCATION_FAILED		= 17 # the system seems to be running low on memory or the DLL could not allocate some memory
-	eXS_ERRORCODE_LIBRARY_NOT_INITIALIZED		= 18 # The DLL library has not been initialized
-	eXS_ERRORCODE_AUTOCONFIG_SENSORNOTFOUND		= 19 # no sensors found during enumeration - please check XS_GetLastEnumState()
-	eXS_ERRORCODE_COULDNOTCREATECAPTUREFILE		= 20 # Could not create the target capture file
-	eXS_ERRORCODE_SIMFILE_LOADFAIL				= 21 # A problem occured while loading the simulation file.  The path might be incorrect or the file cannot be opened.  (Try loading it in the XSENSOR desktop software.)
-	eXS_ERRORCODE_SIM_FUNCTION_NA				= 22 # The DLL function is not available or does nothing while in simulation mode.
-	eXS_ERRORCODE_SIM_CALIBRATED_ONLY			= 23 # The simulation only supports calibrated (pressure) data
-	eXS_ERRORCODE_SIM_RAW_ONLY					= 24 # The simulation only supports raw (non-pressure) data
-	eXS_ERRORCODE_MANCAL_FUNCTION_NOTSET		= 25 # The manaul calibration state is not set which this function requires.
-	eXS_ERRORCODE_MANCAL_FUNCTION_NA			= 26 # The DLL function is not available or does nothing while in manual calibration mode.
-	eXS_ERRORCODE_CALIBRATION_AUTOCACHE			= 27 # This calibration function is disabled while the calibration auto-cache is enabled via XS_SetCalibrationFolder.
-	eXS_ERRORCODE_X4CONFIGSCRIPT_COULDNOTOPEN	= 28 # The X4 config script could not be opened. Perhaps a bad file path? Or the sensor is not an X4!
-	eXS_ERRORCODE_X4CONFIGSCRIPT_BADRESPONSE	= 29 # A command in the X4 config script returned a bad response
+    eXS_ERRORCODE_OK = 0  # Function ran normally
+    eXS_ERRORCODE_BADPARAMETER_OUTOFRANGE = 1  # a parameter is out of range
+    eXS_ERRORCODE_BADPARAMETER_NULL = 2  # null parameter - pass in a variable/buffers address
+    eXS_ERRORCODE_BADPARAMETER_INVALID_SENSOR_PID = 3  # either the PID is bad or the sensor was not configured
+    eXS_ERRORCODE_CALFILE_LOADFAILED = 4  # calibration file failed to load - likely the file wasn't found
+    eXS_ERRORCODE_CALFILE_DOESNOTMATCHSENSOR = 5  # the calibration file does not match the sensor
+    eXS_ERRORCODE_CONFIGURATION_NOTCOMPLETE = 6  # Call XS_ConfigComplete() to complete the sensor configuration.
+    eXS_ERRORCODE_CONFIGURATION_NOSENSORS = 7  # no sensors have been added to the sample config via XS_AddSensorToConfig() or could not be added
+    eXS_ERRORCODE_CONFIGURATION_FAILCREATEXSN = 8  # Could not create the XSN file. Check that the path is valid and the location can be written too.
+    eXS_ERRORCODE_SENSORS_SENSORNOTFOUND = 9  # either the sensor isn't enumerated or the PID is invalid
+    eXS_ERRORCODE_SENSORS_RAWONLY = 10  # XS_GetPressure() called but no calibration files have been loaded.  Only raw data is available.
+    eXS_ERRORCODE_SENSORS_NOSAMPLE = 11  # XS_Sample() has not been called yet or it has not succeeded in retrieving a sample
+    eXS_ERRORCODE_SENSORS_CONNECTIONLOST = 12  # XS_Sample failed because a sensor was disconnected or USB power reset
+    eXS_ERRORCODE_SENSORS_SAMPLETIMEOUT = 13  # XS_Sample failed because the sensor timed out while reading
+    eXS_ERRORCODE_SENSORS_SAMPLEFAILED = 14  # XS_Sample failed for reasons unknown
+    eXS_ERRORCODE_SENSORS_NOCONNECTION = 15  # Calling XS_Sample() without first calling to XS_OpenConnection()?
+    eXS_ERRORCODE_SENSORS_CONNECTFAILED = 16  # It's possible that one of the sensors has become disconnected.  Check connections.
+    eXS_ERRORCODE_MEMORYALLOCATION_FAILED = 17  # the system seems to be running low on memory or the DLL could not allocate some memory
+    eXS_ERRORCODE_LIBRARY_NOT_INITIALIZED = 18  # The DLL library has not been initialized
+    eXS_ERRORCODE_AUTOCONFIG_SENSORNOTFOUND = 19  # no sensors found during enumeration - please check XS_GetLastEnumState()
+    eXS_ERRORCODE_COULDNOTCREATECAPTUREFILE = 20  # Could not create the target capture file
+    eXS_ERRORCODE_SIMFILE_LOADFAIL = 21  # A problem occured while loading the simulation file.  The path might be incorrect or the file cannot be opened.  (Try loading it in the XSENSOR desktop software.)
+    eXS_ERRORCODE_SIM_FUNCTION_NA = 22  # The DLL function is not available or does nothing while in simulation mode.
+    eXS_ERRORCODE_SIM_CALIBRATED_ONLY = 23  # The simulation only supports calibrated (pressure) data
+    eXS_ERRORCODE_SIM_RAW_ONLY = 24  # The simulation only supports raw (non-pressure) data
+    eXS_ERRORCODE_MANCAL_FUNCTION_NOTSET = 25  # The manaul calibration state is not set which this function requires.
+    eXS_ERRORCODE_MANCAL_FUNCTION_NA = 26  # The DLL function is not available or does nothing while in manual calibration mode.
+    eXS_ERRORCODE_CALIBRATION_AUTOCACHE = 27  # This calibration function is disabled while the calibration auto-cache is enabled via XS_SetCalibrationFolder.
+    eXS_ERRORCODE_X4CONFIGSCRIPT_COULDNOTOPEN = 28  # The X4 config script could not be opened. Perhaps a bad file path? Or the sensor is not an X4!
+    eXS_ERRORCODE_X4CONFIGSCRIPT_BADRESPONSE = 29  # A command in the X4 config script returned a bad response
 
 
 # this is a bit mask - any number of these bits might be set
 class EEnumerationState(Enum):
-	eENUMSTATE_OK						= 0x00000000	# no errors detected
-	eENUMSTATE_NOSPKSDETECTED			= 0x00000001	# no SPKS appear in the computer
-	eENUMSTATE_OPENDEVICEFAIL			= 0x00000002	# The SPK could not be opened with CreateFile
-	eENUMSTATE_OPENDEVICEFAIL_PROCESSLOCK = 0x00000004	# The SPK could not be opened because some other process has it opened
-	eENUMSTATE_HIDDEVICEENUMFAIL		= 0x00000008	# The HID device enumerate failed - very low level
-	eENUMSTATE_MISSINGCON				= 0x00000010	# The SPK is not connected to a sensor pad
-	eENUMSTATE_MISSINGDLLCODE			= 0x00000020	# The sensor does not have a DLL code
-	eENUMSTATE_MISMATCHEDDLLCODE		= 0x00000040	# The sensor's DLL code does not match this DLL
-	eENUMSTATE_MISSINGPROFILE			= 0x00000080	# The sensors profile is not supported by this DLL
-	eENUMSTATE_MISSINGCHILDSPKS			= 0x00000100	# This multi-SPK sensor is missing SPKS ports 2 to N
-	eENUMSTATE_MISSINGPARENTSPK			= 0x00000200	# This multi-SPK sensor is missing SPK on port 1
-	eENUMSTATE_MISMATCHEEDFIRMWARE		= 0x00000400	# This multi-SPK sensor must the same firmware on each SPK
-	eENUMSTATE_MISMATCHEDSPKTYPES		= 0x00000800	# This multi-SPK sensor must the same SPK types on each port (either XS PRO or just XS)
-	eENUMSTATE_CONNECTIONSENSE			= 0x00001000	# This sensor pad is not properly plugged into the SPK - or there is a hardware problem with the sensor
-	eENUMSTATE_CONREQUIRESNEWERFIRMWARE	= 0x00002000	# The sensor pad requires SPK(s) with firmware 1.3 or better
-	eENUMSTATE_MIXEDHSSX3				= 0x00004000,	# Mixed X3 and HSS components (either HSS sensor on X3, or X3 sensor on HSS)
-	eENUMSTATE_SENSORLOCK				= 0x00008000,	# The sensor is locked (likely due to time trial expiry)
+    eENUMSTATE_OK = 0x00000000  # no errors detected
+    eENUMSTATE_NOSPKSDETECTED = 0x00000001  # no SPKS appear in the computer
+    eENUMSTATE_OPENDEVICEFAIL = 0x00000002  # The SPK could not be opened with CreateFile
+    eENUMSTATE_OPENDEVICEFAIL_PROCESSLOCK = 0x00000004  # The SPK could not be opened because some other process has it opened
+    eENUMSTATE_HIDDEVICEENUMFAIL = 0x00000008  # The HID device enumerate failed - very low level
+    eENUMSTATE_MISSINGCON = 0x00000010  # The SPK is not connected to a sensor pad
+    eENUMSTATE_MISSINGDLLCODE = 0x00000020  # The sensor does not have a DLL code
+    eENUMSTATE_MISMATCHEDDLLCODE = 0x00000040  # The sensor's DLL code does not match this DLL
+    eENUMSTATE_MISSINGPROFILE = 0x00000080  # The sensors profile is not supported by this DLL
+    eENUMSTATE_MISSINGCHILDSPKS = 0x00000100  # This multi-SPK sensor is missing SPKS ports 2 to N
+    eENUMSTATE_MISSINGPARENTSPK = 0x00000200  # This multi-SPK sensor is missing SPK on port 1
+    eENUMSTATE_MISMATCHEEDFIRMWARE = 0x00000400  # This multi-SPK sensor must the same firmware on each SPK
+    eENUMSTATE_MISMATCHEDSPKTYPES = 0x00000800  # This multi-SPK sensor must the same SPK types on each port (either XS PRO or just XS)
+    eENUMSTATE_CONNECTIONSENSE = 0x00001000  # This sensor pad is not properly plugged into the SPK - or there is a hardware problem with the sensor
+    eENUMSTATE_CONREQUIRESNEWERFIRMWARE = 0x00002000  # The sensor pad requires SPK(s) with firmware 1.3 or better
+    eENUMSTATE_MIXEDHSSX3 = 0x00004000,  # Mixed X3 and HSS components (either HSS sensor on X3, or X3 sensor on HSS)
+    eENUMSTATE_SENSORLOCK = 0x00008000,  # The sensor is locked (likely due to time trial expiry)
+
 
 class EPressureUnit(Enum):
-	ePRESUNIT_MMHG	= 0	# millimeters of mercury
-	ePRESUNIT_INH2O = 1	# inches of water
-	ePRESUNIT_PSI	= 2	# pounds/sq.inch
-	ePRESUNIT_KPA	= 3	# kilopascals
-	ePRESUNIT_KGCM2	= 4	# kgf/cm^2
-	ePRESUNIT_ATM	= 5	# atmospheres
-	ePRESUNIT_NCM2	= 6	# newtons/cm^2
-	ePRESUNIT_MBAR	= 7	# millibars
-	ePRESUNIT_NM2	= 8	# Newton/meter^2
-	ePRESUNIT_GCM2	= 9	# grams/cm^2
-	ePRESUNIT_RAW 	= 255 # non-calibrated readings from the sensors - 16 bit integers
+    ePRESUNIT_MMHG = 0  # millimeters of mercury
+    ePRESUNIT_INH2O = 1  # inches of water
+    ePRESUNIT_PSI = 2  # pounds/sq.inch
+    ePRESUNIT_KPA = 3  # kilopascals
+    ePRESUNIT_KGCM2 = 4  # kgf/cm^2
+    ePRESUNIT_ATM = 5  # atmospheres
+    ePRESUNIT_NCM2 = 6  # newtons/cm^2
+    ePRESUNIT_MBAR = 7  # millibars
+    ePRESUNIT_NM2 = 8  # Newton/meter^2
+    ePRESUNIT_GCM2 = 9  # grams/cm^2
+    ePRESUNIT_RAW = 255  # non-calibrated readings from the sensors - 16 bit integers
+
 
 # ===========================================================================
 # load the library. Change the path if you want to put it in another folder.
@@ -82,30 +96,24 @@ class EPressureUnit(Enum):
 
 # import the 64 bit dll
 # libXSC = ctypes.cdll.LoadLibrary("XSCore90x64.dll")
-
-# import the 32 bit dll
-# usage example: libXSC = ctypes.cdll.LoadLibrary("E:\\xsource\\xsensor.libs\\Xsensor.Libraries.X3\\XSCore90\\bin\\Win32\\Debug\\XSCore90.dll")
-#libXSC = ctypes.cdll.LoadLibrary(r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\XSCore90x64.dll")
-libXSC = ctypes.cdll.LoadLibrary(r"C:\pypy3.9-v7.3.9-win64\pypy3.9-v7.3.9-win64\XSCore90x64.dll")
+libXSC = ctypes.cdll.LoadLibrary(path)
 
 # ===========================================================================
-#	Library initialization/deinitialization
+#	Library initialization/initialization
 # ===========================================================================
 
 # Retrieves the last error code.  Check this value when a function reports a failure.  (see enum EXSErrorCodes below).
 XS_GetLastErrorCode = libXSC.XS_GetLastErrorCode
 XS_GetLastErrorCode.restype = ctypes.c_uint
 
-
 # XS_InitLibrary
 # Initialize the XS software engine.  This must be the first call to the XS Library
 # Use bThreadMode set to TRUE(1) if you want the DLL to sample independently of the call to XS_Sample.
-# Otherwise set to FALSE(0) to have finer control over the sample rate.
+# Otherwise, set to FALSE(0) to have finer control over the sample rate.
 # XBOOL XS_InitLibrary(XBOOL bThreadMode);
 XS_InitLibrary = libXSC.XS_InitLibrary
 XS_InitLibrary.argtypes = [ctypes.c_ubyte]
 XS_InitLibrary.restype = ctypes.c_ubyte
-
 
 # XS_ExitLibrary
 # Uninitializes the XS software engine, freeing all allocated resources.  This should be the last call to the XS Library
@@ -113,14 +121,12 @@ XS_InitLibrary.restype = ctypes.c_ubyte
 XS_ExitLibrary = libXSC.XS_ExitLibrary
 XS_ExitLibrary.restype = ctypes.c_ubyte
 
-
 # XS_GetVersion
 # fetches the DLL version - major.minor.build.revision
 # XBOOL XS_GetVersion(uint16_t& major, uint16_t& minor, uint16_t& build, uint16_t& revision);
 XS_GetVersion = libXSC.XS_GetVersion
 XS_GetVersion.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
 XS_GetVersion.restype = ctypes.c_ubyte
-
 
 # ===========================================================================
 #	Sensor Enumeration and Information
@@ -134,7 +140,6 @@ XS_GetVersion.restype = ctypes.c_ubyte
 # uint32_t XS_EnumSensors();
 XS_EnumSensors = libXSC.XS_EnumSensors
 XS_EnumSensors.restype = ctypes.c_uint
-
 
 # When enabled, the DLL skips looking for new sensors and only attempts to talk to sensors it already knows about.
 # Use this when you've found a sensor, but lost its connection and want to rescan for it without the delay of looking
@@ -153,7 +158,6 @@ XS_GetAllowFastEnum.restype = ctypes.c_uint
 XS_GetLastEnumState = libXSC.XS_GetLastEnumState
 XS_GetLastEnumState.restype = ctypes.c_uint
 
-
 # XS_EnumSensorCount
 # Returns a count of the number of sensors found during the EnumSensors() call.
 # uint32_t XS_EnumSensorCount();
@@ -167,14 +171,12 @@ XS_EnumSensorPID = libXSC.XS_EnumSensorPID
 XS_EnumSensorPID.argtypes = [ctypes.c_uint]
 XS_EnumSensorPID.restype = ctypes.c_ulonglong
 
-
 # XS_GetSerialFromPID
 # Retrieve a sensor's 4 digit serial number.
 # uint16_t XS_GetSerialFromPID(SENSORPID spid);
 XS_GetSerialFromPID = libXSC.XS_GetSerialFromPID
 XS_GetSerialFromPID.argtypes = [ctypes.c_ulonglong]
 XS_GetSerialFromPID.restype = ctypes.c_ushort
-
 
 # XS_GetSensorDimensions
 # Retrieves the sensor's row and column counts
@@ -207,7 +209,6 @@ XS_GetSensorNameUTF8 = libXSC.XS_GetSensorNameUTF8
 XS_GetSensorNameUTF8.argtypes = [ctypes.c_ulonglong, ctypes.c_void_p, ctypes.c_void_p]
 XS_GetSensorNameUTF8.restype = ctypes.c_ubyte
 
-
 # XS_IsX4Sensor
 # Is this an X4 sensor?
 # XBOOL XS_IsX4Sensor(SENSORPID spid);
@@ -221,7 +222,6 @@ XS_IsX4Sensor.restype = ctypes.c_ubyte
 XS_IsX4FootSensor = libXSC.XS_IsX4FootSensor
 XS_IsX4FootSensor.argtypes = [ctypes.c_ulonglong, ctypes.c_void_p, ctypes.c_void_p]
 XS_IsX4FootSensor.restype = ctypes.c_ubyte
-
 
 # ===========================================================================
 #	Calibration file management
@@ -256,7 +256,6 @@ XS_SetCalibrationFolder.restype = ctypes.c_uint
 XS_SetCalibrationFolderUTF8 = libXSC.XS_SetCalibrationFolderUTF8
 XS_SetCalibrationFolderUTF8.argtypes = [ctypes.c_char_p]
 XS_SetCalibrationFolderUTF8.restype = ctypes.c_uint
-
 
 # XS_DownloadCalibrations
 # Downloads the calibration files stored on the target sensor and saves them to a folder.  Returns number of files downloaded.
@@ -312,7 +311,6 @@ XS_GetCalibrationInfoUTF8 = libXSC.XS_GetCalibrationInfoUTF8
 XS_GetCalibrationInfoUTF8.argtypes = [ctypes.c_char_p, ctypes.c_ubyte, ctypes.c_void_p, ctypes.c_void_p]
 XS_GetCalibrationInfoUTF8.restype = ctypes.c_ubyte
 
-
 # XS_GetCalibrationInfoEx
 # Retrieve the SENSORPID from this calibration file
 # szCalibrationFile is the full path to the cal file on disk.  eg: c:\\CalFiles\\MyCalFile.xsc
@@ -328,7 +326,6 @@ XS_GetCalibrationInfoEx.restype = ctypes.c_ubyte
 XS_GetCalibrationInfoExUTF8 = libXSC.XS_GetCalibrationInfoExUTF8
 XS_GetCalibrationInfoExUTF8.argtypes = [ctypes.c_char_p, ctypes.c_void_p]
 XS_GetCalibrationInfoExUTF8.restype = ctypes.c_ubyte
-
 
 # ===========================================================================
 #	AUTOMATIC Sensor Configuration
@@ -359,7 +356,6 @@ XS_AutoConfigXSN.restype = ctypes.c_ubyte
 XS_AutoConfigXSNUTF8 = libXSC.XS_AutoConfigXSNUTF8
 XS_AutoConfigXSNUTF8.argtypes = [ctypes.c_char_p, ctypes.c_ubyte, ctypes.c_float]
 XS_AutoConfigXSNUTF8.restype = ctypes.c_ubyte
-
 
 # XS_AutoConfigByDefault
 # creates a configuration using all sensors attached to the system.  Downloads any calibration files into memory and uses them.
@@ -463,7 +459,6 @@ XS_AddSensorToConfigUTF8 = libXSC.XS_AddSensorToConfigUTF8
 XS_AddSensorToConfigUTF8.argtypes = [ctypes.c_ulonglong, ctypes.c_char_p]
 XS_AddSensorToConfigUTF8.restype = ctypes.c_ubyte
 
-
 # XS_AddSensorToConfig_AutoCalByDefault
 # Adds a sensor to the sensor configuration.  Sensors in the configuration are sampled when XS_Sample() is called.
 # Attempts to download a calibration file from the sensor and use it.
@@ -493,14 +488,12 @@ XS_ConfigComplete.restype = ctypes.c_ubyte
 XS_HasConfig = libXSC.XS_HasConfig
 XS_HasConfig.restype = ctypes.c_ubyte
 
-
 # XS_ReleaseConfig
 # Closes any open connection and releases the configuration (including any XSN file).
 # Subsequent calls to XS_OpenConnection will fail until a new config is created.
 # XBOOL XS_ReleaseConfig();
 XS_ReleaseConfig = libXSC.XS_ReleaseConfig
 XS_ReleaseConfig.restype = ctypes.c_ubyte
-
 
 # ===========================================================================
 #	Sensor Configuration Information
@@ -514,20 +507,17 @@ XS_ConfigSensorPID = libXSC.XS_ConfigSensorPID
 XS_ConfigSensorPID.argtypes = [ctypes.c_uint]
 XS_ConfigSensorPID.restype = ctypes.c_ulonglong
 
-
 # XS_ConfigSensorCount
 # returns the number of configured sensors
 # uint32_t XS_ConfigSensorCount();
 XS_ConfigSensorCount = libXSC.XS_ConfigSensorCount
 XS_ConfigSensorCount.restype = ctypes.c_uint
 
-
 # XS_IsCalibrationConfigured
 # Returns 1 if the configuration is setup for calibrated data.
 # XBOOL XS_IsCalibrationConfigured();
 XS_IsCalibrationConfigured = libXSC.XS_IsCalibrationConfigured
 XS_IsCalibrationConfigured.restype = ctypes.c_ubyte
-
 
 # XS_GetConfigInfo
 # After the configuration is complete, call this to check the pressure range of the sensor.
@@ -538,14 +528,12 @@ XS_GetConfigInfo = libXSC.XS_GetConfigInfo
 XS_GetConfigInfo.argtypes = [ctypes.c_ubyte, ctypes.c_void_p, ctypes.c_void_p]
 XS_GetConfigInfo.restype = ctypes.c_ubyte
 
-
 # XS_GetSenselDims
 # returns a single sensel's physical dimensions in centimetres. Note this only works once a sensor configuration is via XS_AutoConfigByDefault or XS_ConfigComplete
 # XBOOL XS_GetSenselDims(SENSORPID spid, float& nWidthCM, float& nHeightCM);
 XS_GetSenselDims = libXSC.XS_GetSenselDims
 XS_GetSenselDims.argtypes = [ctypes.c_ulonglong, ctypes.c_void_p, ctypes.c_void_p]
 XS_GetSenselDims.restype = ctypes.c_ubyte
-
 
 # ===========================================================================
 #	Other Settings
@@ -566,7 +554,6 @@ XS_SetPressureUnit.argtypes = [ctypes.c_ubyte]
 XS_GetPressureUnit = libXSC.XS_GetPressureUnit
 XS_GetPressureUnit.restype = ctypes.c_ubyte
 
-
 # XS_SetReadTimeout
 # Sets the sample function's timeout period (in seconds).
 # 5 seconds is default
@@ -582,7 +569,6 @@ XS_SetReadTimeout.argtypes = [ctypes.c_uint]
 XS_GetReadTimeout = libXSC.XS_GetReadTimeout
 XS_GetReadTimeout.restype = ctypes.c_uint
 
-
 # XS_SetOverlapMode
 # if the sensors are physically overlapped, ensure this mode is on to avoid image distortion
 # void XS_SetOverlapMode(XBOOL bOverlap);
@@ -596,7 +582,6 @@ XS_SetOverlapMode.argtypes = [ctypes.c_ubyte]
 XS_GetOverlapMode = libXSC.XS_GetOverlapMode
 XS_GetOverlapMode.restype = ctypes.c_ubyte
 
-
 # XS_SetAllowWireless
 # allows use of the X3 wireless series
 XS_SetAllowWireless = libXSC.XS_SetAllowWireless
@@ -607,7 +592,6 @@ XS_SetAllowWireless.argtypes = [ctypes.c_ubyte]
 # returns 1 if the DLL is allowed to scan for X3 wireless sensors, or 0 otherwise
 XS_GetAllowWireless = libXSC.XS_GetAllowWireless
 XS_GetAllowWireless.restype = ctypes.c_ubyte
-
 
 # XS_SetAllowX4
 # allow the DLL to find X4 sensors that are connected by USB
@@ -620,7 +604,6 @@ XS_SetAllowX4.argtypes = [ctypes.c_ubyte]
 XS_GetAllowX4 = libXSC.XS_GetAllowX4
 XS_GetAllowX4.restype = ctypes.c_ubyte
 
-
 # XS_SetAllowX4Wireless
 # allow the DLL to find X4 sensors that are connected by Bluetooth
 XS_SetAllowX4Wireless = libXSC.XS_SetAllowX4Wireless
@@ -631,7 +614,6 @@ XS_SetAllowX4Wireless.argtypes = [ctypes.c_ubyte]
 # returns 1 if the DLL is allowed to scan for X4 Bluetooth sensors, or 0 otherwise
 XS_GetAllowX4Wireless = libXSC.XS_GetAllowX4Wireless
 XS_GetAllowX4Wireless.restype = ctypes.c_ubyte
-
 
 # XS_SetX4Mode8Bit
 # Place the X4 in 8 bit mode - This can improve the reliability of Bluetooth transmission speeds. Has no impact on actual recording speed.
@@ -664,7 +646,6 @@ XS_SetEnableIMU.argtypes = [ctypes.c_ubyte]
 XS_GetEnableIMU = libXSC.XS_GetEnableIMU
 XS_GetEnableIMU.restype = ctypes.c_ubyte
 
-
 # XS_SetStreamingMode
 # If you are sampling < 10 Hz, set this mode to false, otherwise set to true for better sample rates
 # void XS_SetStreamingMode(XBOOL bStreaming);
@@ -677,7 +658,6 @@ XS_SetStreamingMode.argtypes = [ctypes.c_ubyte]
 # XBOOL XS_GetStreamingMode();
 XS_GetStreamingMode = libXSC.XS_GetStreamingMode
 XS_GetStreamingMode.restype = ctypes.c_ubyte
-
 
 # XS_SetSampleAverageCount
 # Set the number of readings the hardware will perform on each sensel.
@@ -701,7 +681,6 @@ XS_SetSampleAverageCount.argtypes = [ctypes.c_ushort]
 XS_GetSampleAverageCount = libXSC.XS_GetSampleAverageCount
 XS_GetSampleAverageCount.restype = ctypes.c_ushort
 
-
 # C functions not presently supported (2021-03-12)
 # XS_AllocPressureBuffer
 # XS_ReleasePressureBuffer
@@ -723,11 +702,10 @@ XS_GetSampleAverageCount.restype = ctypes.c_ushort
 #    Actual rate may be slower depending on the sensor configuration and
 #    the PC's USB subsystem. This field is ignored when XS_InitLibrary(FALSE)
 #	  is called.
-#XBOOL XS_OpenConnection(uint32_t nThreadedFramesPerMinute=0);
+# XBOOL XS_OpenConnection(uint32_t nThreadedFramesPerMinute=0);
 XS_OpenConnection = libXSC.XS_OpenConnection
 XS_OpenConnection.argtypes = [ctypes.c_uint]
 XS_OpenConnection.restype = ctypes.c_ubyte
-
 
 # XS_IsConnectionOpen
 # returns 1 if the connection is open
@@ -741,13 +719,11 @@ XS_IsConnectionOpen.restype = ctypes.c_ubyte
 XS_IsConnectionThreaded = libXSC.XS_IsConnectionThreaded
 XS_IsConnectionThreaded.restype = ctypes.c_ubyte
 
-
 # XS_CloseConnection
 # closes the connection - this releases the sensors and allows other applications to talk to them.
 # XBOOL XS_CloseConnection();
 XS_CloseConnection = libXSC.XS_CloseConnection
 XS_CloseConnection.restype = ctypes.c_ubyte
-
 
 # ===========================================================================
 #	Sampling functions
@@ -766,7 +742,6 @@ XS_SetNoiseThreshold = libXSC.XS_SetNoiseThreshold
 XS_SetNoiseThreshold.argtypes = [ctypes.c_float]
 XS_SetNoiseThreshold.restype = ctypes.c_ubyte
 
-
 # XS_Sample
 # Ask the sensor(s) to record a sample.
 # Returns 1 if a sample is collected, 0 otherwise
@@ -778,7 +753,8 @@ XS_Sample.restype = ctypes.c_ubyte
 # Fetch the timestamp components (UTC time). month (1-12), day (1-31). Hour is (0-23), minute and second (0-59), millisecond (0-999)
 # XBOOL XS_GetSampleTimestampUTC(uint16_t& year, uint8_t& month, uint8_t& day, uint8_t& hour, uint8_t& minute, uint8_t& second, uint16_t& millisecond);
 XS_GetSampleTimestampUTC = libXSC.XS_GetSampleTimestampUTC
-XS_GetSampleTimestampUTC.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
+XS_GetSampleTimestampUTC.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                                     ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
 XS_GetSampleTimestampUTC.restype = ctypes.c_ubyte
 
 # XS_GetSampleTimestampExUTC
@@ -787,7 +763,9 @@ XS_GetSampleTimestampUTC.restype = ctypes.c_ubyte
 #	uint16_t& year, uint8_t& month, uint8_t& day, 
 #	uint8_t& hour, uint8_t& minute, uint8_t& second, uint16_t& millisecond, uint16_t& microsecond, bool bAsLocalTime);
 XS_GetSampleTimestampExUTC = libXSC.XS_GetSampleTimestampExUTC
-XS_GetSampleTimestampExUTC.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_ubyte]
+XS_GetSampleTimestampExUTC.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                                       ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                                       ctypes.c_ubyte]
 XS_GetSampleTimestampExUTC.restype = ctypes.c_ubyte
 
 # C functions not presently supported (2021-03-12)
@@ -833,7 +811,9 @@ XS_GetRawSafe.restype = ctypes.c_ubyte
 #	float& gx, float& gy, float& gz);
 # Fetches the IMU data (if any) for the current Sample
 XS_GetIMU = libXSC.XS_GetIMU
-XS_GetIMU.argtypes = [ctypes.c_ulonglong, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
+XS_GetIMU.argtypes = [ctypes.c_ulonglong, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                      ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                      ctypes.c_void_p]
 XS_GetIMU.restype = ctypes.c_ubyte
 
 # XS_GetHardwareFrameState
@@ -843,7 +823,6 @@ XS_GetIMU.restype = ctypes.c_ubyte
 XS_GetHardwareFrameState = libXSC.XS_GetHardwareFrameState
 XS_GetHardwareFrameState.argtypes = [ctypes.c_ulonglong, ctypes.c_void_p, ctypes.c_void_p]
 XS_GetHardwareFrameState.restype = ctypes.c_ubyte
-
 
 # XS_CenterOfPressure
 # Computes the center of pressure (COP) and returns its column and row coordinates.
@@ -869,7 +848,6 @@ XS_GetHardwareFrameState.restype = ctypes.c_ubyte
 XS_CenterOfPressure = libXSC.XS_CenterOfPressure
 XS_CenterOfPressure.argtypes = [ctypes.c_ulonglong, ctypes.c_float, ctypes.c_void_p, ctypes.c_void_p]
 XS_CenterOfPressure.restype = ctypes.c_ubyte
-
 
 # C functions not presently supported (2021-03-12)
 # XS_GetDeadMap

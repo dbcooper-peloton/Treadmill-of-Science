@@ -19,6 +19,18 @@
 import ctypes
 from enum import Enum
 
+# path for importing 64 bit DLL
+
+# Path for Daniel's PC
+path = r"C:\Users\DanielCooper\PycharmProjects\pythonProject2\XSNReader64.dll"
+
+# Path for Andy's PC
+# path = r"C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\XSNReader64.dll"
+
+# Path for TOS PC
+# path = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\XSNReader64.dll"
+
+
 class EXSNPressureUnit(Enum):
 	eXSNPRESUNIT_MMHG	= 0	# millimeters of mercury
 	eXSNPRESUNIT_INH2O = 1	# inches of water
@@ -58,11 +70,7 @@ class EXSNReaderErrorCodes(Enum):
 # ===========================================================================
 
 # import the 64 bit dll
-# libXSN = ctypes.cdll.LoadLibrary("XSNReader64.dll")
-
-# import the 32 bit dll
-# libXSN = ctypes.cdll.LoadLibrary(r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\XSNReader64.dll")
-libXSN = ctypes.cdll.LoadLibrary(r"C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\XSNReader64.dll")
+libXSN = ctypes.cdll.LoadLibrary(path)
 
 
 # ===========================================================================

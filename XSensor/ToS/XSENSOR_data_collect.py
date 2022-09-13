@@ -1,3 +1,11 @@
+# ====================================================================================
+# Python Script to Collect Data from XSENSOR
+#
+#  This software collects pressure data and creates an XSN log file containing
+#  that data. Next, the software reads the XSN log file and writes the data into a .csv
+#
+# ====================================================================================
+
 import ctypes
 import XSCore90
 import XSNReader
@@ -7,13 +15,26 @@ import warnings
 import csv
 import numpy as np
 
-# csv file path
-path = r"C:\TOS_Data\XSensor\XSensor_output.csv"
-# XSN file path
-path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
-# calibration file path
-path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
+# File path variables
 
+# Daniel's PC
+# csv file path
+path = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\XSensor_output.csv"
+# XSN file path
+path2 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\X_log.XSN"
+# calibration file path
+path3 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor_Calibration"
+
+# TOS PC
+# csv file path
+# path = r"C:\TOS_Data\XSensor\XSensor_output.csv"
+# XSN file path
+# path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
+# calibration file path
+# path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
+
+
+# ignore warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # pre-define some variables to hold data from XCore90 DLL
@@ -93,6 +114,7 @@ print(sMesg)
 # creating time stamp for when test started
 now = datetime.now()
 date_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+
 
 # Use this to write header and other non-frame info to the csv
 def write_to_csv(junk):
