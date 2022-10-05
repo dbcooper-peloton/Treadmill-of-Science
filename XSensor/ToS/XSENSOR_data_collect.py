@@ -20,22 +20,48 @@ import numpy as np
 # File path variables
 
 # Daniel's PC
-# csv file path
-#path = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\XSensor_output.csv"
+# XSensor csv data file path
+path = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\XSensor_output.csv"
 # XSN file path
-#path2 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\X_log.XSN"
+path2 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\X_log.XSN"
 # calibration file path
-#path3 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor_Calibration"
+path3 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor_Calibration"
+# IMU data file path
+path4 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\IMU_output.csv"
 
 # TOS PC
 # csv file path
-path = r"C:\TOS_Data\XSensor\XSensor_output.csv"
+# path = r"C:\TOS_Data\XSensor\XSensor_output.csv"
 # XSN file path
-path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
+# path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
 # calibration file path
-path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
+# path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
+# path4 = r"C:\TOS_Data\XSensor\IMU_output.csv"
 
-path4 = r"C:\TOS_Data\XSensor\IMU_output.csv"
+# this function checks to see if a file is open or not
+# if a file is open, the user is asked to close the file and then continue
+def check_is_open(check_path):
+    while True:
+        try:
+            # try to open path
+            with open(check_path, 'a', newline='') as f:
+                print(check_path + ' is closed')
+            # end function if path is closed
+            break
+        except IOError:
+                # prompt the user to close the file before continuing
+                decision = input("Open file Exception caught \n"
+                                 'File that is still open: ' + check_path + '\n'
+                                 "Please close the file \n"
+                                 "Try to write file again? [y/n]: ")
+                if decision != 'n':
+                    continue
+
+# check to make sure all files are closed before starting the test
+check_is_open(path)
+check_is_open(path2)
+# check_is_open(path3)
+check_is_open(path4)
 
 # ignore warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -119,7 +145,7 @@ XSCore90.XS_SetCalibrationFolder(path3)
 XSCore90.XS_SetAllowX4Wireless(1);
 XSCore90.XS_SetX4Mode8Bit(1);
 XSCore90.XS_SetStreamingMode(1);
-XSCore90.XS_SetEnableIMU(1) # if we want IMU data with each frame
+XSCore90.XS_SetEnableIMU(1)  # if we want IMU data with each frame
 
 # Ask the DLL to scan the computer for attached sensors. Returns the number of sensors found.
 nbrSensors = XSCore90.XS_EnumSensors()
@@ -258,7 +284,6 @@ def XSN_to_CSV():
                 # modPID = sProductID.value % 1000
                 data_out['ID'] = sModel.value[-2]
 
-
                 senselColumns = XSNReader.XSN_Columns(pad);
                 senselRows = XSNReader.XSN_Rows(pad);
 
@@ -319,13 +344,13 @@ if nbrSensors > 0:
     # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_GCM2.value # grams/cm^2
     # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_RAW.value # non-calibrated readings from the sensors - 16 bit integers
 
-    #XSN version
+    # XSN version
     if XSCore90.XS_AutoConfigXSN(path2, pressure_unit, -1.0) == 1:
-         nbrSensors = XSCore90.XS_ConfigSensorCount()
-         sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
-         print(sMesg)
+        nbrSensors = XSCore90.XS_ConfigSensorCount()
+        sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
+        print(sMesg)
 
-    #non-XSN version
+    # non-XSN version
     # if XSCore90.XS_AutoConfig(pressure_unit, -1.0) == 1:
     #      nbrSensors = XSCore90.XS_ConfigSensorCount()
     #      sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
@@ -414,7 +439,7 @@ if XSCore90.XS_OpenConnection(9000) == 1:
         while True:
             # request the sample - this call blocks until the samples are buffered
             if XSCore90.XS_Sample() == 0:
-                #Error handling
+                # Error handling
                 if XSCore90.XS_IsConnectionThreaded() != 0:
                     if XSCore90.XS_GetLastErrorCode() == XSCore90.XSErrorCodes.eXS_ERRORCODE_SENSORS_NOSAMPLE.value:
                         # this just means the sample is not available
@@ -426,17 +451,17 @@ if XSCore90.XS_OpenConnection(9000) == 1:
 
                 # fetch the sample timestamp
             XSCore90.XS_GetSampleTimestampUTC(ctypes.byref(sampleYear), ctypes.byref(sampleMonth),
-                                                  ctypes.byref(sampleDay), ctypes.byref(sampleHour),
-                                                  ctypes.byref(sampleMinute), ctypes.byref(sampleSecond),
-                                                  ctypes.byref(sampleMillisecond))
+                                              ctypes.byref(sampleDay), ctypes.byref(sampleHour),
+                                              ctypes.byref(sampleMinute), ctypes.byref(sampleSecond),
+                                              ctypes.byref(sampleMillisecond))
 
-            #if XSCore90.XS_IsConnectionThreaded() != 0:
+            # if XSCore90.XS_IsConnectionThreaded() != 0:
             #     if sampleYear.value == 0:
             #         # no new sample
             #         continue
 
             if ((sampleMinute.value == prevsampleMinute) and (sampleSecond.value == prevsampleSecond) and (
-                         sampleMillisecond.value == prevsampleMillisecond)):
+                    sampleMillisecond.value == prevsampleMillisecond)):
                 continue  # same Timestamp
 
             prevsampleMinute = sampleMinute.value
@@ -462,17 +487,18 @@ if XSCore90.XS_OpenConnection(9000) == 1:
                 sensorPID = XSCore90.XS_ConfigSensorPID(sensorIndex)
                 sensorIndex = sensorIndex + 1
                 XSCore90.XS_GetIMU(sensorPID, ctypes.byref(qx), ctypes.byref(qy), ctypes.byref(qz),
-                          ctypes.byref(qw), ctypes.byref(ax), ctypes.byref(ay), ctypes.byref(az),
-                          ctypes.byref(gx), ctypes.byref(gy), ctypes.byref(gz))
-                IMUbuffer = [timestamp_seconds, sensorPID % 1000, qx.value, qy.value, qz.value, qw.value, ax.value, ay.value,
+                                   ctypes.byref(qw), ctypes.byref(ax), ctypes.byref(ay), ctypes.byref(az),
+                                   ctypes.byref(gx), ctypes.byref(gy), ctypes.byref(gz))
+                IMUbuffer = [timestamp_seconds, sensorPID % 1000, qx.value, qy.value, qz.value, qw.value, ax.value,
+                             ay.value,
                              az.value, gx.value, gy.value, gz.value]
                 data_out3.loc[len(data_out3)] = IMUbuffer
-                #print(str(IMUbuffer))
-                #print("logging")
+                # print(str(IMUbuffer))
+                print("logging")
 
     # stop the while loop with a keyboard press
     except KeyboardInterrupt:
-        #print(data_out3)
+        # print(data_out3)
         data_out3.to_csv(path4, mode='wb', index=False)
         XSCore90.XS_CloseConnection()
         XSCore90.XS_ExitLibrary()
@@ -483,4 +509,3 @@ if XSCore90.XS_OpenConnection(9000) == 1:
         XSCore90.XS_CloseConnection()
         XSCore90.XS_ExitLibrary()
         sys.exit(1)
-    
