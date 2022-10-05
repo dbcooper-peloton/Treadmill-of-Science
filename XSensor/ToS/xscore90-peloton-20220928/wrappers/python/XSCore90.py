@@ -8,8 +8,6 @@
 import ctypes
 from enum import Enum
 
-path = r"C:\Users\preco\OneDrive\Documents\GitHub\Treadmill-of-Science\XSensor\ToS\XSCore90x64.dll"
-
 class XSErrorCodes(Enum):
 	eXS_ERRORCODE_OK							= 0	# Function ran normally
 	eXS_ERRORCODE_LIBRARY_NOT_INITIALIZED		= 1 # The DLL library has not been initialized
@@ -125,7 +123,7 @@ class EPressureUnit(Enum):
 # import the 32 bit dll
 # usage example: libXSC = ctypes.cdll.LoadLibrary("E:\\xsource\\xsensor.libs\\Xsensor.Libraries.X3\\XSCore90\\bin\\Win32\\Debug\\XSCore90.dll")
 #libXSC = ctypes.cdll.LoadLibrary("XSCore90.dll")
-libXSC = ctypes.cdll.LoadLibrary(path)
+libXSC = ctypes.cdll.LoadLibrary("E:\\xsource\\xsensor.libs\\Xsensor.Libraries.X3\\ClientRelease\\_starterProjects\\xscore90-x3\\XSCore90.dll")
 
 # ===========================================================================
 #	Library initialization/deinitialization

@@ -7,8 +7,6 @@
 # ====================================================================================
 
 import ctypes
-import sys
-import time
 import XSCore90
 import XSNReader
 import pandas as pd
@@ -35,7 +33,6 @@ path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
 # calibration file path
 path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
 
-path4 = r"C:\TOS_Data\XSensor\IMU_output.csv"
 
 # ignore warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -91,18 +88,6 @@ nMinute = ctypes.c_ushort()
 nSecond = ctypes.c_ushort()
 nMilliseconds = ctypes.c_ushort()
 
-# IMU vars
-qx = ctypes.c_float()
-qy = ctypes.c_float()
-qz = ctypes.c_float()
-qw = ctypes.c_float()
-ax = ctypes.c_float()
-ay = ctypes.c_float()
-az = ctypes.c_float()
-gx = ctypes.c_float()
-gy = ctypes.c_float()
-gz = ctypes.c_float()
-
 frameBufferSize = ctypes.c_uint()
 
 XSCore90.XS_InitLibrary(1)
@@ -119,7 +104,6 @@ XSCore90.XS_SetCalibrationFolder(path3)
 XSCore90.XS_SetAllowX4Wireless(1);
 XSCore90.XS_SetX4Mode8Bit(1);
 XSCore90.XS_SetStreamingMode(1);
-XSCore90.XS_SetEnableIMU(1) # if we want IMU data with each frame
 
 # Ask the DLL to scan the computer for attached sensors. Returns the number of sensors found.
 nbrSensors = XSCore90.XS_EnumSensors()
@@ -319,17 +303,11 @@ if nbrSensors > 0:
     # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_GCM2.value # grams/cm^2
     # pressure_unit = XSCore90.EPressureUnit.ePRESUNIT_RAW.value # non-calibrated readings from the sensors - 16 bit integers
 
-    #XSN version
-    if XSCore90.XS_AutoConfigXSN(path2, pressure_unit, -1.0) == 1:
-         nbrSensors = XSCore90.XS_ConfigSensorCount()
-         sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
-         print(sMesg)
 
-    #non-XSN version
-    # if XSCore90.XS_AutoConfig(pressure_unit, -1.0) == 1:
-    #      nbrSensors = XSCore90.XS_ConfigSensorCount()
-    #      sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
-    #      print(sMesg)
+    if XSCore90.XS_AutoConfigXSN(path2, pressure_unit, -1.0) == 1:
+        nbrSensors = XSCore90.XS_ConfigSensorCount()
+        sMesg = 'Configured ' + str(nbrSensors) + ' sensors\n'
+        print(sMesg)
 
 # Tell the DLL we want all pressure values in the following units
 XSCore90.XS_SetPressureUnit(ctypes.c_ubyte(pressure_unit))
@@ -383,6 +361,8 @@ while sensorIndex < nbrSensors:
             float(minPressureRange.value)), 'Max', '{:0.4f} '.format(
             float(maxPressureRange.value))]
         newline = [' ']
+
+        # create header in log file
         with open(path, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(file_version)
@@ -392,95 +372,22 @@ while sensorIndex < nbrSensors:
             writer.writerow(Dims)
             writer.writerow(MinMax)
             writer.writerow(newline)
-
     sensorIndex = sensorIndex + 1
 
 # buffer variables - do we need all of these?
 data_buff = []
 data_out = pd.DataFrame()
 data_out2 = pd.DataFrame()
-dataColumns = [["Timestamp", "PID", "qx", "qz", "qy", "qw", "ax", "az", "ay", "gx", "gy", "gz"]]
-data_out3 = pd.DataFrame(columns=dataColumns)
-
-prevsampleMinute = 0
-prevsampleSecond = 0
-prevsampleMillisecond = 0
 
 # !!!!Main acquisition loop - Open connection with desired frames per minute
 if XSCore90.XS_OpenConnection(9000) == 1:
     try:
         # continuous data logger - this will only end with a keyboard interrupt
-        print("starting")
+        sMesg = '\nLogging'
         while True:
-            # request the sample - this call blocks until the samples are buffered
-            if XSCore90.XS_Sample() == 0:
-                #Error handling
-                if XSCore90.XS_IsConnectionThreaded() != 0:
-                    if XSCore90.XS_GetLastErrorCode() == XSCore90.XSErrorCodes.eXS_ERRORCODE_SENSORS_NOSAMPLE.value:
-                        # this just means the sample is not available
-                        time.sleep(0.001)
-                        continue
-                # else bad State
-                print("XS_Sample failed.  ERRORCODE= {}".format(XSCore90.XS_GetLastErrorCode()))
-                break
-
-                # fetch the sample timestamp
-            XSCore90.XS_GetSampleTimestampUTC(ctypes.byref(sampleYear), ctypes.byref(sampleMonth),
-                                                  ctypes.byref(sampleDay), ctypes.byref(sampleHour),
-                                                  ctypes.byref(sampleMinute), ctypes.byref(sampleSecond),
-                                                  ctypes.byref(sampleMillisecond))
-
-            #if XSCore90.XS_IsConnectionThreaded() != 0:
-            #     if sampleYear.value == 0:
-            #         # no new sample
-            #         continue
-
-            if ((sampleMinute.value == prevsampleMinute) and (sampleSecond.value == prevsampleSecond) and (
-                         sampleMillisecond.value == prevsampleMillisecond)):
-                continue  # same Timestamp
-
-            prevsampleMinute = sampleMinute.value
-            prevsampleSecond = sampleSecond.value
-            prevsampleMillisecond = sampleMillisecond.value
-
-            SampleTimeStamp = '{:02d}'.format(sampleHour.value - 7) + ':{:02d}'.format(
-                sampleMinute.value) + ':{:02d}'.format(sampleSecond.value) + '.{:03d}'.format(
-                sampleMillisecond.value)
-
-            # convert
-            # to
-            # datetime
-            final_time = datetime.strptime(SampleTimeStamp, '%H:%M:%S.%f')
-
-            # convert timestamp to seconds
-            a_timedelta = final_time - datetime(1900, 1, 1)
-            timestamp_seconds = a_timedelta.total_seconds()
-
-            sensorIndex = 0
-            while sensorIndex < nbrSensors:
-                # fetch the sensor Product ID (PID)
-                sensorPID = XSCore90.XS_ConfigSensorPID(sensorIndex)
-                sensorIndex = sensorIndex + 1
-                XSCore90.XS_GetIMU(sensorPID, ctypes.byref(qx), ctypes.byref(qy), ctypes.byref(qz),
-                          ctypes.byref(qw), ctypes.byref(ax), ctypes.byref(ay), ctypes.byref(az),
-                          ctypes.byref(gx), ctypes.byref(gy), ctypes.byref(gz))
-                IMUbuffer = [timestamp_seconds, sensorPID % 1000, qx.value, qy.value, qz.value, qw.value, ax.value, ay.value,
-                             az.value, gx.value, gy.value, gz.value]
-                data_out3.loc[len(data_out3)] = IMUbuffer
-                #print(str(IMUbuffer))
-                #print("logging")
-
+            print(sMesg)
     # stop the while loop with a keyboard press
     except KeyboardInterrupt:
-        #print(data_out3)
-        data_out3.to_csv(path4, mode='wb', index=False)
         XSCore90.XS_CloseConnection()
         XSCore90.XS_ExitLibrary()
         XSN_to_CSV()
-
-    except Exception as e:
-        print(e)
-        XSCore90.XS_CloseConnection()
-        XSCore90.XS_ExitLibrary()
-        sys.exit(1)
-    

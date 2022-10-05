@@ -8,96 +8,58 @@
 import ctypes
 from enum import Enum
 
-path = r"C:\Users\preco\OneDrive\Documents\GitHub\Treadmill-of-Science\XSensor\ToS\XSCore90x64.dll"
-
-class XSErrorCodes(Enum):
+class EXSErrorCodes(Enum):
 	eXS_ERRORCODE_OK							= 0	# Function ran normally
-	eXS_ERRORCODE_LIBRARY_NOT_INITIALIZED		= 1 # The DLL library has not been initialized
-	
-	eXS_ERRORCODE_BADPARAMETER_OUTOFRANGE		= 2 # a parameter is out of range
-	eXS_ERRORCODE_BADPARAMETER_NULL				= 3 # null parameter - pass in a variable/buffers address
-	eXS_ERRORCODE_BADPARAMETER_INVALID_SENSOR_PID = 4 # either the PID is bad or the sensor was not configured
-	eXS_ERRORCODE_BADPARAMETER_BUFFERTOOSMALL	= 5	# the buffer parameter is too small to hold the contents
-
-	eXS_ERRORCODE_CREATEFOLDER_NOPERMISSION		= 6 # the program doesn't have permission to create a folder at the specified location
-
-	eXS_ERRORCODE_CALFILE_LOADFAILED			= 7 # calibration file failed to load - likely the file wasn't found
-	eXS_ERRORCODE_CALFILE_DOESNOTMATCHSENSOR	= 8 # the calibration file does not match the sensor
-
-	eXS_ERRORCODE_CONFIGURATION_NOTCOMPLETE		= 9 # Call XS_ConfigComplete() to complete the sensor configuration.
-	eXS_ERRORCODE_CONFIGURATION_NOSENSORS		= 10 # no sensors have been added to the sample config via XS_AddSensorToConfig() or could not be added
-	eXS_ERRORCODE_CONFIGURATION_FAILCREATEXSN   = 11 # Could not create the XSN file. Check that the path is valid and the location can be written too.
-	eXS_ERRORCODE_AUTOCONFIG_SENSORNOTFOUND		= 12 # no sensors found during enumeration - please check XS_GetLastEnumState()
-
-	eXS_ERRORCODE_SENSORS_SENSORNOTFOUND		= 13 # either the sensor isn't enumerated or the PID is invalid
-	eXS_ERRORCODE_SENSORS_RAWONLY				= 14 # XS_GetPressure() called but no calibration files have been loaded.  Only raw data is available.
-	eXS_ERRORCODE_SENSORS_NOSAMPLE				= 15 # XS_Sample() has not been called yet or it has not succeeded in retrieving a sample
-
-	eXS_ERRORCODE_SENSORS_CONNECTIONLOST		= 16 # XS_Sample failed because a sensor was disconnected or USB power reset
-	eXS_ERRORCODE_SENSORS_SAMPLETIMEOUT			= 17 # XS_Sample failed because the sensor timed out while reading
-	eXS_ERRORCODE_SENSORS_SAMPLEFAILED			= 18 # XS_Sample failed for reasons unknown
-
-	eXS_ERRORCODE_SENSORS_NOCONNECTION			= 19 # Calling XS_Sample() without first calling to XS_OpenConnection()?
-	eXS_ERRORCODE_SENSORS_CONNECTFAILED			= 20 # It's possible that one of the sensors has become disconnected.  Check connections.
-	eXS_ERRORCODE_SENSORS_COMMANDFAILED			= 21 # The sensor did not respond properly to the command. Check connections or try the call again.
-
-	eXS_ERRORCODE_MEMORYALLOCATION_FAILED		= 22 # the system seems to be running low on memory or the DLL could not allocate some memory
-	eXS_ERRORCODE_COULDNOTCREATECAPTUREFILE		= 23 # Could not create the target capture file
-
-	eXS_ERRORCODE_SIMFILE_LOADFAIL				= 24 # A problem occured while loading the simulation file.  The path might be incorrect or the file cannot be opened.  (Try loading it in the XSENSOR desktop software.)
-	eXS_ERRORCODE_SIM_FUNCTION_NA				= 25 # The DLL function is not available or does nothing while in simulation mode.
-	eXS_ERRORCODE_SIM_CALIBRATED_ONLY			= 26 # The simulation only supports calibrated (pressure) data
-	eXS_ERRORCODE_SIM_RAW_ONLY					= 27 # The simulation only supports raw (non-pressure) data
-
-	eXS_ERRORCODE_MANCAL_FUNCTION_NOTSET		= 28 # The manaul calibration state is not set which this function requires.
-	eXS_ERRORCODE_MANCAL_FUNCTION_NA			= 29 # The DLL function is not available or does nothing while in manual calibration mode.
-	eXS_ERRORCODE_CALIBRATION_AUTOCACHE			= 30 # This calibration function is disabled while the calibration auto-cache is enabled via XS_SetCalibrationFolder.
-
-	eXS_ERRORCODE_X4CONFIGSCRIPT_COULDNOTOPEN	= 31 # The X4 config script could not be opened. Perhaps a bad file path? Or the sensor is not an X4!
-	eXS_ERRORCODE_X4CONFIGSCRIPT_BADRESPONSE	= 32 # A command in the X4 config script returned a bad response
-
-	eXS_ERRORCODE_X4SPKNOTCOMPATIBLEWITHCALFILE = 33 # the selected X4 SPK is not compatible with the sensor's calibration file
-
-	eXS_ERRORCODE_FAIL_X4REMOTE_ACTIVE          = 34 # This local command failed because an X4REMOTE connection is active.
-	eX4_ERRORCODE_FAIL_LOCAL_ACTIVE             = 35 # This remote command failed because a session is open via XS_OpenConnection. X4 Remote connections are not compatible with this mode.
-	eX4_ERRORCODE_DOWNLOAD_INTERRUPTED          = 36 # The command was interrupted in the middle of downloading some state. Check connection and try again.
-	eX4_ERRORCODE_UPLOAD_INTERRUPTED            = 37 # The command was interrupted in the middle of uploading some state. Check connection and try again.
-
-	eX4_ERRORCODE_SESSIONINDEX_OUTOFBOUNDS      = 38 # the session file index is too large for the list.
-	eX4_ERRORCODE_RECORDINGINPROGRESS           = 39 # The command failed because the X4 is in the middle of a remote recording.
-	eX4_ERRORCODE_REMOTENOTOPEN                 = 40 # the remote connection is not open. This command requires an open connection
-
-	eX4_ERRORCODE_REMOTERECORD_STARTFAIL        = 41 # the remote recording failed to start ... check connections
-	eX4_ERRORCODE_REMOTERECORD_MISMATCHED       = 42 # the sensors are mismatched (ie: two left feet) for a paired recording
-	eX4_ERRORCODE_REMOTERECORD_NOT_INSOLE       = 43 # A specified sensor is not an insole.
-	eX4_ERRORCODE_REMOTERECORD_BADCMDRESPONSE   = 44 # The command failed due to an unknown issue with the remote sensor. Try again!
-	eX4_ERRORCODE_REMOTESAMPLE_CALNOTAVAILABLE  = 45 # there's no local calibration file and the X4 is busy recording (thus a cal file can't be downloaded)
-
+	eXS_ERRORCODE_BADPARAMETER_OUTOFRANGE		= 1 # a parameter is out of range
+	eXS_ERRORCODE_BADPARAMETER_NULL				= 2 # null parameter - pass in a variable/buffers address
+	eXS_ERRORCODE_BADPARAMETER_INVALID_SENSOR_PID = 3 # either the PID is bad or the sensor was not configured
+	eXS_ERRORCODE_CALFILE_LOADFAILED			= 4 # calibration file failed to load - likely the file wasn't found
+	eXS_ERRORCODE_CALFILE_DOESNOTMATCHSENSOR	= 5 # the calibration file does not match the sensor
+	eXS_ERRORCODE_CONFIGURATION_NOTCOMPLETE		= 6 # Call XS_ConfigComplete() to complete the sensor configuration.
+	eXS_ERRORCODE_CONFIGURATION_NOSENSORS		= 7 # no sensors have been added to the sample config via XS_AddSensorToConfig() or could not be added
+	eXS_ERRORCODE_CONFIGURATION_FAILCREATEXSN   = 8 # Could not create the XSN file. Check that the path is valid and the location can be written too.
+	eXS_ERRORCODE_SENSORS_SENSORNOTFOUND		= 9 # either the sensor isn't enumerated or the PID is invalid
+	eXS_ERRORCODE_SENSORS_RAWONLY				= 10 # XS_GetPressure() called but no calibration files have been loaded.  Only raw data is available.
+	eXS_ERRORCODE_SENSORS_NOSAMPLE				= 11 # XS_Sample() has not been called yet or it has not succeeded in retrieving a sample
+	eXS_ERRORCODE_SENSORS_CONNECTIONLOST		= 12 # XS_Sample failed because a sensor was disconnected or USB power reset
+	eXS_ERRORCODE_SENSORS_SAMPLETIMEOUT			= 13 # XS_Sample failed because the sensor timed out while reading
+	eXS_ERRORCODE_SENSORS_SAMPLEFAILED			= 14 # XS_Sample failed for reasons unknown
+	eXS_ERRORCODE_SENSORS_NOCONNECTION			= 15 # Calling XS_Sample() without first calling to XS_OpenConnection()?
+	eXS_ERRORCODE_SENSORS_CONNECTFAILED			= 16 # It's possible that one of the sensors has become disconnected.  Check connections.
+	eXS_ERRORCODE_MEMORYALLOCATION_FAILED		= 17 # the system seems to be running low on memory or the DLL could not allocate some memory
+	eXS_ERRORCODE_LIBRARY_NOT_INITIALIZED		= 18 # The DLL library has not been initialized
+	eXS_ERRORCODE_AUTOCONFIG_SENSORNOTFOUND		= 19 # no sensors found during enumeration - please check XS_GetLastEnumState()
+	eXS_ERRORCODE_COULDNOTCREATECAPTUREFILE		= 20 # Could not create the target capture file
+	eXS_ERRORCODE_SIMFILE_LOADFAIL				= 21 # A problem occured while loading the simulation file.  The path might be incorrect or the file cannot be opened.  (Try loading it in the XSENSOR desktop software.)
+	eXS_ERRORCODE_SIM_FUNCTION_NA				= 22 # The DLL function is not available or does nothing while in simulation mode.
+	eXS_ERRORCODE_SIM_CALIBRATED_ONLY			= 23 # The simulation only supports calibrated (pressure) data
+	eXS_ERRORCODE_SIM_RAW_ONLY					= 24 # The simulation only supports raw (non-pressure) data
+	eXS_ERRORCODE_MANCAL_FUNCTION_NOTSET		= 25 # The manaul calibration state is not set which this function requires.
+	eXS_ERRORCODE_MANCAL_FUNCTION_NA			= 26 # The DLL function is not available or does nothing while in manual calibration mode.
+	eXS_ERRORCODE_CALIBRATION_AUTOCACHE			= 27 # This calibration function is disabled while the calibration auto-cache is enabled via XS_SetCalibrationFolder.
+	eXS_ERRORCODE_X4CONFIGSCRIPT_COULDNOTOPEN	= 28 # The X4 config script could not be opened. Perhaps a bad file path? Or the sensor is not an X4!
+	eXS_ERRORCODE_X4CONFIGSCRIPT_BADRESPONSE	= 29 # A command in the X4 config script returned a bad response
 
 
 # this is a bit mask - any number of these bits might be set
 class EEnumerationState(Enum):
 	eENUMSTATE_OK						= 0x00000000	# no errors detected
-	
 	eENUMSTATE_NOSPKSDETECTED			= 0x00000001	# no SPKS appear in the computer
 	eENUMSTATE_OPENDEVICEFAIL			= 0x00000002	# The SPK could not be opened with CreateFile
 	eENUMSTATE_OPENDEVICEFAIL_PROCESSLOCK = 0x00000004	# The SPK could not be opened because some other process has it opened
 	eENUMSTATE_HIDDEVICEENUMFAIL		= 0x00000008	# The HID device enumerate failed - very low level
-	
 	eENUMSTATE_MISSINGCON				= 0x00000010	# The SPK is not connected to a sensor pad
 	eENUMSTATE_MISSINGDLLCODE			= 0x00000020	# The sensor does not have a DLL code
 	eENUMSTATE_MISMATCHEDDLLCODE		= 0x00000040	# The sensor's DLL code does not match this DLL
 	eENUMSTATE_MISSINGPROFILE			= 0x00000080	# The sensors profile is not supported by this DLL
-	
 	eENUMSTATE_MISSINGCHILDSPKS			= 0x00000100	# This multi-SPK sensor is missing SPKS ports 2 to N
 	eENUMSTATE_MISSINGPARENTSPK			= 0x00000200	# This multi-SPK sensor is missing SPK on port 1
 	eENUMSTATE_MISMATCHEEDFIRMWARE		= 0x00000400	# This multi-SPK sensor must the same firmware on each SPK
 	eENUMSTATE_MISMATCHEDSPKTYPES		= 0x00000800	# This multi-SPK sensor must the same SPK types on each port (either XS PRO or just XS)
-	
 	eENUMSTATE_CONNECTIONSENSE			= 0x00001000	# This sensor pad is not properly plugged into the SPK - or there is a hardware problem with the sensor
 	eENUMSTATE_CONREQUIRESNEWERFIRMWARE	= 0x00002000	# The sensor pad requires SPK(s) with firmware 1.3 or better
-	eENUMSTATE_MIXEDHSSX3				= 0x00004000	# Mixed X3 and HSS components (either HSS sensor on X3, or X3 sensor on HSS)
-	eENUMSTATE_SENSORLOCK				= 0x00008000	# The sensor is locked (likely due to time trial expiry)
+	eENUMSTATE_MIXEDHSSX3				= 0x00004000,	# Mixed X3 and HSS components (either HSS sensor on X3, or X3 sensor on HSS)
+	eENUMSTATE_SENSORLOCK				= 0x00008000,	# The sensor is locked (likely due to time trial expiry)
 
 class EPressureUnit(Enum):
 	ePRESUNIT_MMHG	= 0	# millimeters of mercury
@@ -110,7 +72,6 @@ class EPressureUnit(Enum):
 	ePRESUNIT_MBAR	= 7	# millibars
 	ePRESUNIT_NM2	= 8	# Newton/meter^2
 	ePRESUNIT_GCM2	= 9	# grams/cm^2
-	ePRESUNIT_BAR   = 10 # bar
 	ePRESUNIT_RAW 	= 255 # non-calibrated readings from the sensors - 16 bit integers
 
 # ===========================================================================
@@ -124,14 +85,13 @@ class EPressureUnit(Enum):
 
 # import the 32 bit dll
 # usage example: libXSC = ctypes.cdll.LoadLibrary("E:\\xsource\\xsensor.libs\\Xsensor.Libraries.X3\\XSCore90\\bin\\Win32\\Debug\\XSCore90.dll")
-#libXSC = ctypes.cdll.LoadLibrary("XSCore90.dll")
-libXSC = ctypes.cdll.LoadLibrary(path)
+libXSC = ctypes.cdll.LoadLibrary(r"C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\testScripts\XSCore90x64.dll")
 
 # ===========================================================================
 #	Library initialization/deinitialization
 # ===========================================================================
 
-# Retrieves the last error code.  Check this value when a function reports a failure.  (see enum XSErrorCodes below).
+# Retrieves the last error code.  Check this value when a function reports a failure.  (see enum EXSErrorCodes below).
 XS_GetLastErrorCode = libXSC.XS_GetLastErrorCode
 XS_GetLastErrorCode.restype = ctypes.c_uint
 
@@ -175,19 +135,6 @@ XS_EnumSensors = libXSC.XS_EnumSensors
 XS_EnumSensors.restype = ctypes.c_uint
 
 
-# XS_EnumSensors normally interrupts remote recording sessions for X4 sensors.
-# This is required to query the X4 sensor for its information. Remote session recordings
-# prevent this information from being retrieved.
-# 
-# Set this to xFALSE to prevent XS_EnumSensors from interrupting any active remote recordings.
-# void XS_SetAllowEnumInterruptX4Remote(XBOOL allow);
-XS_SetAllowEnumInterruptX4Remote = libXSC.XS_SetAllowEnumInterruptX4Remote
-XS_SetAllowEnumInterruptX4Remote.argtypes = [ctypes.c_ubyte]
-
-# XBOOL XS_GetAllowEnumInterruptX4Remote();
-XS_GetAllowEnumInterruptX4Remote = libXSC.XS_GetAllowEnumInterruptX4Remote
-XS_GetAllowEnumInterruptX4Remote.restype = ctypes.c_ubyte
-
 # When enabled, the DLL skips looking for new sensors and only attempts to talk to sensors it already knows about.
 # Use this when you've found a sensor, but lost its connection and want to rescan for it without the delay of looking
 # for new sensors.
@@ -197,7 +144,7 @@ XS_SetAllowFastEnum.argtypes = [ctypes.c_ubyte]
 
 # XBOOL XS_GetAllowFastEnum();
 XS_GetAllowFastEnum = libXSC.XS_GetAllowFastEnum
-XS_GetAllowFastEnum.restype = ctypes.c_ubyte
+XS_GetAllowFastEnum.restype = ctypes.c_uint
 
 # XS_GetLastEnumState
 # Retrieves the enumeration error state.  This value is only valid after a call to XS_EnumSensors
@@ -922,96 +869,6 @@ XS_CenterOfPressure = libXSC.XS_CenterOfPressure
 XS_CenterOfPressure.argtypes = [ctypes.c_ulonglong, ctypes.c_float, ctypes.c_void_p, ctypes.c_void_p]
 XS_CenterOfPressure.restype = ctypes.c_ubyte
 
-
-# ===========================================================================
-#	X4 Remote Connection Management
-# 
-#  These functions allow starting & stopping remote X4 recordings (made to
-#  the onboard SD card), as well as managing the files.
-# 
-#  These functions should not be used in the context of live sessions created
-#  with XS_OpenConnection().
-# 
-#  The function calls in this block should be made in the context of an open 
-#  remote connection.
-# ===========================================================================
-
-
-# XBOOL X4_OpenRemote(SENSORPID spid);
-# Opens a remote connection to an X4 sensor. Can fail if the sensor doesn't not have 
-# an SD card, check error codes.
-# The initial open call may take a while as the DLL downloads (and caches) various 
-# sensor details on the first call.
-X4_OpenRemote = libXSC.X4_OpenRemote
-X4_OpenRemote.argtypes = [ctypes.c_ulonglong]
-X4_OpenRemote.restype = ctypes.c_ubyte
-
-
-# XBOOL X4_CloseRemote(SENSORPID spid);
-# Closes a remote connection to an X4 sensor.
-X4_CloseRemote = libXSC.X4_CloseRemote
-X4_CloseRemote.argtypes = [ctypes.c_ulonglong]
-X4_CloseRemote.restype = ctypes.c_ubyte
-
-
-# XBOOL X4_IsRemoteRecording(SENSORPID spid, XBOOL* remoteRecording);
-# Is the X4 currently recording remotely?
-# Sets remoteRecording to xTRUE if it is.
-X4_IsRemoteRecording = libXSC.X4_IsRemoteRecording
-X4_IsRemoteRecording.argtypes = [ctypes.c_ulonglong, ctypes.c_void_p]
-X4_IsRemoteRecording.restype = ctypes.c_ubyte
-
-
-# XBOOL X4_StartRemoteRecording(SENSORPID spid, float framesPerSecond);
-# Starts the X4's remote recording.
-X4_StartRemoteRecording = libXSC.X4_StartRemoteRecording
-X4_StartRemoteRecording.argtypes = [ctypes.c_ulonglong, ctypes.c_float]
-X4_StartRemoteRecording.restype = ctypes.c_ubyte
-
-# XBOOL X4_StopRemoteRecording(SENSORPID spid);
-# Stops the X4's remote recording. This ends the active session.
-X4_StopRemoteRecording = libXSC.X4_StopRemoteRecording
-X4_StopRemoteRecording.argtypes = [ctypes.c_ulonglong]
-X4_StopRemoteRecording.restype = ctypes.c_ubyte
-
-# XBOOL X4_StartRemotePairRecording(SENSORPID spid_left_insole, SENSORPID spid_right_insole, float framesPerSecond);
-# Starts a synchronized recording for two X4 foot sensors (left and right insoles only)
-X4_StartRemotePairRecording = libXSC.X4_StartRemotePairRecording
-X4_StartRemotePairRecording.argtypes = [ctypes.c_ulonglong, ctypes.c_ulonglong, ctypes.c_float]
-X4_StartRemotePairRecording.restype = ctypes.c_ubyte
-
-# XBOOL X4_StopRemotePairRecording(SENSORPID spid_left_insole, SENSORPID spid_right_insole);
-# Stops a synchronized recording
-X4_StopRemotePairRecording = libXSC.X4_StopRemotePairRecording
-X4_StopRemotePairRecording.argtypes = [ctypes.c_ulonglong, ctypes.c_ulonglong]
-X4_StopRemotePairRecording.restype = ctypes.c_ubyte
-
-# XBOOL X4_SampleRemote(SENSORPID spid);
-# Fetches a preview frame from the sensor. Call XS_GetPressure() to get the frame.
-# Only available when a calibration file is cached.
-# Be careful to limit the calls to this as it may interfer with the remote recording.
-X4_SampleRemote = libXSC.X4_SampleRemote
-X4_SampleRemote.argtypes = [ctypes.c_ulonglong]
-X4_SampleRemote.restype = ctypes.c_ubyte
-
-# XBOOL X4_GetRemoteSampleRange(SENSORPID spid, uint8_t pressureUnits, float* minPressure, float* maxPressure);
-# Fetch the pressure range of the remote sample.
-# Only valid after at least one successful call to X4_SampleRemote()
-X4_GetRemoteSampleRange = libXSC.X4_GetRemoteSampleRange
-X4_GetRemoteSampleRange.argtypes = [ctypes.c_ulonglong, ctypes.c_ubyte, ctypes.c_void_p, ctypes.c_void_p]
-X4_GetRemoteSampleRange.restype = ctypes.c_ubyte
-
-# XBOOL X4_GetRemoteDuration(SENSORPID spid, float framesPerSecond, uint32_t* minutes);
-# For a given recording speed, returns the available duration of recording in total minutes.
-# This is based on SD card space and not battery life.
-# This information is not available when a recording is running.
-X4_GetRemoteDuration = libXSC.X4_GetRemoteDuration
-X4_GetRemoteDuration.argtypes = [ctypes.c_ulonglong, ctypes.c_float, ctypes.c_void_p]
-X4_GetRemoteDuration.restype = ctypes.c_ubyte
-
-# ===========================================================================
-# X4 REMOTE SESSION COMMANDS
-# ===========================================================================
 
 # C functions not presently supported (2021-03-12)
 # XS_GetDeadMap

@@ -28,7 +28,7 @@ from enum import Enum
 # path = r"C:\Users\AndyKind\Documents\GitHub\Project-Orchid\XSensor\ToS\XSNReader64.dll"
 
 # Path for TOS PC
-path = r"C:\Users\preco\OneDrive\Documents\GitHub\Treadmill-of-Science\XSensor\ToS\XSNReader64.dll"
+path = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\XSNReader64.dll"
 
 
 class EXSNPressureUnit(Enum):
