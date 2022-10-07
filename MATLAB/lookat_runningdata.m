@@ -1,5 +1,8 @@
 close all;clear;clc;
 
+%DataRootDir is the parent path of the dataset folder
+%Dname is the folder that the dataset file is in
+
 %DataRootDir = 'C:\Users\Tony\Downloads\Tread AD Adv Metrics';
 DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
