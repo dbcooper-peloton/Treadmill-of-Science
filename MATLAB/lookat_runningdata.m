@@ -61,6 +61,23 @@ subplot 313
 plot(TachData.t,B_vel) % [m/s] to [mph] *2.23694
 end
 
+%% READ ENCODER DATA
+
+if 1
+EncoderData = load_EncoderData(fullfile(Dname,'Torque_Position.tdms'));
+
+figure 
+%subplot 211
+%plot(EncoderData.t, EncoderData.Encoder);title('Encoder')
+%subplot 212
+plot(EncoderData.t, EncoderData.vel);title('RPM')
+end
+
+%% READ DOPPLER DATA
+if 1
+TachData = load_TachData(fullfile(Dname,'Belt_Speed.tdms'));
+end
+
 %% READ LOADCELL DATA
 if 1
 ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
@@ -126,8 +143,6 @@ subplot 312
 %subplot 313
 %plot(MotorData.t,MotorData.Voltage);legend('Voltage')
 end
-%% TODO: Add Doppler and Torque Position Parser
-        % Add Xsensor IMU parser
 
 
 %% READ XSENSOR DATA
