@@ -75,7 +75,13 @@ end
 
 %% READ DOPPLER DATA
 if 1
-TachData = load_TachData(fullfile(Dname,'Belt_Speed.tdms'));
+DopplerData = load_DopplerData(fullfile(Dname,'Belt_Speed.tdms'));
+
+figure
+subplot(211)
+plot(DopplerData.t, DopplerData.velocity);title('Doppler ft/min')
+subplot(212)
+plot(DopplerData.t, DopplerData.mph);title('Doppler MPH')
 end
 
 %% READ LOADCELL DATA
