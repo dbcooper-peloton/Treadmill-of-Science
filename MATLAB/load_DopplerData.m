@@ -1,6 +1,6 @@
 function DopplerData = load_DopplerData(fullfname_tdms)
 
-%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'XSensorIMU Test', 'Belt_Speed.tdms')
+%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'noRunner_1MPH', 'Feet_Traveled.tdms')
 
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
@@ -33,7 +33,8 @@ if ~exist(fullfname_mat,'file')
     pulse = DopplerData.Doppler;
     %disp(pulse);
     %calc pulse rate
-    pulserate = [0;(pulse)/(65535)];
+    %pulserate = [0;(pulse)/(65535)];
+    pulserate = [0;(pulse)/(45000)];
     %disp(pulserate)
 
     %calc change in pulse rate

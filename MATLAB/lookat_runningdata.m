@@ -3,24 +3,14 @@ close all;clear;clc;
 %DataRootDir is the parent path of the dataset folder
 %Dname is the folder that the dataset file is in
 
-%DataRootDir = 'C:\Users\Tony\Downloads\Tread AD Adv Metrics';
 DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
-% Dname = 'Real Data 8_3_22\Andrea';
-% Dname = 'Real Data 8_3_22\Data Sync drop test2';
+%Dname = 'XSensorIMU Test';
+%Dname = 'NoRunner_2MPH_800K';
+%Dname = 'Andy3MPH_900K';
+%Dname = 'Andy3MPH_800K';
+Dname = '1MPH_NoRunner';
 
-% Dname = 'Dataset_20220822\Andrea';
-% Dname = 'Dataset_20220822\Andy'; % Heel
-% Dname = 'Dataset_20220822\Daniel Cooper';
-% Dname = 'Dataset_20220822\Harrison'; % Heel
-% Dname = 'Dataset_20220822\Sana'; % bug
-% Dname = 'Dataset_20220822\Sarah';
-
-% Dname = 'Dataset_20220823\ChrisP'; % Midfoot
-% Dname = 'Dataset_20220823\Dee';
-% Dname = 'Dataset_20220823\Joshua'; % Forefoot
-% Dname = 'Dataset_20220823\Rene';
-Dname = 'XSensorIMU Test'
 
 Dname = fullfile(DataRootDir,Dname);
 
@@ -33,7 +23,7 @@ Dname = fullfile(DataRootDir,Dname);
 
 %% READ ACCEL DATA
 if 1
-AccelData = load_AccelData(fullfile(Dname,'accel_and_power_data.tdms'));
+AccelData = load_AccelData(fullfile(Dname,'accel_data.tdms'));
 
 figure
 %plot(AccelData.t,AccelData.Left);
@@ -56,9 +46,9 @@ subplot 311
 plot(TachData.t,TachData.Tach);title('Tach')
 ylim([-0.25 1.25])
 subplot 312
-plot(TachData.t,vel)
+plot(TachData.t,vel);title('Velocity m/s')
 subplot 313
-plot(TachData.t,B_vel) % [m/s] to [mph] *2.23694
+plot(TachData.t,B_vel);title('Velocity mph') % [m/s] to [mph] *2.23694
 end
 
 %% READ ENCODER DATA
@@ -73,15 +63,46 @@ figure
 plot(EncoderData.t, EncoderData.vel);title('RPM')
 end
 
+%% READ VOLTAGE DATA
+
+if 1
+VoltsData = load_VoltsData(fullfile(Dname,'Voltage_Data.tdms'));
+figure;
+plot(VoltsData.t,VoltsData.Voltage);hold all;title('Motor Volts')
+legend('Voltage')
+end
+
 %% READ DOPPLER DATA
 if 1
 DopplerData = load_DopplerData(fullfile(Dname,'Belt_Speed.tdms'));
 
+windowSize = 5; 
+b = (1/windowSize)*ones(1,windowSize);
+a = 1;
+
 figure
 subplot(211)
-plot(DopplerData.t, DopplerData.velocity);title('Doppler ft/min')
-subplot(212)
+%plot(DopplerData.t, DopplerData.velocity);title('Doppler ft/min')
 plot(DopplerData.t, DopplerData.mph);title('Doppler MPH')
+%subplot(312)
+
+%y1 = filter(b,a,DopplerData.mph);
+%plot(DopplerData.t, y1);title('Doppler Smoothed 1')
+
+%x = second(DopplerData.t);
+%y = DopplerData.mph;
+%y = cast(DopplerData.mph, double);
+
+%p = polyfit(x, y, 1);
+%v = polyval(p, x);
+
+%disp(v)
+
+subplot(212)
+y2 = medfilt1(DopplerData.mph);
+%plot(x, v);title('Doppler Smoothed 2')
+plot(DopplerData.t, y2);title('Doppler Smoothed 2')
+
 end
 
 %% READ LOADCELL DATA
@@ -89,7 +110,7 @@ if 1
 ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
 
 figure
-plot(ForceData.t,ForceData.Frnt_L);hold all;title('Load Cells')
+plot(ForceData.t,ForceData.Frnt_L);hold all;title('Load Cells lbs')
 plot(ForceData.t,ForceData.FMid_L);
 plot(ForceData.t,ForceData.BMid_L);
 plot(ForceData.t,ForceData.Back_L);
@@ -107,7 +128,7 @@ plot(ForceData.t,ForceData.Frnt_L+...
                  ForceData.Frnt_R+...
                  ForceData.FMid_R+...
                  ForceData.BMid_R+...
-                 ForceData.BMid_R)
+                 ForceData.BMid_R);title('Combined Force')
 end
 
 %% READ MIC DATA
@@ -124,7 +145,7 @@ end
 
 %% READ TORQUE AND POWER DATA
 if 1
-MotorData = load_MotorData(fullfile(Dname,'Torque_Data.tdms'));
+MotorData = load_MotorData(fullfile(Dname,'Torque_and_current_Data.tdms'));
 G_mtop = 2.6; % Motion ratio Motor shaft to drive roller
 
 %M_EP = MotorData.Current.*MotorData.Voltage;
@@ -136,16 +157,16 @@ M_MP = M_vel .* MotorData.Torque;
 
 figure
 %plot(MotorData.t,M_EP);hold on
-plot(MotorData.t,M_MP);legend('EP','MP')
+plot(MotorData.t,M_MP);legend('EP','MP');title('Power')
 
 % figure
 % plot(M_vel/(2*pi) * 60,M_Voltage)
 
 figure;
-subplot 311
-plot(MotorData.t,MotorData.Torque);hold all;title('Motor');legend('Torque')
-subplot 312
-%plot(MotorData.t,MotorData.Current);legend('Current')
+subplot 211
+plot(MotorData.t,MotorData.Torque);hold all;title('Torque');legend('Torque')
+subplot 212
+plot(MotorData.t,MotorData.Current);title('Current')
 %subplot 313
 %plot(MotorData.t,MotorData.Voltage);legend('Voltage')
 end
