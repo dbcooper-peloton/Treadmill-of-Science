@@ -28,7 +28,7 @@
 			<Property Name="ScaleType" Type="Str">Linear</Property>
 		</Item>
 		<Item Name="MicSig High Voltage Probe" Type="NI-DAQmx Scale">
-			<Property Name="Lin.Slope" Type="Str">10</Property>
+			<Property Name="Lin.Slope" Type="Str">100</Property>
 			<Property Name="Lin.YIntercept" Type="Str">0</Property>
 			<Property Name="Name" Type="Str">MicSig High Voltage Probe</Property>
 			<Property Name="PreScaledUnits" Type="Str">Volts</Property>
@@ -42,6 +42,7 @@
 		<Item Name="NI_Torque_Analog.vi" Type="VI" URL="../NI_Torque_Analog.vi"/>
 		<Item Name="OMEGA_Load_Analog.vi" Type="VI" URL="../OMEGA_Load_Analog.vi"/>
 		<Item Name="OMEGA_Temp.vi" Type="VI" URL="../OMEGA_Temp.vi"/>
+		<Item Name="Torque_and_Power_and_Doppler.vi" Type="VI" URL="../Torque_and_Power_and_Doppler.vi"/>
 		<Item Name="WaveBook516E Infinite Acquisition.vi" Type="VI" URL="../WaveBook516E Infinite Acquisition.vi"/>
 		<Item Name="Dependencies" Type="Dependencies">
 			<Item Name="vi.lib" Type="Folder">
