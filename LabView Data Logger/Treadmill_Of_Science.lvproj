@@ -10,6 +10,15 @@
 		<Property Name="server.vi.callsEnabled" Type="Bool">true</Property>
 		<Property Name="server.vi.propertiesEnabled" Type="Bool">true</Property>
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
+		<Item Name="Digital_Counter_w_External_Clock_V2.vi" Type="VI" URL="../Digital_Counter_w_External_Clock_V2.vi"/>
+		<Item Name="Doppler_Analog_Speed" Type="NI-DAQmx Scale">
+			<Property Name="Lin.Slope" Type="Str">150</Property>
+			<Property Name="Lin.YIntercept" Type="Str">0</Property>
+			<Property Name="Name" Type="Str">Doppler_Analog_Speed</Property>
+			<Property Name="PreScaledUnits" Type="Str">Volts</Property>
+			<Property Name="ScaledUnits" Type="Str">Feet/Min</Property>
+			<Property Name="ScaleType" Type="Str">Linear</Property>
+		</Item>
 		<Item Name="Futek787404" Type="NI-DAQmx Scale">
 			<Property Name="Lin.Slope" Type="Str">3.9123</Property>
 			<Property Name="Lin.YIntercept" Type="Str">0</Property>
@@ -136,6 +145,7 @@
 				<Item Name="compatWriteText.vi" Type="VI" URL="/&lt;vilib&gt;/_oldvers/_oldvers.llb/compatWriteText.vi"/>
 				<Item Name="Convert 1DDbl to DDT 2.vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/miscellaneous.llb/Convert 1DDbl to DDT 2.vi"/>
 				<Item Name="Convert 1DWfm to DDT.vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/miscellaneous.llb/Convert 1DWfm to DDT.vi"/>
+				<Item Name="Convert 2DDbl to DDT.vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/miscellaneous.llb/Convert 2DDbl to DDT.vi"/>
 				<Item Name="Convert property node font to graphics font.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Convert property node font to graphics font.vi"/>
 				<Item Name="DAQmx Advance Trigger (Digital Edge).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/configure/trigger.llb/DAQmx Advance Trigger (Digital Edge).vi"/>
 				<Item Name="DAQmx Advance Trigger (None).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/configure/trigger.llb/DAQmx Advance Trigger (None).vi"/>

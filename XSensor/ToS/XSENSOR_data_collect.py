@@ -21,22 +21,22 @@ import numpy as np
 
 # Daniel's PC
 # XSensor csv data file path
-path = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\XSensor_output.csv"
+#path = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\XSensor_output.csv"
 # XSN file path
-path2 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\X_log.XSN"
+#path2 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\X_log.XSN"
 # calibration file path
-path3 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor_Calibration"
+#path3 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor_Calibration"
 # IMU data file path
-path4 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\IMU_output.csv"
+#path4 = r"C:\Users\DanielCooper\Documents\TOS\Xsensor Data\IMU_output.csv"
 
 # TOS PC
 # csv file path
-# path = r"C:\TOS_Data\XSensor\XSensor_output.csv"
+path = r"C:\TOS_Data\XSensor\XSensor_output.csv"
 # XSN file path
-# path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
+path2 = r"C:\TOS_Data\XSensor\X_log.XSN"
 # calibration file path
-# path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
-# path4 = r"C:\TOS_Data\XSensor\IMU_output.csv"
+path3 = r"C:\Users\preco\OneDrive\Desktop\Project-Orchid\XSensor\ToS\Calibration"
+path4 = r"C:\TOS_Data\XSensor\IMU_output.csv"
 
 # this function checks to see if a file is open or not
 # if a file is open, the user is asked to close the file and then continue
@@ -502,7 +502,7 @@ if XSCore90.XS_OpenConnection(9000) == 1:
         data_out3.to_csv(path4, mode='wb', index=False)
         XSCore90.XS_CloseConnection()
         XSCore90.XS_ExitLibrary()
-        XSN_to_CSV()
+        #XSN_to_CSV()
 
     except Exception as e:
         print(e)
