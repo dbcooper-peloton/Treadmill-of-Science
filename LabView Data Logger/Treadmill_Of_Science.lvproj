@@ -28,6 +28,7 @@
 			<Property Name="ScaleType" Type="Str">Linear</Property>
 		</Item>
 		<Item Name="Main_ch.vi" Type="VI" URL="../Main_ch.vi"/>
+		<Item Name="Main_toggled_sensors.vi" Type="VI" URL="../Main_toggled_sensors.vi"/>
 		<Item Name="MicSig Current Probe" Type="NI-DAQmx Scale">
 			<Property Name="Lin.Slope" Type="Str">100</Property>
 			<Property Name="Lin.YIntercept" Type="Str">0</Property>
