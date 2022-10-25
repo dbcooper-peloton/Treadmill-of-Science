@@ -8,7 +8,7 @@ DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 %Dname = 'XSensorIMU Test';
 %Dname = 'NoRunner_2MPH_800K';
 %Dname = 'Andy3MPH_900K';
-Dname = 'Mic Test 9_30';
+Dname = 'Andy_10.24.22';
 %Dname = '1MPH_NoRunner';
 
 
@@ -33,14 +33,14 @@ ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
 %TODO: Subtract zero value from each force in summed up force plot
 
 %plot of the summed up forces
-%figure
-%plot(ForceData.t, ForceData.sum);title('Combined Force lbs')
+figure
+plot(ForceData.t, ForceData.sum);title('Combined Force lbs')
 %plot(ForceData.newTime, ForceData.newSum);title('Combined Force lbs')
 
 % plot single rows
-%row = 17;
-%figure
-%plot(ForceData.timeMat(row,:),ForceData.mat(row,:));title('Combined Force lbs')
+row = 4;
+figure
+plot(ForceData.timeMat(row,:),ForceData.mat(row,:));title('Combined Force lbs')
 
 % plot each row
 %figure
@@ -63,3 +63,17 @@ ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
 
 
 end
+
+
+%% READ ACCEL DATA
+if 1
+AccelData = load_AccelData(fullfile(Dname,'accel_data.tdms'));
+
+figure
+%plot(AccelData.t,AccelData.Left);
+%plot(AccelData.t,AccelData.Right);
+plot(AccelData.t,AccelData.Center_X);hold all;title('Accels')
+plot(AccelData.t,AccelData.Center_Y);
+end
+
+

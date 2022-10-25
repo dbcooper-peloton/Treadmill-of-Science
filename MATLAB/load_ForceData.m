@@ -1,7 +1,7 @@
 
 function ForceData = load_ForceData(fullfname_tdms)
 
-fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Mic Test 9_30', 'load_cells_Data.tdms')
+%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy_10.24.22', 'load_cells_Data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
@@ -97,16 +97,16 @@ if ~exist(fullfname_mat,'file')
          BR_zero;
 
     % Snapshot Algorithm
-    % if above data point is above 20 lbs and less than 0.35 seconds, record until data point is no longer above 20 lbs
-    % line this up with accel and mic data (compare time)
-    % if weight is above 20 lbs, store in an array until weight drops below
-    % 20 lbs
+    % if above data point is above 20 lbs and less than 2 seconds, record until data point is no longer above 20 lbs
+    % TODO: line this up with accel and mic data (compare time)
 
     % create empty vectors and matrices
     temp = [];
     timeTemp = [];
     mat = zeros(1,4000);
     timeMat = NaT(1,4000);
+
+    endTime = [];
 
     % same timezone as time data
     timeMat.TimeZone = 'America/Los_Angeles';
@@ -135,9 +135,13 @@ if ~exist(fullfname_mat,'file')
             elseif isempty(temp)
                 continue;
             end
+            
             % add vector to matrix and flush temp vector
             temp(end+1:4000) = -1;
             mat = [mat; temp];
+
+            %grab end time
+            endTime = [endTime, timeTemp(end)];
 
             timeTemp(end+1:4000) = NaT;
             timeMat = [timeMat; timeTemp]; 
@@ -149,8 +153,11 @@ if ~exist(fullfname_mat,'file')
 
     ForceData.mat = mat;
     ForceData.timeMat = timeMat;
+    endTime = second(endTime);
+    ForceData.endTime = endTime';
+    
 
-    save(fullfname_mat,'ForceData');
+    %save(fullfname_mat,'ForceData');
 else
     load(fullfname_mat,'ForceData');
 end
