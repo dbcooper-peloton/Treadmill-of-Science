@@ -502,7 +502,7 @@ if XSCore90.XS_OpenConnection(9000) == 1:
         data_out3.to_csv(path4, mode='wb', index=False)
         XSCore90.XS_CloseConnection()
         XSCore90.XS_ExitLibrary()
-        #XSN_to_CSV()
+        XSN_to_CSV()
 
     except Exception as e:
         print(e)

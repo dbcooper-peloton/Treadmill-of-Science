@@ -1,5 +1,5 @@
 import os, shutil
-folder = [r'C:\TOS_Data\Tach Sensor', r'C:\TOS_Data\LoadCells', r'C:\TOS_Data\Belt Speed', r'C:\TOS_Data\Torque', r'C:\TOS_Data\Mics', r'C:\TOS_Data\Accels', 'C:\TOS_Data\Power']
+folder = [r'C:\TOS_Data\Tach Sensor', r'C:\TOS_Data\LoadCells', r'C:\TOS_Data\Belt Speed', r'C:\TOS_Data\Torque_and_Power', r'C:\TOS_Data\Mics', r'C:\TOS_Data\Accels']
 for folder in folder:
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
