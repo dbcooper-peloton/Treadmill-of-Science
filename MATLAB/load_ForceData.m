@@ -1,7 +1,7 @@
+
 function ForceData = load_ForceData(fullfname_tdms)
 
-%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'XSensorIMU Test', 'load_cells_Data.tdms')
-
+fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Mic Test 9_30', 'load_cells_Data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
@@ -25,7 +25,131 @@ if ~exist(fullfname_mat,'file')
     ForceData.FMid_R = Data.Data.MeasuredData( 6).Data * G; % ch 2
     ForceData.BMid_R = Data.Data.MeasuredData( 7).Data * G; % ch 3
     ForceData.Back_R = Data.Data.MeasuredData( 9).Data * G; % ch 5
+
+    % smooth data 
+    %FL_smooth = smoothdata(ForceData.Frnt_L);
+    %FML_smooth = smoothdata(ForceData.FMid_L);
+    %BML_smooth = smoothdata(ForceData.BMid_L);
+    %BL_smooth = smoothdata(ForceData.Back_L);
+    %FR_smooth = smoothdata(ForceData.Frnt_R);
+    %FMR_smooth = smoothdata(ForceData.FMid_R);
+    %BMR_smooth = smoothdata(ForceData.BMid_R);
+    %BR_smooth = smoothdata(ForceData.Back_R);
+
+    % don't smooth data
+    FL_smooth = ForceData.Frnt_L;
+    FML_smooth = ForceData.FMid_L;
+    BML_smooth = ForceData.BMid_L;
+    BL_smooth = ForceData.Back_L;
+    FR_smooth = ForceData.Frnt_R;
+    FMR_smooth = ForceData.FMid_R;
+    BMR_smooth = ForceData.BMid_R;
+    BR_smooth = ForceData.Back_R;
+
+
+    % 2khz = 2,000 cycles/second
+    % 1 sec =  2,000 data points 
+    FL_short = FL_smooth(1:2000);
+    FML_short = FML_smooth(1:2000);
+    BML_short = BML_smooth(1:2000);
+    BL_short = BL_smooth(1:2000);
+    FR_short = FR_smooth(1:2000);
+    FMR_short = FMR_smooth(1:2000);
+    BMR_short = BMR_smooth(1:2000);
+    BR_short = BR_smooth(1:2000);
+
+
+    % find average of each shortened data point using mean()
+    % ForceData.average = mean(ForceData.sum);
+    FL_av = mean(FL_short);
+    FML_av = mean(FML_short);
+    BML_av = mean(BML_short);
+    BL_av = mean(BL_short);
+    FR_av = mean(FR_short);
+    FMR_av = mean(FMR_short);
+    BMR_av = mean(BMR_short);
+    BR_av = mean(BR_short);
+
+    % zero out forces by subtracting mean from each data point
+    FL_zero = FL_smooth - FL_av;
+    FML_zero = FML_smooth - FML_av;
+    BML_zero = BML_smooth - BML_av; 
+    BL_zero = BL_smooth - BL_av;
+    FR_zero = FR_smooth - FR_av;
+    FMR_zero = FMR_smooth - FMR_av;
+    BMR_zero = BMR_smooth - BMR_av;
+    BR_zero = BR_smooth - BR_av;
     
+    % test 
+    %display(ForceData.Frnt_L)
+    %display(FL_short)
+    %display(FL_av)
+    %display(FL_zero)
+
+    % sum forces after being zeroed
+    ForceData.sum = FL_zero+...
+         FML_zero+...
+         BML_zero+...
+         BL_zero+...
+         FR_zero+...
+         FMR_zero+...
+         BMR_zero+...
+         BR_zero;
+
+    % Snapshot Algorithm
+    % if above data point is above 20 lbs and less than 0.35 seconds, record until data point is no longer above 20 lbs
+    % line this up with accel and mic data (compare time)
+    % if weight is above 20 lbs, store in an array until weight drops below
+    % 20 lbs
+
+    % create empty vectors and matrices
+    temp = [];
+    timeTemp = [];
+    mat = zeros(1,4000);
+    timeMat = NaT(1,4000);
+
+    % same timezone as time data
+    timeMat.TimeZone = 'America/Los_Angeles';
+    
+    %create snap shots using non-empty data points
+    for i=1:length(ForceData.sum)
+        % if the data point is above 20 lbs, add to temp vector
+        if ForceData.sum(i) > 20
+            item = ForceData.sum(i);
+            temp = [temp, [item]];
+            itemTime = ForceData.t(i);
+            timeTemp = [timeTemp, [itemTime]];
+        % if data point is below 20 lbs, store temp vector as a matrix
+        else
+            % if the vector is longer than 2 seconds, then remove
+            if length(temp) > 4000
+                temp = [];
+                timeTemp = [];
+                continue;
+            % if vector is shorter than 20 data points, then remove
+            elseif length(temp) < 20
+                temp = [];
+                timeTemp = [];
+                continue;
+            % if the vector is empty, then start loop again
+            elseif isempty(temp)
+                continue;
+            end
+            % add vector to matrix and flush temp vector
+            temp(end+1:4000) = -1;
+            mat = [mat; temp];
+
+            timeTemp(end+1:4000) = NaT;
+            timeMat = [timeMat; timeTemp]; 
+
+            temp = []; 
+            timeTemp = [];
+        end
+    end
+
+    ForceData.mat = mat;
+    ForceData.timeMat = timeMat;
+
     save(fullfname_mat,'ForceData');
 else
     load(fullfname_mat,'ForceData');
