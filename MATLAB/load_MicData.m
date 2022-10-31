@@ -1,9 +1,27 @@
 function MicData = load_MicData(fullfname_tdms)
 
-%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'XSensorIMU Test', 'mic_data.tdms')
+fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy_10.24.22', 'mic_data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
+
+% need this to use ForceData
+ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
+
+% creating the end time vector
+MicData.endTime = ForceData.endTime;
+
+startTime = [];
+% create start time vector
+for i=1:length(ForceData.footStrikeTime)
+    startTime = [startTime, ForceData.footStrikeTime(:,i)];
+
+% remove empty cells
+startTime = rmmissing(startTime);
+%display(startTime);
+
+% converting datetime to seconds
+MicData.startTimeSec = second(startTime);
 
 if ~exist(fullfname_mat,'file')
     Data = convertTDMS(0,fullfname_tdms);
@@ -32,9 +50,101 @@ if ~exist(fullfname_mat,'file')
     %Mic_RightBack = lopass(Mic_RightBack,Fs,Fc);
     %Mic_RightFront = lopass(Mic_RightFront,Fs,Fc);
 
-    save(fullfname_mat,'MicData');
+    % converting to seconds from datetime
+    MicData.accelTime = second(MicData.t);
+    %display(AccelData.accelTime);
+
+    % creating empty vectors
+    tempTime = [];
+    tempFrontL = [];
+    tempBackL = [];
+    tempFrontR = [];
+    tempBackR = [];
+
+
+    % create empty matrixes
+    matFrontL = zeros(1,40000);
+    matBackL = zeros(1,40000);
+    matFrontR = zeros(1,40000);
+    matBackR = zeros(1,40000);
+
+    timeMat = NaT(1,40000);
+
+    % same timezone as time data
+    timeMat.TimeZone = 'America/Los_Angeles';
+     
+    % creating empty indices
+    j = 1;
+    
+
+    % using the endtime and startime, create a snapshot of the FRONT LEFT mic data
+    if 1 == 1
+       for i=1:length(MicData.accelTime)
+            % if we hit the startime, start logging
+            if MicData.startTimeSec(j) <= MicData.accelTime(i)
+                % if we're less than end time, keep logging
+                if MicData.accelTime(i) <= MicData.endTime(j)
+                    % log into vector
+                    tempTime = [tempTime, [MicData.t(i)]];
+                    tempFrontL = [tempFrontL, [MicData.Frnt_L(i)]]; 
+                    tempBackL = [tempBackL, [MicData.Back_L(i)]]; 
+                    tempFrontR = [tempFrontL, [MicData.Frnt_R(i)]]; 
+                    tempBackR = [tempFrontL, [MicData.Back_R(i)]]; 
+
+                    % continue loop
+                    continue;
+                % else if we hit the end time, stop logging
+                else
+                    % increase index
+                    j = j+1;
+                    % if we reach the end of the index
+                    if j == 25
+                        break;
+                    end
+                    % log vector into matrix
+                    %display(length(tempFrontL));
+                    tempFrontL(end+1:40000) = -1;
+                    matFrontL = [matFrontL; tempFrontL];
+                    
+                    tempBackL(end+1:40000) = -1;
+                    matBackL = [matBackL; tempBackL];
+                    
+                    tempFrontR(end+1:40000) = -1;
+                    matFrontR = [matFrontR; tempFrontR];
+                    
+                    tempBackR(end+1:40000) = -1;
+                    matBackR = [matBackR; tempBackR];
+                    
+                    % log vector into matrix
+                    tempTime(end+1:40000) = NaT;
+                    timeMat = [timeMat; tempTime]; 
+
+                    % flush
+                    tempFrontL = []; 
+                    tempBackL = [];
+                    tempFrontR = [];
+                    tempBackR = [];
+                    tempTime = [];
+
+                end                               
+            end
+        end
+    end
+
+    % create workspace vector
+    MicData.footStrikeFL = matFrontL;
+    MicData.footStrikeBL = matBackL;
+    MicData.footStrikeFR = matFrontR;
+    MicData.footStrikeBR = matBackR;
+
+    MicData.footStrikeTime = timeMat;
+    
+
+    %save(fullfname_mat,'MicData');
 else
     load(fullfname_mat,'MicData');
 end
 
 return
+
+end

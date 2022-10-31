@@ -136,24 +136,28 @@ if ~exist(fullfname_mat,'file')
                 continue;
             end
             
-            % add vector to matrix and flush temp vector
+            % add data vector to data matrix
             temp(end+1:4000) = -1;
             mat = [mat; temp];
 
             %grab end time
             endTime = [endTime, timeTemp(end)];
 
+            % add time vector to time matrix
             timeTemp(end+1:4000) = NaT;
             timeMat = [timeMat; timeTemp]; 
-
+            
+    
             temp = []; 
             timeTemp = [];
         end
     end
 
+    % create workspace vectors
     ForceData.footStrike = mat;
     ForceData.footStrikeTime = timeMat;
     
+    % create endtime workspace vector
     endTime = second(endTime);
     ForceData.endTime = endTime';
     

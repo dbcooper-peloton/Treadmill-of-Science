@@ -1,14 +1,13 @@
 
 function AccelData = load_AccelData(fullfname_tdms)
 
-fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy_10.24.22', 'accel_data.tdms')
+%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy_10.24.22', 'accel_data.tdms')
+
+[Dname,fname,~] = fileparts(fullfname_tdms);
+fullfname_mat = fullfile(Dname,[fname '.mat']);
 
 % need this to use ForceData
-DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
-Dname = 'Andy_10.24.22';
-Dname = fullfile(DataRootDir,Dname);
 ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
-%ForceData = load_ForceData(fullfile(fullfname_tdms));
 
 % creating the end time vector
 AccelData.endTime = ForceData.endTime;
@@ -26,8 +25,6 @@ startTime = rmmissing(startTime);
 AccelData.startTimeSec = second(startTime);
 %display(AccelData.startTimeSec)
 
-[Dname,fname,~] = fileparts(fullfname_tdms);
-fullfname_mat = fullfile(Dname,[fname '.mat']);
 
 if ~exist(fullfname_mat,'file')
     Data = convertTDMS(0,fullfname_tdms);
@@ -100,16 +97,6 @@ if ~exist(fullfname_mat,'file')
     % create workspace vector
     AccelData.footStrike = mat;
     AccelData.footStrikeTime = timeMat;
-
-    % plot single rows
-    row = 4;
-    figure
-    subplot 211
-    plot(AccelData.footStrikeTime(row,:),AccelData.footStrike(row,:));title('single strike accel')
-    subplot 212
-    plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell')
-
-
 
     %save(fullfname_mat,'AccelData');
 else
