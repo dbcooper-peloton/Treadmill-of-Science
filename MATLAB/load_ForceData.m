@@ -151,8 +151,9 @@ if ~exist(fullfname_mat,'file')
         end
     end
 
-    ForceData.mat = mat;
-    ForceData.timeMat = timeMat;
+    ForceData.footStrike = mat;
+    ForceData.footStrikeTime = timeMat;
+    
     endTime = second(endTime);
     ForceData.endTime = endTime';
     

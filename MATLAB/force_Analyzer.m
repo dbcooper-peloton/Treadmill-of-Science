@@ -40,7 +40,7 @@ plot(ForceData.t, ForceData.sum);title('Combined Force lbs')
 % plot single rows
 row = 4;
 figure
-plot(ForceData.timeMat(row,:),ForceData.mat(row,:));title('Combined Force lbs')
+plot(footStrikeTime(row,:),footStrike(row,:));title('Combined Force lbs')
 
 % plot each row
 %figure
