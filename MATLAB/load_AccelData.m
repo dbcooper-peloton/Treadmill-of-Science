@@ -49,46 +49,66 @@ if ~exist(fullfname_mat,'file')
     % creating empty vectors
     temp = [];
     tempX = [];
+
+    % create empty matrixes
+    mat = zeros(1,4000);
+    timeMat = NaT(1,4000);
+
+    % same timezone as time data
+    timeMat.TimeZone = 'America/Los_Angeles';
      
     % creating empty indices
     j = 1;
-    jj = 1;
-
-    %display(length(AccelData.endTime));
     
     % using the endtime and startime, create a snapshot of the accel data
     if 1 == 1
        for i=1:length(AccelData.accelTime)
             % if we hit the startime, start logging
-            if AccelData.startTimeSec(j) < AccelData.accelTime(i)
-                jj = jj+1;
-                % if we hit end time, stop logging
-                if AccelData.accelTime(i) < AccelData.endTime(j)
+            if AccelData.startTimeSec(j) <= AccelData.accelTime(i)
+                % if we're less than end time, keep logging
+                if AccelData.accelTime(i) <= AccelData.endTime(j)
+                    % log into vector
+                    temp = [temp, [AccelData.t(i)]];
+                    tempX = [tempX, [AccelData.Center_X(i)]]; 
+                    % continue loop
                     continue;
-                end
-                temp = [temp, [AccelData.accelTime(i)]];
-                tempX = [tempX, [AccelData.Center_X(i)]];
-                
-                % increase index
-                j = j+1;
+                % else if we hit the end time, stop logging
+                else
+                    % increase index
+                    j = j+1;
+                    % if we reach the end of the index
+                    if j == 25
+                        break;
+                    end
+                    % log vector into matrix
+                    tempX(end+1:4000) = -1;
+                    mat = [mat; tempX];
+                    
+                    % log vector into matrix
+                    temp(end+1:4000) = NaT;
+                    timeMat = [timeMat; temp]; 
 
-                % if we reach the end of the index
-                if j == 25
-                    break;
-                end
-                
+                    % flush
+                    tempX = []; 
+                    temp = [];
+
+                end                               
             end
         end
     end
 
     % create workspace vector
-    AccelData.footStrike = tempX;
-    AccelData.footStrikeTime = temp;
+    AccelData.footStrike = mat;
+    AccelData.footStrikeTime = timeMat;
 
     % plot single rows
-    %row = 4;
-    %figure
-    %plot(AccelData.footStrikeTime(row,:),AccelData.footStrike(row,:));title('single strike')
+    row = 4;
+    figure
+    subplot 211
+    plot(AccelData.footStrikeTime(row,:),AccelData.footStrike(row,:));title('single strike accel')
+    subplot 212
+    plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell')
+
 
 
     %save(fullfname_mat,'AccelData');
