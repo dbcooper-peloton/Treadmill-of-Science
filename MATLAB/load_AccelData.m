@@ -1,7 +1,7 @@
 
 function AccelData = load_AccelData(fullfname_tdms)
 
-%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy_10.24.22', 'accel_data.tdms')
+fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'accel_data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
@@ -12,17 +12,22 @@ ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
 % creating the end time vector
 AccelData.endTime = ForceData.endTime;
 
-startTime = [];
+% startTime = [];
 % create start time vector
-for i=1:length(ForceData.footStrikeTime)
-    startTime = [startTime, ForceData.footStrikeTime(:,i)];
+startTime = ForceData.footStrikeTime(:,1);
 
 % remove empty cells
 startTime = rmmissing(startTime);
 %display(startTime);
 
+%display(startTime);
+
+AccelData.startTimeSec = startTime;
+
 % converting datetime to seconds
-AccelData.startTimeSec = second(startTime);
+%AccelData.startTimeSec = second(startTime);
+%AccelData.startTimeSec = datenum(startTime, 'HH:MM:SS.SSS');
+
 %display(AccelData.startTimeSec)
 
 
@@ -32,6 +37,7 @@ if ~exist(fullfname_mat,'file')
     AccelData.t = Data.Data.MeasuredData(3).Data;
     AccelData.t = datetime(AccelData.t,'ConvertFrom','datenum','TimeZone','local');
     AccelData.t.TimeZone = 'America/Los_Angeles';
+    AccelData.t.Format = 'HH:mm:ss.SSS';
 
     %AccelData.Left = Data.Data.MeasuredData(4).Data;
     %AccelData.Right = Data.Data.MeasuredData(5).Data;
@@ -40,7 +46,7 @@ if ~exist(fullfname_mat,'file')
     %AccelData.Current_Time = Data.Data.MeasuredData(6).Data;
     
     % converting to seconds from datetime
-    AccelData.accelTime = second(AccelData.t);
+    AccelData.accelTime = AccelData.t;
     %display(AccelData.accelTime);
 
     % creating empty vectors
@@ -62,26 +68,29 @@ if ~exist(fullfname_mat,'file')
        for i=1:length(AccelData.accelTime)
             % if we hit the startime, start logging
             if AccelData.startTimeSec(j) <= AccelData.accelTime(i)
+                %display(i);
                 % if we're less than end time, keep logging
                 if AccelData.accelTime(i) <= AccelData.endTime(j)
                     % log into vector
                     temp = [temp, [AccelData.t(i)]];
                     tempX = [tempX, [AccelData.Center_X(i)]]; 
                     % continue loop
-                    continue;
+                    % continue;
                 % else if we hit the end time, stop logging
                 else
-                    % increase index
-                    j = j+1;
                     % if we reach the end of the index
-                    if j == 25
+                    if j == length(AccelData.endTime)
                         break;
+                    % if the vector is empty, then start loop again
+                    elseif isempty(temp)
+                        continue;
                     end
                     % log vector into matrix
                     tempX(end+1:4000) = -1;
                     mat = [mat; tempX];
                     
                     % log vector into matrix
+                    %display(temp);
                     temp(end+1:4000) = NaT;
                     timeMat = [timeMat; temp]; 
 
@@ -89,20 +98,25 @@ if ~exist(fullfname_mat,'file')
                     tempX = []; 
                     temp = [];
 
+                    % increase index
+                    j = j+1;
+
                 end                               
             end
         end
     end
 
+    %display(AccelData.accelTime(126000));
+    %display(length(AccelData.endTime));
+    %display(j);
+
     % create workspace vector
     AccelData.footStrike = mat;
     AccelData.footStrikeTime = timeMat;
 
-    %save(fullfname_mat,'AccelData');
+    save(fullfname_mat,'AccelData');
 else
     load(fullfname_mat,'AccelData');
 end
 
 return
-
-end

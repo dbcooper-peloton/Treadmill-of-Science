@@ -1,6 +1,6 @@
 function MicData = load_MicData(fullfname_tdms)
 
-fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy_10.24.22', 'mic_data.tdms')
+fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'mic_data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
@@ -10,18 +10,18 @@ ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
 
 % creating the end time vector
 MicData.endTime = ForceData.endTime;
+%display(length(MicData.endTime));
 
-startTime = [];
 % create start time vector
-for i=1:length(ForceData.footStrikeTime)
-    startTime = [startTime, ForceData.footStrikeTime(:,i)];
+startTime = ForceData.footStrikeTime(:,1);
 
 % remove empty cells
 startTime = rmmissing(startTime);
 %display(startTime);
 
 % converting datetime to seconds
-MicData.startTimeSec = second(startTime);
+MicData.startTimeSec = (startTime);
+%MicData.startTimeSec = convertTo(startTime, '.net');
 
 if ~exist(fullfname_mat,'file')
     Data = convertTDMS(0,fullfname_tdms);
@@ -29,6 +29,7 @@ if ~exist(fullfname_mat,'file')
     MicData.t = Data.Data.MeasuredData(3).Data;
     MicData.t = datetime(MicData.t,'ConvertFrom','datenum','TimeZone','local');
     MicData.t.TimeZone = 'America/Los_Angeles';
+    MicData.t.Format = 'HH:mm:ss.SSS';
 
     G = 1/(3.3/2); % [unknown]
     Bias = 3.3/2;
@@ -51,7 +52,7 @@ if ~exist(fullfname_mat,'file')
     %Mic_RightFront = lopass(Mic_RightFront,Fs,Fc);
 
     % converting to seconds from datetime
-    MicData.accelTime = second(MicData.t);
+    MicData.accelTime = (MicData.t);
     %display(AccelData.accelTime);
 
     % creating empty vectors
@@ -94,12 +95,13 @@ if ~exist(fullfname_mat,'file')
                     % continue loop
                     continue;
                 % else if we hit the end time, stop logging
-                else
-                    % increase index
-                    j = j+1;
+                else                 
                     % if we reach the end of the index
-                    if j == 25
+                    if j == length(MicData.endTime)
                         break;
+                    % if the vector is empty, then start loop again
+                    elseif isempty(tempTime)
+                        continue;
                     end
                     % log vector into matrix
                     %display(length(tempFrontL));
@@ -126,6 +128,9 @@ if ~exist(fullfname_mat,'file')
                     tempBackR = [];
                     tempTime = [];
 
+                    % increase index
+                    j = j+1;
+
                 end                               
             end
         end
@@ -140,11 +145,9 @@ if ~exist(fullfname_mat,'file')
     MicData.footStrikeTime = timeMat;
     
 
-    %save(fullfname_mat,'MicData');
+    save(fullfname_mat,'MicData');
 else
     load(fullfname_mat,'MicData');
 end
 
 return
-
-end

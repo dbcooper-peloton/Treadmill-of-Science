@@ -1,7 +1,7 @@
 
 function ForceData = load_ForceData(fullfname_tdms)
 
-%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy_10.24.22', 'load_cells_Data.tdms')
+fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'load_cells_Data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
@@ -12,6 +12,7 @@ if ~exist(fullfname_mat,'file')
     ForceData.t = Data.Data.MeasuredData(3).Data;
     ForceData.t = datetime(ForceData.t,'ConvertFrom','datenum','TimeZone','local');
     ForceData.t.TimeZone = 'America/Los_Angeles';
+    ForceData.t.Format = 'HH:mm:ss.SSS';
 
     % from Dee, Vout = 0.005(lbs force)
     G = 1/0.005; % Volts to [lbf]
@@ -158,11 +159,11 @@ if ~exist(fullfname_mat,'file')
     ForceData.footStrikeTime = timeMat;
     
     % create endtime workspace vector
-    endTime = second(endTime);
+    % endTime = second(endTime);
     ForceData.endTime = endTime';
     
 
-    %save(fullfname_mat,'ForceData');
+    save(fullfname_mat,'ForceData');
 else
     load(fullfname_mat,'ForceData');
 end
