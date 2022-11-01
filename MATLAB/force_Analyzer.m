@@ -5,12 +5,11 @@
 
 DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
-%Dname = 'XSensorIMU Test';
-%Dname = 'NoRunner_2MPH_800K';
-%Dname = 'Andy3MPH_900K';
 Dname = 'Andy_10.24.22';
-%Dname = '1MPH_NoRunner';
-
+%Dname = 'ChrisP_10.24.22';
+%Dname = 'Sana_10_26_22';
+%Dname = 'Andy_toe_10_26_22';
+%Dname = 'Emily10_27_22';
 
 Dname = fullfile(DataRootDir,Dname);
 
@@ -32,9 +31,11 @@ end
 
 %% PLOT
 
+row = 15;
+
 % PLOT SINGLE STRIKES
-if 1
-row = 4;
+if 0
+%row = 17;
 figure
 subplot 611
 plot(AccelData.footStrikeTime(row,:),AccelData.footStrike(row,:));title('single strike accel')
@@ -50,8 +51,37 @@ subplot 616
 plot(MicData.footStrikeTime(row,:),MicData.footStrikeBR(row,:));title('single strike back right mic')
 end
 
+% SINGLE FORCE 
+if 1
+%row = 17;
+figure
+plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell')
+end
+
+% SINGLE ACCEL
+if 1
+figure
+%subplot 211
+%plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeX(row,:));title('single strike accel X')
+%subplot 212
+plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeY(row,:));title('single strike accel Y')
+end
+
+% SINGEL MIC
+if 1
+figure
+%subplot 411
+plot(MicData.footStrikeTime(row,:),MicData.footStrikeFL(row,:));title('single strike front left mic')
+%subplot 412
+%plot(MicData.footStrikeTime(row,:),MicData.footStrikeBL(row,:));title('single strike back left mic')
+%subplot 413
+%plot(MicData.footStrikeTime(row,:),MicData.footStrikeFR(row,:));title('single strike front right mic')
+%subplot 414
+%plot(MicData.footStrikeTime(row,:),MicData.footStrikeBR(row,:));title('single strike back right mic')
+end
+
 % PLOT ACCEL DATA
-if 0
+if 1
 figure
 plot(AccelData.t,AccelData.Center_X);hold all;title('Accels')
 plot(AccelData.t,AccelData.Center_Y);
@@ -87,6 +117,17 @@ plot(ForceData.t, ForceData.sum);title('Combined Force lbs')
                  %ForceData.BMid_R);title('Combined Force 2')
 end
 
+% PLOT MIC DATA
+if 0
+MicData = load_MicData(fullfile(Dname,'mic_data.tdms'));
+
+figure;
+plot(MicData.t,MicData.Frnt_L);hold all;title('Mics')
+plot(MicData.t,MicData.Back_L);
+plot(MicData.t,MicData.Frnt_R);
+plot(MicData.t,MicData.Back_R);
+legend('Frnt L','Back L','Frnt R','Back R')
+end
 
 
 

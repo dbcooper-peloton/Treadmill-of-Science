@@ -1,7 +1,7 @@
 
 function AccelData = load_AccelData(fullfname_tdms)
 
-fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'accel_data.tdms')
+%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'accel_data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
@@ -44,6 +44,26 @@ if ~exist(fullfname_mat,'file')
     AccelData.Center_X = Data.Data.MeasuredData(4).Data;
     AccelData.Center_Y = Data.Data.MeasuredData(5).Data;
     %AccelData.Current_Time = Data.Data.MeasuredData(6).Data;
+
+    %Butterworth Filter on sum of X
+    fc = 1000;
+    fs = 3000;
+    
+    [b,a] = butter(6,fc/(fs/2));
+    freqz(b,a,[],fs)
+    
+    %subplot(2,1,1)
+    %ylim([-100 20])
+    
+    % Filter X data
+    XdataIn = AccelData.Center_X;
+    XdataOut = filter(b,a,XdataIn);
+    AccelData.Center_X_BW = XdataOut;
+
+    % Filter Y data
+    YdataIn = AccelData.Center_Y;
+    YdataOut = filter(b,a,YdataIn);
+    AccelData.Center_Y_BW = YdataOut;
     
     % converting to seconds from datetime
     AccelData.accelTime = AccelData.t;
@@ -52,10 +72,12 @@ if ~exist(fullfname_mat,'file')
     % creating empty vectors
     temp = [];
     tempX = [];
+    tempY = [];
 
     % create empty matrixes
-    mat = zeros(1,4000);
-    timeMat = NaT(1,4000);
+    matX = zeros(1,10000);
+    matY = zeros(1,10000);
+    timeMat = NaT(1,10000);
 
     % same timezone as time data
     timeMat.TimeZone = 'America/Los_Angeles';
@@ -73,7 +95,8 @@ if ~exist(fullfname_mat,'file')
                 if AccelData.accelTime(i) <= AccelData.endTime(j)
                     % log into vector
                     temp = [temp, [AccelData.t(i)]];
-                    tempX = [tempX, [AccelData.Center_X(i)]]; 
+                    tempX = [tempX, [AccelData.Center_X_BW(i)]]; 
+                    tempY = [tempY, [AccelData.Center_Y_BW(i)]];
                     % continue loop
                     % continue;
                 % else if we hit the end time, stop logging
@@ -85,17 +108,22 @@ if ~exist(fullfname_mat,'file')
                     elseif isempty(temp)
                         continue;
                     end
-                    % log vector into matrix
-                    tempX(end+1:4000) = -1;
-                    mat = [mat; tempX];
+                    % log vector into X matrix
+                    tempX(end+1:10000) = -1;
+                    matX = [matX; tempX];
+
+                    % log vector into Y matrix
+                    tempY(end+1:10000) = -1;
+                    matY = [matY; tempY];
                     
                     % log vector into matrix
                     %display(temp);
-                    temp(end+1:4000) = NaT;
+                    temp(end+1:10000) = NaT;
                     timeMat = [timeMat; temp]; 
 
                     % flush
                     tempX = []; 
+                    tempY = [];
                     temp = [];
 
                     % increase index
@@ -111,7 +139,8 @@ if ~exist(fullfname_mat,'file')
     %display(j);
 
     % create workspace vector
-    AccelData.footStrike = mat;
+    AccelData.footStrikeX = matX;
+    AccelData.footStrikeY = matY;
     AccelData.footStrikeTime = timeMat;
 
     save(fullfname_mat,'AccelData');

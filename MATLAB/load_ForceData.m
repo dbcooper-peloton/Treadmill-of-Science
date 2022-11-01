@@ -1,7 +1,7 @@
 
 function ForceData = load_ForceData(fullfname_tdms)
 
-fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'load_cells_Data.tdms')
+%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'load_cells_Data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
@@ -15,7 +15,7 @@ if ~exist(fullfname_mat,'file')
     ForceData.t.Format = 'HH:mm:ss.SSS';
 
     % from Dee, Vout = 0.005(lbs force)
-    G = 1/0.005; % Volts to [lbf]
+    G = 1/0.02; % Volts to [lbf]
 
     ForceData.Frnt_L = Data.Data.MeasuredData( 5).Data * G; % ch 1
     ForceData.FMid_L = Data.Data.MeasuredData(11).Data * G; % ch 7
@@ -26,6 +26,41 @@ if ~exist(fullfname_mat,'file')
     ForceData.FMid_R = Data.Data.MeasuredData( 6).Data * G; % ch 2
     ForceData.BMid_R = Data.Data.MeasuredData( 7).Data * G; % ch 3
     ForceData.Back_R = Data.Data.MeasuredData( 9).Data * G; % ch 5
+
+    % butterworth filter 
+    fc = 1000;
+    fs = 3000;
+    [b,a] = butter(6,fc/(fs/2));
+    freqz(b,a,[],fs)
+    %subplot(2,1,1)
+    %ylim([-100 20])
+
+    dataInFL = ForceData.Frnt_L;
+    dataInFML = ForceData.FMid_L;
+    dataInBML = ForceData.BMid_L;
+    dataInBL = ForceData.Back_L;
+    dataInFR = ForceData.Frnt_R;
+    dataInFMR = ForceData.FMid_R;
+    dataInBMR = ForceData.BMid_R;
+    dataInBR = ForceData.Back_R;
+
+    dataOutFL = filter(b,a,dataInFL);
+    dataOutFML = filter(b,a,dataInFML);
+    dataOutBML = filter(b,a,dataInBML);
+    dataOutBL = filter(b,a,dataInBL);
+    dataOutFR = filter(b,a,dataInFR);
+    dataOutFMR = filter(b,a,dataInFMR);
+    dataOutBMR = filter(b,a,dataInBMR);
+    dataOutBR = filter(b,a,dataInBR);
+    
+    FL_smooth = dataOutFL;
+    FML_smooth = dataOutFML;
+    BML_smooth = dataOutBML;
+    BL_smooth = dataOutBL;
+    FR_smooth = dataOutFR;
+    FMR_smooth = dataOutFMR;
+    BMR_smooth = dataOutBMR;
+    BR_smooth = dataOutBR;
 
     % smooth data 
     %FL_smooth = smoothdata(ForceData.Frnt_L);
@@ -38,14 +73,14 @@ if ~exist(fullfname_mat,'file')
     %BR_smooth = smoothdata(ForceData.Back_R);
 
     % don't smooth data
-    FL_smooth = ForceData.Frnt_L;
-    FML_smooth = ForceData.FMid_L;
-    BML_smooth = ForceData.BMid_L;
-    BL_smooth = ForceData.Back_L;
-    FR_smooth = ForceData.Frnt_R;
-    FMR_smooth = ForceData.FMid_R;
-    BMR_smooth = ForceData.BMid_R;
-    BR_smooth = ForceData.Back_R;
+    %FL_smooth = ForceData.Frnt_L;
+    %FML_smooth = ForceData.FMid_L;
+    %BML_smooth = ForceData.BMid_L;
+    %BL_smooth = ForceData.Back_L;
+    %FR_smooth = ForceData.Frnt_R;
+    %FMR_smooth = ForceData.FMid_R;
+    %BMR_smooth = ForceData.BMid_R;
+    %BR_smooth = ForceData.Back_R;
 
 
     % 2khz = 2,000 cycles/second
@@ -98,7 +133,7 @@ if ~exist(fullfname_mat,'file')
          BR_zero;
 
     % Snapshot Algorithm
-    % if above data point is above 20 lbs and less than 2 seconds, record until data point is no longer above 20 lbs
+    % if above data point is above 30 lbs, record until data point is no longer above 30 lbs
     % TODO: line this up with accel and mic data (compare time)
 
     % create empty vectors and matrices
@@ -114,8 +149,8 @@ if ~exist(fullfname_mat,'file')
     
     %create snap shots using non-empty data points
     for i=1:length(ForceData.sum)
-        % if the data point is above 20 lbs, add to temp vector
-        if ForceData.sum(i) > 20
+        % if the data point is above 30 lbs, add to temp vector
+        if ForceData.sum(i) > 30
             item = ForceData.sum(i);
             temp = [temp, [item]];
             itemTime = ForceData.t(i);
@@ -138,6 +173,9 @@ if ~exist(fullfname_mat,'file')
             end
             
             % add data vector to data matrix
+            % make the vector into a 2 second window if its not already so
+            % that we are concatenating the right size vector to the matrix
+            % each time
             temp(end+1:4000) = -1;
             mat = [mat; temp];
 

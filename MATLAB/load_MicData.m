@@ -1,6 +1,6 @@
 function MicData = load_MicData(fullfname_tdms)
 
-fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'mic_data.tdms')
+%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'ChrisP Dataset', 'mic_data.tdms')
 
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
@@ -64,12 +64,12 @@ if ~exist(fullfname_mat,'file')
 
 
     % create empty matrixes
-    matFrontL = zeros(1,40000);
-    matBackL = zeros(1,40000);
-    matFrontR = zeros(1,40000);
-    matBackR = zeros(1,40000);
+    matFrontL = zeros(1,100000);
+    matBackL = zeros(1,100000);
+    matFrontR = zeros(1,100000);
+    matBackR = zeros(1,100000);
 
-    timeMat = NaT(1,40000);
+    timeMat = NaT(1,100000);
 
     % same timezone as time data
     timeMat.TimeZone = 'America/Los_Angeles';
@@ -105,20 +105,21 @@ if ~exist(fullfname_mat,'file')
                     end
                     % log vector into matrix
                     %display(length(tempFrontL));
-                    tempFrontL(end+1:40000) = -1;
+                    tempFrontL(end+1:100000) = -1;
+                    %display(length(tempFrontL));
                     matFrontL = [matFrontL; tempFrontL];
                     
-                    tempBackL(end+1:40000) = -1;
+                    tempBackL(end+1:100000) = -1;
                     matBackL = [matBackL; tempBackL];
                     
-                    tempFrontR(end+1:40000) = -1;
+                    tempFrontR(end+1:100000) = -1;
                     matFrontR = [matFrontR; tempFrontR];
                     
-                    tempBackR(end+1:40000) = -1;
+                    tempBackR(end+1:100000) = -1;
                     matBackR = [matBackR; tempBackR];
                     
                     % log vector into matrix
-                    tempTime(end+1:40000) = NaT;
+                    tempTime(end+1:100000) = NaT;
                     timeMat = [timeMat; tempTime]; 
 
                     % flush
