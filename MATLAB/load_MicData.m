@@ -10,19 +10,18 @@ ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
 
 % creating the end time vector
 MicData.endTime = ForceData.endTime;
-%display(length(MicData.endTime));
 
 % create start time vector
 startTime = ForceData.footStrikeTime(:,1);
 
 % remove empty cells
 startTime = rmmissing(startTime);
-%display(startTime);
 
-% converting datetime to seconds
+% assign mic start time vector to force start time vector
 MicData.startTimeSec = (startTime);
-%MicData.startTimeSec = convertTo(startTime, '.net');
 
+% check first if MATLAB converted TDMS file exists, if not then convert
+% TDMS into MATLAB file
 if ~exist(fullfname_mat,'file')
     Data = convertTDMS(0,fullfname_tdms);
 
@@ -31,6 +30,7 @@ if ~exist(fullfname_mat,'file')
     MicData.t.TimeZone = 'America/Los_Angeles';
     MicData.t.Format = 'HH:mm:ss.SSS';
 
+    % TODO: figure out scaling
     G = 1/(3.3/2); % [unknown]
     Bias = 3.3/2;
     MicData.Frnt_L = (Data.Data.MeasuredData(4).Data-Bias) * G;
@@ -51,9 +51,27 @@ if ~exist(fullfname_mat,'file')
     %Mic_RightBack = lopass(Mic_RightBack,Fs,Fc);
     %Mic_RightFront = lopass(Mic_RightFront,Fs,Fc);
 
+    %ZERO OUT DATA
+    % 40khz = 40,000 cycles/second
+    % 1 sec =  40,000 data points 
+    FL_short = MicData.Frnt_L(1:40000);
+    BL_short = MicData.Back_L(1:40000);
+    FR_short = MicData.Frnt_R(1:40000);
+    BR_short = MicData.Back_R(1:40000);
+    % find average of each shortened data point using mean()
+    % ForceData.average = mean(ForceData.sum);
+    FL_av = mean(FL_short);
+    BL_av = mean(BL_short);
+    FR_av = mean(FR_short);
+    BR_av = mean(BR_short);
+    % zero out forces by subtracting mean from each data point
+    FL_zero = MicData.Frnt_L - FL_av;
+    BL_zero = MicData.Back_L - BL_av;
+    FR_zero = MicData.Frnt_R - FR_av; 
+    BR_zero = MicData.Back_R - BR_av; 
+
     % converting to seconds from datetime
     MicData.accelTime = (MicData.t);
-    %display(AccelData.accelTime);
 
     % creating empty vectors
     tempTime = [];
@@ -87,26 +105,24 @@ if ~exist(fullfname_mat,'file')
                 if MicData.accelTime(i) <= MicData.endTime(j)
                     % log into vector
                     tempTime = [tempTime, [MicData.t(i)]];
-                    tempFrontL = [tempFrontL, [MicData.Frnt_L(i)]]; 
-                    tempBackL = [tempBackL, [MicData.Back_L(i)]]; 
-                    tempFrontR = [tempFrontL, [MicData.Frnt_R(i)]]; 
-                    tempBackR = [tempFrontL, [MicData.Back_R(i)]]; 
+                    tempFrontL = [tempFrontL, [FL_zero(i)]]; 
+                    tempBackL = [tempBackL, [BL_zero(i)]]; 
+                    tempFrontR = [tempFrontL, [FR_zero(i)]]; 
+                    tempBackR = [tempFrontL, [BR_zero(i)]]; 
 
                     % continue loop
                     continue;
                 % else if we hit the end time, stop logging
                 else                 
-                    % if we reach the end of the index
+                    % if we reach the end of the index, stop logging
                     if j == length(MicData.endTime)
                         break;
                     % if the vector is empty, then start loop again
                     elseif isempty(tempTime)
                         continue;
                     end
-                    % log vector into matrix
-                    %display(length(tempFrontL));
+                    % log vectors into corresponding matrices
                     tempFrontL(end+1:100000) = -1;
-                    %display(length(tempFrontL));
                     matFrontL = [matFrontL; tempFrontL];
                     
                     tempBackL(end+1:100000) = -1;

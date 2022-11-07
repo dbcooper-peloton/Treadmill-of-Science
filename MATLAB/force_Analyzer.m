@@ -1,15 +1,14 @@
-%close all;clear;clc;
+close all;clear;clc;
 
 %DataRootDir is the parent path of the dataset folder
 %Dname is the folder that the dataset file is in
 
 DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
-Dname = 'Andy_10.24.22';
-%Dname = 'ChrisP_10.24.22';
-%Dname = 'Sana_10_26_22';
-%Dname = 'Andy_toe_10_26_22';
-%Dname = 'Emily10_27_22';
+%Dname = 'Sana_11.4.22';
+%Dname = 'Andy-11.1.22';
+Dname = 'Chris_11.3.22';
+%Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
 
@@ -31,7 +30,9 @@ end
 
 %% PLOT
 
-row = 15;
+row = 20;
+endvalue = rmmissing(ForceData.footStrikeTime(row,:));
+endvaluenum = numel(endvalue);
 
 % PLOT SINGLE STRIKES
 if 0
@@ -52,23 +53,45 @@ plot(MicData.footStrikeTime(row,:),MicData.footStrikeBR(row,:));title('single st
 end
 
 % SINGLE FORCE 
-if 1
+if 0
 %row = 17;
 figure
 plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell')
 end
 
+% LOAD CELL Derivative
+if 0
+figure
+%Calcuate derivative of filtered and combined GRF data
+GRF_Derivative = diff(ForceData.footStrike(row,(1:endvaluenum)));
+%GRF_2ndDerivative = diff(ForceData.GRF_Derivative);
+
+%display(length(GRF_Derivative));
+%display((endvaluenum));
+
+XValues = numel(GRF_Derivative);
+plot([1:endvaluenum-1],GRF_Derivative);hold all;title(Dname,'GRF Derivative')
+end
+
 % SINGLE ACCEL
-if 1
+if 0
 figure
 %subplot 211
 %plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeX(row,:));title('single strike accel X')
 %subplot 212
-plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeY(row,:));title('single strike accel Y')
+plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeZ(row,:));title('single strike accel Z')
 end
 
+% INTEGRAL of ACCEL
+if 0
+figure
+dataAccel = cumtrapz(AccelData.footStrikeY(row,:));
+plot(AccelData.footStrikeTime(row,:),dataAccel);
+end
+
+
 % SINGEL MIC
-if 1
+if 0
 figure
 %subplot 411
 plot(MicData.footStrikeTime(row,:),MicData.footStrikeFL(row,:));title('single strike front left mic')
@@ -81,14 +104,20 @@ plot(MicData.footStrikeTime(row,:),MicData.footStrikeFL(row,:));title('single st
 end
 
 % PLOT ACCEL DATA
-if 1
+if 01
 figure
-plot(AccelData.t,AccelData.Center_X);hold all;title('Accels')
+subplot 311
+plot(AccelData.t,AccelData.Center_X);title('Accels')
+subplot 312
 plot(AccelData.t,AccelData.Center_Y);
+subplot 313
+plot(AccelData.t, AccelData.Center_Z);
 end
 
+
+
 % PLOT LOAD CELL DATA
-if 0
+if 01
 %plot forces individually
 %figure
 %plot(ForceData.t,ForceData.Frnt_L);hold all;title('Load Cells lbs')
@@ -118,7 +147,7 @@ plot(ForceData.t, ForceData.sum);title('Combined Force lbs')
 end
 
 % PLOT MIC DATA
-if 0
+if 01
 MicData = load_MicData(fullfile(Dname,'mic_data.tdms'));
 
 figure;
@@ -128,6 +157,31 @@ plot(MicData.t,MicData.Frnt_R);
 plot(MicData.t,MicData.Back_R);
 legend('Frnt L','Back L','Frnt R','Back R')
 end
+
+%% ACCEL AND MIC FFT
+
+if 0
+FFT_ACCEL = fft(AccelData.Center_Z);
+%FFT_ACCEL = fft(AccelData.footStrikeZ(row, (1:endvaluenum)));
+FFTValues = numel(FFT_ACCEL);
+
+%display((endvaluenum));
+%display((FFT_ACCEL));
+%display(FFT_ACCEL);
+%display(FFTValues);
+
+%f = Fs*(0:(L/2))/L;
+%plot(5000, FFT_ACCEL)
+
+%display('pass');
+%plot([1:endvaluenum], FFT_ACCEL);
+end
+
+
+%% clear intermediate mat files from target directory
+%D = dir(fullfile(Dname,'*.mat'));
+%delete(fullfile(Dname,'*.mat'));
+%return
 
 
 

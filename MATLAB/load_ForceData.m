@@ -31,7 +31,7 @@ if ~exist(fullfname_mat,'file')
     fc = 1000;
     fs = 3000;
     [b,a] = butter(6,fc/(fs/2));
-    freqz(b,a,[],fs)
+    %freqz(b,a,[],fs)
     %subplot(2,1,1)
     %ylim([-100 20])
 
@@ -199,7 +199,7 @@ if ~exist(fullfname_mat,'file')
     % create endtime workspace vector
     % endTime = second(endTime);
     ForceData.endTime = endTime';
-    
+   
 
     save(fullfname_mat,'ForceData');
 else
