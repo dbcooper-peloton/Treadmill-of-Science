@@ -7,8 +7,8 @@ DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
 %Dname = 'Sana_11.4.22';
 %Dname = 'Andy-11.1.22';
-Dname = 'Chris_11.3.22';
-%Dname = 'Emily_11.3.22';
+%Dname = 'Chris_11.3.22';
+Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
 
@@ -30,7 +30,7 @@ end
 
 %% PLOT
 
-row = 20;
+row = 15;
 endvalue = rmmissing(ForceData.footStrikeTime(row,:));
 endvaluenum = numel(endvalue);
 
@@ -104,7 +104,7 @@ plot(MicData.footStrikeTime(row,:),MicData.footStrikeFL(row,:));title('single st
 end
 
 % PLOT ACCEL DATA
-if 01
+if 0
 figure
 subplot 311
 plot(AccelData.t,AccelData.Center_X);title('Accels')
@@ -117,7 +117,7 @@ end
 
 
 % PLOT LOAD CELL DATA
-if 01
+if 0
 %plot forces individually
 %figure
 %plot(ForceData.t,ForceData.Frnt_L);hold all;title('Load Cells lbs')
@@ -147,7 +147,7 @@ plot(ForceData.t, ForceData.sum);title('Combined Force lbs')
 end
 
 % PLOT MIC DATA
-if 01
+if 0
 MicData = load_MicData(fullfile(Dname,'mic_data.tdms'));
 
 figure;
@@ -158,22 +158,40 @@ plot(MicData.t,MicData.Back_R);
 legend('Frnt L','Back L','Frnt R','Back R')
 end
 
-%% ACCEL AND MIC FFT
+%% ACCEL FFT
 
-if 0
-FFT_ACCEL = fft(AccelData.Center_Z);
-%FFT_ACCEL = fft(AccelData.footStrikeZ(row, (1:endvaluenum)));
-FFTValues = numel(FFT_ACCEL);
+% ACCEL
+if 01
+% Z
+%FFT_ACCELZ = fft(AccelData.Center_Z);
+FFT_ACCELZ = fft(AccelData.footStrikeZ(row, (1:endvaluenum)));
+FFTValuesZ = numel(FFT_ACCELZ);
 
-%display((endvaluenum));
-%display((FFT_ACCEL));
-%display(FFT_ACCEL);
-%display(FFTValues);
+figure
+plot(1:FFTValuesZ, FFT_ACCELZ);title('Z AXIS ACCEL FFT')
 
-%f = Fs*(0:(L/2))/L;
-%plot(5000, FFT_ACCEL)
+% X
+%FFT_ACCELX = fft(AccelData.Center_X);
+%FFT_ACCELX = fft(AccelData.footStrikeX(row, (1:endvaluenum)));
+%FFTValuesX = numel(FFT_ACCELX);
 
-%display('pass');
+% Y
+%FFT_ACCELY = fft(AccelData.Center_Y);
+%FFT_ACCELY = fft(AccelData.footStrikeY(row, (1:endvaluenum)));
+%FFTValuesY = numel(FFT_ACCELY);
+end
+
+%% MIC FFT
+
+if 01
+% MIC
+FFT_MIC_FL = fft(MicData.footStrikeFL(row, (1:endvaluenum)));
+FFTValues_FL = numel(FFT_MIC_FL);
+
+figure
+plot(1:FFTValuesZ, FFT_MIC_FL);title('FRONT LEFT MIC FFT')
+
+
 %plot([1:endvaluenum], FFT_ACCEL);
 end
 
