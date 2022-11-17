@@ -132,6 +132,11 @@ if ~exist(fullfname_mat,'file')
          BMR_zero+...
          BR_zero;
 
+    ForceData.zone1 = FR_zero + FL_zero;
+    ForceData.zone2 = FML_zero + FMR_zero;
+    ForceData.zone3 = BMR_zero + BML_zero;
+    ForceData.zone4 = BR_zero + BL_zero;
+
     % Snapshot Algorithm
     % if above data point is above 30 lbs, record until data point is no longer above 30 lbs
     % TODO: line this up with accel and mic data (compare time)
@@ -139,8 +144,19 @@ if ~exist(fullfname_mat,'file')
     % create empty vectors and matrices
     temp = [];
     timeTemp = [];
+
     mat = zeros(1,4000);
     timeMat = NaT(1,4000);
+
+    tempzone1 = [];
+    tempzone2 = [];
+    tempzone3 = [];
+    tempzone4 = [];
+
+    matzone1 = zeros(1,4000);
+    matzone2 = zeros(1,4000);
+    matzone3 = zeros(1,4000);
+    matzone4 = zeros(1,4000);
 
     endTime = [];
 
@@ -151,20 +167,36 @@ if ~exist(fullfname_mat,'file')
     for i=1:length(ForceData.sum)
         % if the data point is above 30 lbs, add to temp vector
         if ForceData.sum(i) > 30
+            % create matrix for force sum
             item = ForceData.sum(i);
             temp = [temp, [item]];
             itemTime = ForceData.t(i);
             timeTemp = [timeTemp, [itemTime]];
-        % if data point is below 20 lbs, store temp vector as a matrix
+
+            % create matrix for each zone
+            tempzone1 = [tempzone1, [ForceData.zone1(i)]];
+            tempzone2 = [tempzone2, [ForceData.zone2(i)]];
+            tempzone3 = [tempzone3, [ForceData.zone3(i)]];
+            tempzone4 = [tempzone4, [ForceData.zone4(i)]];
+
+        % if data point is below 30 lbs, store temp vector as a matrix
         else
             % if the vector is longer than 2 seconds, then remove
             if length(temp) > 4000
                 temp = [];
+                tempzone1 = [];
+                tempzone2 = [];
+                tempzone3 = [];
+                tempzone4 = [];
                 timeTemp = [];
                 continue;
             % if vector is shorter than 20 data points, then remove
             elseif length(temp) < 20
                 temp = [];
+                tempzone1 = [];
+                tempzone2 = [];
+                tempzone3 = [];
+                tempzone4 = [];
                 timeTemp = [];
                 continue;
             % if the vector is empty, then start loop again
@@ -179,6 +211,21 @@ if ~exist(fullfname_mat,'file')
             temp(end+1:4000) = -1;
             mat = [mat; temp];
 
+            %display(length(tempzone1));
+            %display(lenght(temp));
+
+            tempzone1(end+1:4000) = -1;
+            matzone1 = [matzone1; tempzone1];
+
+            tempzone2(end+1:4000) = -1;
+            matzone2 = [matzone2; tempzone2];
+
+            tempzone3(end+1:4000) = -1;
+            matzone3 = [matzone3; tempzone3];
+
+            tempzone4(end+1:4000) = -1;
+            matzone4 = [matzone4; tempzone4];
+
             %grab end time
             endTime = [endTime, timeTemp(end)];
 
@@ -188,13 +235,23 @@ if ~exist(fullfname_mat,'file')
             
     
             temp = []; 
+            tempzone1 = [];
+            tempzone2 = [];
+            tempzone3 = [];
+            tempzone4 = [];
             timeTemp = [];
         end
     end
 
     % create workspace vectors
     ForceData.footStrike = mat;
-    ForceData.footStrikeTime = timeMat;
+    ForceData.footStrikeTime = timeMat; 
+
+    ForceData.footStrikeZone1 = matzone1;
+    ForceData.footStrikeZone2 = matzone2;
+    ForceData.footStrikeZone3 = matzone3;
+    ForceData.footStrikeZone4 = matzone4;
+    
     
     % create endtime workspace vector
     % endTime = second(endTime);

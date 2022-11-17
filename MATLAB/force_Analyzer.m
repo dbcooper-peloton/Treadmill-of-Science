@@ -5,10 +5,10 @@ close all;clear;clc;
 
 DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
-%Dname = 'Sana_11.4.22';
+Dname = 'Sana_11.4.22';
 %Dname = 'Andy-11.1.22';
 %Dname = 'Chris_11.3.22';
-Dname = 'Emily_11.3.22';
+%Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
 
@@ -30,7 +30,7 @@ end
 
 %% PLOT
 
-row = 15;
+row = 18;
 endvalue = rmmissing(ForceData.footStrikeTime(row,:));
 endvaluenum = numel(endvalue);
 
@@ -53,10 +53,115 @@ plot(MicData.footStrikeTime(row,:),MicData.footStrikeBR(row,:));title('single st
 end
 
 % SINGLE FORCE 
-if 0
+if 1
 %row = 17;
 figure
-plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell')
+hold all
+plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell');ylabel('Pounds (lbs)');xlabel('Time (Datetime)')
+plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone1(row,:));
+plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone2(row,:));
+plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone3(row,:));
+plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone4(row,:));
+%hold off
+
+
+%display(ForceData.max)
+%display(ForceData.maxTime)
+
+% calculate the max
+[xmax, ymax] = max(ForceData.footStrike(row,:));
+maxStrike = xmax;
+maxTime = ForceData.footStrikeTime(row,ymax);
+
+%display(maxStrike)
+%display(maxTime)
+plot(maxTime, maxStrike,'x',color='red');
+
+% calculate the percentages
+zone1_percent = ForceData.footStrikeZone1(row,ymax)/maxStrike * 100;
+zone2_percent = ForceData.footStrikeZone2(row,ymax)/maxStrike * 100;
+zone3_percent = ForceData.footStrikeZone3(row,ymax)/maxStrike * 100;
+zone4_percent = ForceData.footStrikeZone4(row,ymax)/maxStrike * 100;
+
+% find the value of the zones at the max value
+zone1_value = ForceData.footStrikeZone1(row,ymax);
+zone2_value = ForceData.footStrikeZone2(row,ymax);
+zone3_value = ForceData.footStrikeZone3(row,ymax);
+zone4_value = ForceData.footStrikeZone4(row,ymax);
+
+% create vectors
+zonevectorpercentage = [zone1_percent,zone2_percent,zone3_percent,zone4_percent];
+zonevectorvalue = [zone1_value, zone2_value, zone3_value, zone4_value];
+deckvector = [8.3, 26.7, 28.3, 26.7, 10];
+
+%figure
+% plot the max
+%hold on
+plot(ForceData.footStrikeTime(row,ymax), zone1_value,'x',color='magenta');
+plot(ForceData.footStrikeTime(row,ymax), zone2_value,'x',color='blue');
+plot(ForceData.footStrikeTime(row,ymax), zone3_value,'x',color='green');
+plot(ForceData.footStrikeTime(row,ymax), zone4_value,'x',color='black');
+
+% algo time
+sum = 0;
+sum2 = 0;
+rise = 0;
+run = 0;
+ii = 1;
+b= 0;
+while true
+    % if zones add up to over 50, then we are done
+    if sum + zonevectorpercentage(ii) > 50
+        break;
+    else
+       % calculate b
+       sum = sum + zonevectorpercentage(ii);       
+       b = sum;
+       % calculate deck percentages to find distance later
+       sum2 = sum2 + deckvector(ii);
+       % find rise and run
+       rise = zonevectorpercentage(ii+1);
+       run = deckvector(ii);
+       
+    end
+    ii = ii+1;
+end
+
+%display(zonevectorvalue(ii))
+%display(zonevectorvalue(ii-1))
+%display(sum2)
+%display(rise)
+%display(run)
+
+% calculate slope
+m = rise/run;
+
+% find x
+x = fact(m,b);
+
+% find distance travelled
+distance = ((x + sum2)/100) * 60;
+
+display(m)
+display(b)
+display(x)
+display(distance)
+
+
+%legend('Front Percentage: '+ zone1_percent, 'Front Middle Percentage: '+zone2_percent,'Back Middle Percentage: '+zone3_percent,'Back Percentage: '+zone4_percent);
+stringpercentage1 = 'Front: ' + string(zone1_percent);
+stringpercentage2 = 'Front Middle: ' + string(zone2_percent);
+stringpercentage3 = 'Back Middle: ' + string(zone3_percent);
+stringpercentage4 = 'Back: ' + string(zone4_percent);
+legend('Sum', 'Front Zone', 'Front Middle Zone', 'Back Middle Zone', 'Back Zone', stringpercentage1, stringpercentage2, stringpercentage3, stringpercentage4);
+
+
+figure
+hold on
+plot([0,distance,60], [0,12.5,25],'x',color='red');
+plot(12, 0:25,'.',color='blue');
+
+
 end
 
 % LOAD CELL Derivative
@@ -161,7 +266,7 @@ end
 %% ACCEL FFT
 
 % ACCEL
-if 01
+if 0
 % Z
 %FFT_ACCELZ = fft(AccelData.Center_Z);
 FFT_ACCELZ = fft(AccelData.footStrikeZ(row, (1:endvaluenum)));
@@ -183,7 +288,7 @@ end
 
 %% MIC FFT
 
-if 01
+if 0
 % MIC
 FFT_MIC_FL = fft(MicData.footStrikeFL(row, (1:endvaluenum)));
 FFTValues_FL = numel(FFT_MIC_FL);
@@ -201,5 +306,9 @@ end
 %delete(fullfile(Dname,'*.mat'));
 %return
 
+% function to find x in y = mx+b
+function f = fact(m,b)
+    f = (50-b)/m;
+end
 
 
