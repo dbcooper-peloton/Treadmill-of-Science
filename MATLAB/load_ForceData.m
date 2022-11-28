@@ -28,8 +28,8 @@ if ~exist(fullfname_mat,'file')
     ForceData.Back_R = Data.Data.MeasuredData( 9).Data * G; % ch 5
 
     % butterworth filter 
-    fc = 1000;
-    fs = 3000;
+    fc = 30;
+    fs = 2000;
     [b,a] = butter(6,fc/(fs/2));
     %freqz(b,a,[],fs)
     %subplot(2,1,1)
@@ -137,6 +137,10 @@ if ~exist(fullfname_mat,'file')
     ForceData.zone3 = BMR_zero + BML_zero;
     ForceData.zone4 = BR_zero + BL_zero;
 
+    ForceData.LEFT = FL_zero + FML_zero + BML_zero + BL_zero;
+    ForceData.RIGHT = FR_zero + FMR_zero + BMR_zero + BR_zero;
+
+
     % Snapshot Algorithm
     % if above data point is above 30 lbs, record until data point is no longer above 30 lbs
     % TODO: line this up with accel and mic data (compare time)
@@ -157,6 +161,12 @@ if ~exist(fullfname_mat,'file')
     matzone2 = zeros(1,4000);
     matzone3 = zeros(1,4000);
     matzone4 = zeros(1,4000);
+
+    tempRIGHT = [];
+    tempLEFT = [];
+
+    matRIGHT = zeros(1,4000);
+    matLEFT = zeros(1,4000);
 
     endTime = [];
 
@@ -179,6 +189,12 @@ if ~exist(fullfname_mat,'file')
             tempzone3 = [tempzone3, [ForceData.zone3(i)]];
             tempzone4 = [tempzone4, [ForceData.zone4(i)]];
 
+            % create matrix for LEFT and RIGHT zones
+
+           tempRIGHT = [tempRIGHT, [ForceData.RIGHT(i)]];
+           tempLEFT = [tempLEFT, [ForceData.LEFT(i)]];
+
+
         % if data point is below 30 lbs, store temp vector as a matrix
         else
             % if the vector is longer than 2 seconds, then remove
@@ -189,6 +205,8 @@ if ~exist(fullfname_mat,'file')
                 tempzone3 = [];
                 tempzone4 = [];
                 timeTemp = [];
+                tempRIGHT = [];
+                tempLEFT = [];
                 continue;
             % if vector is shorter than 20 data points, then remove
             elseif length(temp) < 20
@@ -197,6 +215,8 @@ if ~exist(fullfname_mat,'file')
                 tempzone2 = [];
                 tempzone3 = [];
                 tempzone4 = [];
+                tempRIGHT = [];
+                tempLEFT = [];
                 timeTemp = [];
                 continue;
             % if the vector is empty, then start loop again
@@ -226,6 +246,12 @@ if ~exist(fullfname_mat,'file')
             tempzone4(end+1:4000) = -1;
             matzone4 = [matzone4; tempzone4];
 
+            tempRIGHT(end+1:4000) =-1;
+            matRIGHT = [matRIGHT; tempRIGHT];
+
+            tempLEFT(end+1:4000) =-1;
+            matLEFT = [matLEFT; tempLEFT];
+
             %grab end time
             endTime = [endTime, timeTemp(end)];
 
@@ -239,6 +265,8 @@ if ~exist(fullfname_mat,'file')
             tempzone2 = [];
             tempzone3 = [];
             tempzone4 = [];
+            tempRIGHT = [];
+            tempLEFT = [];
             timeTemp = [];
         end
     end
@@ -251,6 +279,9 @@ if ~exist(fullfname_mat,'file')
     ForceData.footStrikeZone2 = matzone2;
     ForceData.footStrikeZone3 = matzone3;
     ForceData.footStrikeZone4 = matzone4;
+
+    ForceData.RIGHT = matRIGHT;
+    ForceData.LEFT = matLEFT;
     
     
     % create endtime workspace vector

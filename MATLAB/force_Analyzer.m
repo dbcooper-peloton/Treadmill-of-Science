@@ -5,9 +5,9 @@ close all;clear;clc;
 
 DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
-Dname = 'Sana_11.4.22';
+%Dname = 'Sana_11.4.22';
 %Dname = 'Andy-11.1.22';
-%Dname = 'Chris_11.3.22';
+Dname = 'Chris_11.3.22';
 %Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
@@ -34,6 +34,13 @@ row = 18;
 endvalue = rmmissing(ForceData.footStrikeTime(row,:));
 endvaluenum = numel(endvalue);
 
+% calculate the max
+[xmax, ymax] = max(ForceData.footStrike(row,:));
+maxStrike = xmax;
+maxTime = ForceData.footStrikeTime(row,ymax);
+
+ymaxAccel = ymax*20;
+
 % PLOT SINGLE STRIKES
 if 0
 %row = 17;
@@ -54,24 +61,39 @@ end
 
 % SINGLE FORCE 
 if 1
+plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell');ylabel('Pounds (lbs)');xlabel('Time (Datetime)')
+end
+
+% FORCE STRIKE
+if 0
 %row = 17;
+
+
+
+
 figure
-hold all
+hold on
 plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell');ylabel('Pounds (lbs)');xlabel('Time (Datetime)')
 plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone1(row,:));
 plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone2(row,:));
 plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone3(row,:));
 plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone4(row,:));
+
+plot(ForceData.footStrikeTime(row,:), ForceData.RIGHT(row,:));
+plot(ForceData.footStrikeTime(row,:), ForceData.LEFT(row,:));
+hold off
+
+
+
 %hold off
 
 
 %display(ForceData.max)
 %display(ForceData.maxTime)
 
-% calculate the max
-[xmax, ymax] = max(ForceData.footStrike(row,:));
-maxStrike = xmax;
-maxTime = ForceData.footStrikeTime(row,ymax);
+
+
+
 
 %display(maxStrike)
 %display(maxTime)
@@ -82,12 +104,27 @@ zone1_percent = ForceData.footStrikeZone1(row,ymax)/maxStrike * 100;
 zone2_percent = ForceData.footStrikeZone2(row,ymax)/maxStrike * 100;
 zone3_percent = ForceData.footStrikeZone3(row,ymax)/maxStrike * 100;
 zone4_percent = ForceData.footStrikeZone4(row,ymax)/maxStrike * 100;
+RIGHT_percent = ForceData.RIGHT(row,ymax)/maxStrike;
+LEFT_percent = ForceData.LEFT(row,ymax)/maxStrike;
+
+
+
+FRONT_percent = (zone1_percent + zone2_percent)/100;
+
+
 
 % find the value of the zones at the max value
 zone1_value = ForceData.footStrikeZone1(row,ymax);
 zone2_value = ForceData.footStrikeZone2(row,ymax);
 zone3_value = ForceData.footStrikeZone3(row,ymax);
 zone4_value = ForceData.footStrikeZone4(row,ymax);
+RIGHT_value = ForceData.RIGHT(row,ymax);
+LEFT_value = ForceData.LEFT(row,ymax);
+
+right_left_placement = LEFT_percent * 25;
+
+
+
 
 % create vectors
 zonevectorpercentage = [zone1_percent,zone2_percent,zone3_percent,zone4_percent];
@@ -102,7 +139,7 @@ plot(ForceData.footStrikeTime(row,ymax), zone2_value,'x',color='blue');
 plot(ForceData.footStrikeTime(row,ymax), zone3_value,'x',color='green');
 plot(ForceData.footStrikeTime(row,ymax), zone4_value,'x',color='black');
 
-% algo time
+% algo time baby
 sum = 0;
 sum2 = 0;
 rise = 0;
@@ -153,13 +190,30 @@ stringpercentage1 = 'Front: ' + string(zone1_percent);
 stringpercentage2 = 'Front Middle: ' + string(zone2_percent);
 stringpercentage3 = 'Back Middle: ' + string(zone3_percent);
 stringpercentage4 = 'Back: ' + string(zone4_percent);
-legend('Sum', 'Front Zone', 'Front Middle Zone', 'Back Middle Zone', 'Back Zone', stringpercentage1, stringpercentage2, stringpercentage3, stringpercentage4);
+legend('Sum', 'Front Zone', 'Front Middle Zone', 'Back Middle Zone', 'Back Zone', 'RIGHT', 'LEFT', stringpercentage1, stringpercentage2, stringpercentage3, stringpercentage4);
+
+distanceFront = 60 -(60 * FRONT_percent);
 
 
 figure
-hold on
-plot([0,distance,60], [0,12.5,25],'x',color='red');
-plot(12, 0:25,'.',color='blue');
+%disp(length(ForceData.footStrike));
+for j = 1:length(ForceData.endTime)
+    
+    zone1_percentnextstrike = ForceData.footStrikeZone1(j,ymax)/maxStrike * 100;
+    zone2_percentnextstrike = ForceData.footStrikeZone2(j,ymax)/maxStrike * 100;
+    FRONT_percentnextstrike = (zone1_percentnextstrike + zone2_percentnextstrike)/100;
+    
+    LEFT_percentnextstrike = ForceData.LEFT(j,ymax)/maxStrike;
+    
+    distanceFrontnextstrike = 60 - (60*FRONT_percentnextstrike);
+    right_left_placementnextstrike = LEFT_percentnextstrike * 25;
+
+    hold on
+    plot([0,distance,60], [0,12.5,25],'x',color='white');
+    %plot(distanceFront,right_left_placement, 'x', color='blue');
+    plot(distanceFrontnextstrike,right_left_placementnextstrike, 'x', color='red');
+    plot(12, 0:25,'.',color='blue');
+end
 
 
 end
@@ -179,12 +233,14 @@ plot([1:endvaluenum-1],GRF_Derivative);hold all;title(Dname,'GRF Derivative')
 end
 
 % SINGLE ACCEL
-if 0
+if 1
 figure
 %subplot 211
 %plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeX(row,:));title('single strike accel X')
 %subplot 212
-plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeZ(row,:));title('single strike accel Z')
+%plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeZ(row,:));title('single strike accel Z')
+plot(AccelData.footStrikeTime(row,1:ymaxAccel),AccelData.footStrikeZ(row,1:ymaxAccel));title('single strike accel Z')
+
 end
 
 % INTEGRAL of ACCEL
@@ -196,17 +252,27 @@ end
 
 
 % SINGEL MIC
-if 0
+if 1
 figure
-%subplot 411
-plot(MicData.footStrikeTime(row,:),MicData.footStrikeFL(row,:));title('single strike front left mic')
-%subplot 412
-%plot(MicData.footStrikeTime(row,:),MicData.footStrikeBL(row,:));title('single strike back left mic')
-%subplot 413
-%plot(MicData.footStrikeTime(row,:),MicData.footStrikeFR(row,:));title('single strike front right mic')
-%subplot 414
-%plot(MicData.footStrikeTime(row,:),MicData.footStrikeBR(row,:));title('single strike back right mic')
+hold on
+subplot 411
+plot(MicData.footStrikeTime(row,1:ymaxAccel),MicData.footStrikeFL(row,1:ymaxAccel), color = 'red');title('single strike front left mic')
+subplot 412
+plot(MicData.footStrikeTime(row,1:ymaxAccel),MicData.footStrikeBL(row,1:ymaxAccel),color = 'green');title('single strike back left mic')
+subplot 413
+plot(MicData.footStrikeTime(row,1:ymaxAccel),MicData.footStrikeFR(row,1:ymaxAccel), color = 'blue');title('single strike front right mic')
+subplot 414
+plot(MicData.footStrikeTime(row,1:ymaxAccel),MicData.footStrikeBR(row,1:ymaxAccel),color = 'magenta');title('single strike back right mic')
+
+% FIND SUM of ABS of MIC
+sum_Frnt_L = sum(abs(MicData.footStrikeFL(row,1:ymaxAccel)))
+sum_Back_L = sum(abs(MicData.footStrikeBL(row,1:ymaxAccel)))
+sum_Frnt_R = sum(abs(MicData.footStrikeFR(row,1:ymaxAccel)))
+sum_Back_R = sum(abs(MicData.footStrikeBR(row,1:ymaxAccel)))
+
+
 end
+
 
 % PLOT ACCEL DATA
 if 0
@@ -262,6 +328,9 @@ plot(MicData.t,MicData.Frnt_R);
 plot(MicData.t,MicData.Back_R);
 legend('Frnt L','Back L','Frnt R','Back R')
 end
+
+
+
 
 %% ACCEL FFT
 

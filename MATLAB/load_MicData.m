@@ -51,13 +51,42 @@ if ~exist(fullfname_mat,'file')
     %Mic_RightBack = lopass(Mic_RightBack,Fs,Fc);
     %Mic_RightFront = lopass(Mic_RightFront,Fs,Fc);
 
+    %Butterworth Filter on sum of X
+    fc = 50;
+    fs = 40000;
+    [b,a] = butter(6,fc/(fs/2));
+    %freqz(b,a,[],fs)
+
+    % Filter FL data
+    FLdataIn = MicData.Frnt_L;
+    FLdataOut = filter(b,a,FLdataIn);
+    MicData.Frnt_L_BW = FLdataOut;
+
+    % Filter BL data
+    BLdataIn = MicData.Back_L;
+    BLdataOut = filter(b,a,BLdataIn);
+    MicData.Back_L_BW = BLdataOut;
+
+    % Filter FR data
+    FRdataIn = MicData.Frnt_R;
+    FRdataOut = filter(b,a,FRdataIn);
+    MicData.Frnt_R_BW = FRdataOut;
+
+    % Filter BR data
+    BRdataIn = MicData.Back_R;
+    BRdataOut = filter(b,a,BRdataIn);
+    MicData.Back_R_BW = BRdataOut;
+    
+    %subplot(2,1,1)
+    %ylim([-100 20])
+
     %ZERO OUT DATA
     % 40khz = 40,000 cycles/second
     % 1 sec =  40,000 data points 
-    FL_short = MicData.Frnt_L(1:40000);
-    BL_short = MicData.Back_L(1:40000);
-    FR_short = MicData.Frnt_R(1:40000);
-    BR_short = MicData.Back_R(1:40000);
+    FL_short = MicData.Frnt_L_BW(1:40000);
+    BL_short = MicData.Back_L_BW(1:40000);
+    FR_short = MicData.Frnt_R_BW(1:40000);
+    BR_short = MicData.Back_R_BW(1:40000);
     % find average of each shortened data point using mean()
     % ForceData.average = mean(ForceData.sum);
     FL_av = mean(FL_short);
@@ -65,10 +94,10 @@ if ~exist(fullfname_mat,'file')
     FR_av = mean(FR_short);
     BR_av = mean(BR_short);
     % zero out forces by subtracting mean from each data point
-    FL_zero = MicData.Frnt_L - FL_av;
-    BL_zero = MicData.Back_L - BL_av;
-    FR_zero = MicData.Frnt_R - FR_av; 
-    BR_zero = MicData.Back_R - BR_av; 
+    FL_zero = MicData.Frnt_L_BW - FL_av;
+    BL_zero = MicData.Back_L_BW - BL_av;
+    FR_zero = MicData.Frnt_R_BW - FR_av; 
+    BR_zero = MicData.Back_R_BW - BR_av; 
 
     % converting to seconds from datetime
     MicData.accelTime = (MicData.t);
@@ -107,8 +136,8 @@ if ~exist(fullfname_mat,'file')
                     tempTime = [tempTime, [MicData.t(i)]];
                     tempFrontL = [tempFrontL, [FL_zero(i)]]; 
                     tempBackL = [tempBackL, [BL_zero(i)]]; 
-                    tempFrontR = [tempFrontL, [FR_zero(i)]]; 
-                    tempBackR = [tempFrontL, [BR_zero(i)]]; 
+                    tempFrontR = [tempFrontR, [FR_zero(i)]]; 
+                    tempBackR = [tempBackR, [BR_zero(i)]]; 
 
                     % continue loop
                     continue;

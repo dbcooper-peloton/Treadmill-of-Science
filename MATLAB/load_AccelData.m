@@ -48,7 +48,7 @@ if ~exist(fullfname_mat,'file')
 
     %Butterworth Filter on sum of X
     fc = 1000;
-    fs = 3000;
+    fs = 5000;
     [b,a] = butter(6,fc/(fs/2));
     %freqz(b,a,[],fs)
     
