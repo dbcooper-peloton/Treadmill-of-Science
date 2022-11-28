@@ -1,14 +1,19 @@
 function newTable = V3HallSensorAnalyzer(~)
     
     close all;clear;clc;
-    fullfname = fullfile('C:\', 'Bike V3', 'Summary Report File 2022-11-10T11.33.56 P0.11_140rpm_5mm_sweep.csv');
-    fullfname2 = fullfile('C:\', 'Bike V3', 'Summary Report File 2022-11-11T10.12.47 P0.11_140rpm_5mm_B2_v2.csv');
-    fnameVector = [string(fullfname) string(fullfname2)];
-    plt = false;
+    %filename and sensor number/axis vectors
+    dirPath = 'C:\Bike V3';
+    fnameVector = ["temp"]; % init the vector as string
+    fileList = dir(fullfile(dirPath, '*.csv'));
+    for f = 1:length(fileList)
+        fnameVector(f) = fullfile(dirPath, fileList(f).name);
+    end
 
-    %!!!!!!!!change these 2 variables to change sensor number/axis
     activeSensor = [3, 4, 5];
     activeAxis = {'x', 'y', 'z'};
+
+    %plot option
+    plt = false;
 
     %some constants
     SnCell = 'B3:B3'; %SN cell
