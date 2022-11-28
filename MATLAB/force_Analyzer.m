@@ -6,8 +6,8 @@ close all;clear;clc;
 DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
 %Dname = 'Sana_11.4.22';
-%Dname = 'Andy-11.1.22';
-Dname = 'Chris_11.3.22';
+Dname = 'Andy-11.1.22';
+%Dname = 'Chris_11.3.22';
 %Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
@@ -30,7 +30,7 @@ end
 
 %% PLOT
 
-row = 18;
+row = 2;
 endvalue = rmmissing(ForceData.footStrikeTime(row,:));
 endvaluenum = numel(endvalue);
 
@@ -60,7 +60,7 @@ plot(MicData.footStrikeTime(row,:),MicData.footStrikeBR(row,:));title('single st
 end
 
 % SINGLE FORCE 
-if 1
+if 0
 plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell');ylabel('Pounds (lbs)');xlabel('Time (Datetime)')
 end
 
@@ -81,7 +81,7 @@ plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone4(row,:));
 
 plot(ForceData.footStrikeTime(row,:), ForceData.RIGHT(row,:));
 plot(ForceData.footStrikeTime(row,:), ForceData.LEFT(row,:));
-hold off
+%hold off
 
 
 
@@ -97,7 +97,7 @@ hold off
 
 %display(maxStrike)
 %display(maxTime)
-plot(maxTime, maxStrike,'x',color='red');
+%plot(maxTime, maxStrike,'x',color='red');
 
 % calculate the percentages
 zone1_percent = ForceData.footStrikeZone1(row,ymax)/maxStrike * 100;
@@ -233,7 +233,7 @@ plot([1:endvaluenum-1],GRF_Derivative);hold all;title(Dname,'GRF Derivative')
 end
 
 % SINGLE ACCEL
-if 1
+if 0
 figure
 %subplot 211
 %plot(AccelData.footStrikeTime(row,:),AccelData.footStrikeX(row,:));title('single strike accel X')
@@ -252,7 +252,7 @@ end
 
 
 % SINGEL MIC
-if 1
+if 0
 figure
 hold on
 subplot 411
@@ -265,6 +265,7 @@ subplot 414
 plot(MicData.footStrikeTime(row,1:ymaxAccel),MicData.footStrikeBR(row,1:ymaxAccel),color = 'magenta');title('single strike back right mic')
 
 % FIND SUM of ABS of MIC
+disp(ymaxAccel)
 sum_Frnt_L = sum(abs(MicData.footStrikeFL(row,1:ymaxAccel)))
 sum_Back_L = sum(abs(MicData.footStrikeBL(row,1:ymaxAccel)))
 sum_Frnt_R = sum(abs(MicData.footStrikeFR(row,1:ymaxAccel)))
@@ -335,14 +336,26 @@ end
 %% ACCEL FFT
 
 % ACCEL
-if 0
+if 01
 % Z
 %FFT_ACCELZ = fft(AccelData.Center_Z);
 FFT_ACCELZ = fft(AccelData.footStrikeZ(row, (1:endvaluenum)));
 FFTValuesZ = numel(FFT_ACCELZ);
 
+% frequency domain
+frequencyZ = 5000*(0:(FFTValuesZ/2))/FFTValuesZ;
+
+% single sided and two sided spectrum
+P2 = abs(FFT_ACCELZ/FFTValuesZ);
+P1 = P2(1:FFTValuesZ/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+
 figure
-plot(1:FFTValuesZ, FFT_ACCELZ);title('Z AXIS ACCEL FFT')
+plot(frequencyZ,P1);title('P1 Z AXIS ACCEL FFT')
+%figure
+%plot(frequencyZ,P2);title('P2 Z AXIS ACCEL FFT')
+
+%plot(1:FFTValuesZ, FFT_ACCELZ);title('Z AXIS ACCEL FFT')
 
 % X
 %FFT_ACCELX = fft(AccelData.Center_X);
@@ -357,13 +370,21 @@ end
 
 %% MIC FFT
 
-if 0
+if 01
 % MIC
-FFT_MIC_FL = fft(MicData.footStrikeFL(row, (1:endvaluenum)));
+FFT_MIC_FL = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
 FFTValues_FL = numel(FFT_MIC_FL);
 
+% frequency domain
+frequencyMic = 40000*(0:(FFTValues_FL/2))/FFTValues_FL;
+
+% single sided and two sided spectrum
+P2 = abs(FFT_MIC_FL/FFTValues_FL);
+P1 = P2(1:FFTValues_FL/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+
 figure
-plot(1:FFTValuesZ, FFT_MIC_FL);title('FRONT LEFT MIC FFT')
+plot(frequencyMic,P1);title('P1 FRONT LEFT MIC FFT')
 
 
 %plot([1:endvaluenum], FFT_ACCEL);

@@ -38,6 +38,9 @@ if ~exist(fullfname_mat,'file')
     MicData.Frnt_R = (Data.Data.MeasuredData(7).Data-Bias) * G;
     MicData.Back_R = (Data.Data.MeasuredData(6).Data-Bias) * G;
 
+    MicData.sum = MicData.Frnt_L+MicData.Back_L+MicData.Frnt_R+MicData.Back_R;
+
+
     %MicData.Frnt_L = MicData.Frnt_L - mean(MicData.Frnt_L);
     %MicData.Back_L = MicData.Back_L - mean(MicData.Back_L);
     %MicData.Frnt_R = MicData.Frnt_R - mean(MicData.Frnt_R);
@@ -109,12 +112,16 @@ if ~exist(fullfname_mat,'file')
     tempFrontR = [];
     tempBackR = [];
 
+    tempSum = [];
+
 
     % create empty matrixes
     matFrontL = zeros(1,100000);
     matBackL = zeros(1,100000);
     matFrontR = zeros(1,100000);
     matBackR = zeros(1,100000);
+
+    matSum = zeros(1,100000);
 
     timeMat = NaT(1,100000);
 
@@ -139,6 +146,9 @@ if ~exist(fullfname_mat,'file')
                     tempFrontR = [tempFrontR, [FR_zero(i)]]; 
                     tempBackR = [tempBackR, [BR_zero(i)]]; 
 
+                    tempSum = [tempSum, [MicData.sum(i)]]; 
+
+
                     % continue loop
                     continue;
                 % else if we hit the end time, stop logging
@@ -162,6 +172,9 @@ if ~exist(fullfname_mat,'file')
                     
                     tempBackR(end+1:100000) = -1;
                     matBackR = [matBackR; tempBackR];
+
+                    tempSum(end+1:100000) = -1;
+                    matSum = [matSum; tempSum];
                     
                     % log vector into matrix
                     tempTime(end+1:100000) = NaT;
@@ -173,6 +186,7 @@ if ~exist(fullfname_mat,'file')
                     tempFrontR = [];
                     tempBackR = [];
                     tempTime = [];
+                    tempSum = [];
 
                     % increase index
                     j = j+1;
@@ -187,6 +201,8 @@ if ~exist(fullfname_mat,'file')
     MicData.footStrikeBL = matBackL;
     MicData.footStrikeFR = matFrontR;
     MicData.footStrikeBR = matBackR;
+
+    MicData.footStrikeSum = matSum;
 
     MicData.footStrikeTime = timeMat;
     
