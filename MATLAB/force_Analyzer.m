@@ -32,7 +32,7 @@ end
 %% FOOTSTRIKE ROW SELCTION AND FINDING MAX
 
 % select which footstrike to analyze
-row = 15;
+row = 1;
 
 % remove the zero padding in the footsrike to the end and to find the index of the end
 endvalue = rmmissing(ForceData.footStrikeTime(row,:));
@@ -350,13 +350,10 @@ P2(end+1) = 0;
 P1(1) = 0;
 P2(1) = 0;
 
-disp(P1)
-disp(P2)
 figure
 plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
 figure
 plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
-
 
 end
 
