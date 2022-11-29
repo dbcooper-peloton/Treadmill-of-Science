@@ -1,0 +1,164 @@
+
+function AccelData = load_AccelData(fullfname_tdms)
+
+%fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy-11.1.22', 'accel_data.tdms')
+
+[Dname,fname,~] = fileparts(fullfname_tdms);
+fullfname_mat = fullfile(Dname,[fname '.mat']);
+
+% creating the end and start time vector from ForceData
+ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
+AccelData.endTime = ForceData.endTime;
+startTime = ForceData.footStrikeTime(:,1);
+
+% remove empty cells
+startTime = rmmissing(startTime);
+
+% find start time of Accel Data
+AccelData.startTimeSec = startTime;
+
+if ~exist(fullfname_mat,'file')
+    Data = convertTDMS(0,fullfname_tdms);
+
+    AccelData.t = Data.Data.MeasuredData(3).Data;
+    AccelData.t = datetime(AccelData.t,'ConvertFrom','datenum','TimeZone','local');
+    AccelData.t.TimeZone = 'America/Los_Angeles';
+    AccelData.t.Format = 'HH:mm:ss.SSS';
+
+    % TODO: figure out scaling
+    %AccelData.Left = Data.Data.MeasuredData(4).Data;
+    %AccelData.Right = Data.Data.MeasuredData(5).Data;
+    AccelData.Center_X = Data.Data.MeasuredData(4).Data;
+    AccelData.Center_Y = Data.Data.MeasuredData(5).Data;
+    AccelData.Center_Z = Data.Data.MeasuredData(6).Data;
+
+    %Butterworth Filter on sum of X
+    fc = 1000;
+    fs = 5000;
+    [b,a] = butter(6,fc/(fs/2));
+    %freqz(b,a,[],fs)
+    
+    %subplot(2,1,1)
+    %ylim([-100 20])
+    
+    % Filter X data
+    XdataIn = AccelData.Center_X;
+    XdataOut = filter(b,a,XdataIn);
+    AccelData.Center_X_BW = XdataOut;
+
+
+    % Filter Y data
+    YdataIn = AccelData.Center_Y;
+    YdataOut = filter(b,a,YdataIn);
+    AccelData.Center_Y_BW = YdataOut;
+
+    % Filter Z data
+    ZdataIn = AccelData.Center_Z;
+    ZdataOut = filter(b,a,ZdataIn);
+    AccelData.Center_Z_BW = ZdataOut;
+
+    %AccelData.XInt = cumtrapz(ZdataOut);
+
+    %ZERO OUT DATA
+    % 5khz = 5,000 cycles/second
+    % 1 sec =  5,000 data points 
+    centerX_short = AccelData.Center_X_BW(1:5000);
+    centerY_short = AccelData.Center_Y_BW(1:5000);
+    centerZ_short = AccelData.Center_Z_BW(1:5000);
+    % find average of each shortened data point using mean()
+    % ForceData.average = mean(ForceData.sum);
+    centerX_av = mean(centerX_short);
+    centerY_av = mean(centerY_short);
+    centerZ_av = mean(centerZ_short);
+    % zero out forces by subtracting mean from each data point
+    centerX_zero = AccelData.Center_X_BW - centerX_av;
+    centerY_zero = AccelData.Center_Y_BW - centerY_av;
+    centerZ_zero = AccelData.Center_Z_BW - centerZ_av; 
+    
+    % assign accel start time vector to force start time vector
+    AccelData.accelTime = AccelData.t;
+    %display(AccelData.accelTime);
+
+    % creating empty vectors
+    temp = [];
+    tempX = [];
+    tempY = [];
+    tempZ = [];
+
+    % create empty matrixes
+    matX = zeros(1,10000);
+    matY = zeros(1,10000);
+    matZ = zeros(1,10000);
+    timeMat = NaT(1,10000);
+
+    % same timezone as time data
+    timeMat.TimeZone = 'America/Los_Angeles';
+     
+    % creating empty indices
+    j = 1;
+    
+    % using the endtime and startime, create a snapshot of the accel data
+    if 1 == 1
+       for i=1:length(AccelData.accelTime)
+            % if we hit the startime, start logging
+            if AccelData.startTimeSec(j) <= AccelData.accelTime(i)
+                % if we're less than end time, keep logging
+                if AccelData.accelTime(i) <= AccelData.endTime(j)
+                    % log into vector
+                    temp = [temp, [AccelData.t(i)]];
+                    tempX = [tempX, [centerX_zero(i)]]; 
+                    tempY = [tempY, [centerY_zero(i)]];
+                    tempZ = [tempZ, [centerZ_zero(i)]];
+                % else if we hit the end time, stop logging
+                else
+                    % if we reach the end of the index, stop logging
+                    if j == length(AccelData.endTime)
+                        break;
+                    % if the vector is empty, then start loop again
+                    elseif isempty(temp)
+                        continue;
+                    end
+
+                    % log vector into X matrix
+                    tempX(end+1:10000) = -1;
+                    matX = [matX; tempX];
+
+                    % log vector into Y matrix
+                    tempY(end+1:10000) = -1;
+                    matY = [matY; tempY];
+
+                    % log vector into Z matrix
+                    tempZ(end+1:10000) = -1;
+                    matZ = [matZ; tempZ];
+                    
+                    % log vector into matrix
+                    %display(temp);
+                    temp(end+1:10000) = NaT;
+                    timeMat = [timeMat; temp]; 
+
+                    % flush
+                    tempX = []; 
+                    tempY = [];
+                    tempZ = [];
+                    temp = [];
+
+                    % increase index
+                    j = j+1;
+
+                end                               
+            end
+        end
+    end
+
+    % create workspace vector
+    AccelData.footStrikeX = matX;
+    AccelData.footStrikeY = matY;
+    AccelData.footStrikeZ = matZ;
+    AccelData.footStrikeTime = timeMat;
+
+    save(fullfname_mat,'AccelData');
+else
+    load(fullfname_mat,'AccelData');
+end
+
+return

@@ -5,13 +5,9 @@ function MicData = load_MicData(fullfname_tdms)
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
 
-% need this to use ForceData
+% creating the end and start time vector from ForceData
 ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
-
-% creating the end time vector
 MicData.endTime = ForceData.endTime;
-
-% create start time vector
 startTime = ForceData.footStrikeTime(:,1);
 
 % remove empty cells
@@ -39,12 +35,6 @@ if ~exist(fullfname_mat,'file')
     MicData.Back_R = (Data.Data.MeasuredData(6).Data-Bias) * G;
 
     MicData.sum = MicData.Frnt_L+MicData.Back_L+MicData.Frnt_R+MicData.Back_R;
-
-
-    %MicData.Frnt_L = MicData.Frnt_L - mean(MicData.Frnt_L);
-    %MicData.Back_L = MicData.Back_L - mean(MicData.Back_L);
-    %MicData.Frnt_R = MicData.Frnt_R - mean(MicData.Frnt_R);
-    %MicData.Back_R = MicData.Back_R - mean(MicData.Back_R);
 
     %Ts = mean(seconds(diff(t_Mic)));
     %Fs = 1/Ts;
@@ -79,23 +69,17 @@ if ~exist(fullfname_mat,'file')
     BRdataIn = MicData.Back_R;
     BRdataOut = filter(b,a,BRdataIn);
     MicData.Back_R_BW = BRdataOut;
-    
-    %subplot(2,1,1)
-    %ylim([-100 20])
 
-    %ZERO OUT DATA
+    % ZERO OUT DATA
+
     % 40khz = 40,000 cycles/second
     % 1 sec =  40,000 data points 
-    FL_short = MicData.Frnt_L_BW(1:40000);
-    BL_short = MicData.Back_L_BW(1:40000);
-    FR_short = MicData.Frnt_R_BW(1:40000);
-    BR_short = MicData.Back_R_BW(1:40000);
     % find average of each shortened data point using mean()
     % ForceData.average = mean(ForceData.sum);
-    FL_av = mean(FL_short);
-    BL_av = mean(BL_short);
-    FR_av = mean(FR_short);
-    BR_av = mean(BR_short);
+    FL_av = mean(MicData.Frnt_L_BW(1:40000));
+    BL_av = mean(MicData.Back_L_BW(1:40000));
+    FR_av = mean(MicData.Frnt_R_BW(1:40000));
+    BR_av = mean(MicData.Back_R_BW(1:40000));
     % zero out forces by subtracting mean from each data point
     FL_zero = MicData.Frnt_L_BW - FL_av;
     BL_zero = MicData.Back_L_BW - BL_av;
@@ -111,18 +95,14 @@ if ~exist(fullfname_mat,'file')
     tempBackL = [];
     tempFrontR = [];
     tempBackR = [];
-
     tempSum = [];
-
 
     % create empty matrixes
     matFrontL = zeros(1,100000);
     matBackL = zeros(1,100000);
     matFrontR = zeros(1,100000);
     matBackR = zeros(1,100000);
-
     matSum = zeros(1,100000);
-
     timeMat = NaT(1,100000);
 
     % same timezone as time data
@@ -131,7 +111,6 @@ if ~exist(fullfname_mat,'file')
     % creating empty indices
     j = 1;
     
-
     % using the endtime and startime, create a snapshot of the FRONT LEFT mic data
     if 1 == 1
        for i=1:length(MicData.accelTime)
@@ -145,9 +124,7 @@ if ~exist(fullfname_mat,'file')
                     tempBackL = [tempBackL, [BL_zero(i)]]; 
                     tempFrontR = [tempFrontR, [FR_zero(i)]]; 
                     tempBackR = [tempBackR, [BR_zero(i)]]; 
-
                     tempSum = [tempSum, [MicData.sum(i)]]; 
-
 
                     % continue loop
                     continue;
@@ -206,7 +183,6 @@ if ~exist(fullfname_mat,'file')
 
     MicData.footStrikeTime = timeMat;
     
-
     save(fullfname_mat,'MicData');
 else
     load(fullfname_mat,'MicData');

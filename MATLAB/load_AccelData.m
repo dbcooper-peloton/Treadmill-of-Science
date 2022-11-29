@@ -1,4 +1,3 @@
-
 function AccelData = load_AccelData(fullfname_tdms)
 
 %fullfname_tdms = fullfile('C:\', 'Users' , 'cooper', 'Documents', 'MATLAB', 'Andy-11.1.22', 'accel_data.tdms')
@@ -6,31 +5,19 @@ function AccelData = load_AccelData(fullfname_tdms)
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
 
-% need this to use ForceData
+% creating the end and start time vector from ForceData
 ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
-
-% creating the end time vector
 AccelData.endTime = ForceData.endTime;
-
-% startTime = [];
-% create start time vector
 startTime = ForceData.footStrikeTime(:,1);
 
 % remove empty cells
 startTime = rmmissing(startTime);
-%display(startTime);
 
-%display(startTime);
+% find start time of Accel Data
+AccelData.startTimeSec = startTime;
 
-AccelData.startTimeSec = startTime; % - seconds(1);
-
-% converting datetime to seconds
-%AccelData.startTimeSec = second(startTime);
-%AccelData.startTimeSec = datenum(startTime, 'HH:MM:SS.SSS');
-
-%display(AccelData.startTimeSec)
-
-
+% check first if MATLAB converted TDMS file exists, if not then convert
+% TDMS into MATLAB file
 if ~exist(fullfname_mat,'file')
     Data = convertTDMS(0,fullfname_tdms);
 
@@ -39,27 +26,21 @@ if ~exist(fullfname_mat,'file')
     AccelData.t.TimeZone = 'America/Los_Angeles';
     AccelData.t.Format = 'HH:mm:ss.SSS';
 
-    % TODO: figure out scaling
-    %AccelData.Left = Data.Data.MeasuredData(4).Data;
-    %AccelData.Right = Data.Data.MeasuredData(5).Data;
     AccelData.Center_X = Data.Data.MeasuredData(4).Data;
     AccelData.Center_Y = Data.Data.MeasuredData(5).Data;
     AccelData.Center_Z = Data.Data.MeasuredData(6).Data;
+
+    % TODO: figure out scaling
 
     %Butterworth Filter on sum of X
     fc = 1000;
     fs = 5000;
     [b,a] = butter(6,fc/(fs/2));
-    %freqz(b,a,[],fs)
-    
-    %subplot(2,1,1)
-    %ylim([-100 20])
     
     % Filter X data
     XdataIn = AccelData.Center_X;
     XdataOut = filter(b,a,XdataIn);
     AccelData.Center_X_BW = XdataOut;
-
 
     % Filter Y data
     YdataIn = AccelData.Center_Y;
@@ -71,19 +52,16 @@ if ~exist(fullfname_mat,'file')
     ZdataOut = filter(b,a,ZdataIn);
     AccelData.Center_Z_BW = ZdataOut;
 
-    %AccelData.XInt = cumtrapz(ZdataOut);
+    % ZERO OUT DATA
 
-    %ZERO OUT DATA
     % 5khz = 5,000 cycles/second
     % 1 sec =  5,000 data points 
-    centerX_short = AccelData.Center_X_BW(1:5000);
-    centerY_short = AccelData.Center_Y_BW(1:5000);
-    centerZ_short = AccelData.Center_Z_BW(1:5000);
     % find average of each shortened data point using mean()
     % ForceData.average = mean(ForceData.sum);
-    centerX_av = mean(centerX_short);
-    centerY_av = mean(centerY_short);
-    centerZ_av = mean(centerZ_short);
+    centerX_av = mean(AccelData.Center_X_BW(1:5000));
+    centerY_av = mean(AccelData.Center_Y_BW(1:5000));
+    centerZ_av = mean(AccelData.Center_Z_BW(1:5000));
+    
     % zero out forces by subtracting mean from each data point
     centerX_zero = AccelData.Center_X_BW - centerX_av;
     centerY_zero = AccelData.Center_Y_BW - centerY_av;
@@ -91,7 +69,6 @@ if ~exist(fullfname_mat,'file')
     
     % assign accel start time vector to force start time vector
     AccelData.accelTime = AccelData.t;
-    %display(AccelData.accelTime);
 
     % creating empty vectors
     temp = [];
