@@ -32,7 +32,7 @@ end
 %% FOOTSTRIKE ROW SELCTION AND FINDING MAX
 
 % select which footstrike to analyze
-row = 2;
+row = 15;
 
 % remove the zero padding in the footsrike to the end and to find the index of the end
 endvalue = rmmissing(ForceData.footStrikeTime(row,:));
@@ -71,7 +71,7 @@ plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single 
 end
 
 %% FORCE FOOTSRIKE ANALYZER
-if 01
+if 0
 
 % plot the foot strike of each zone on a single graph
 % this plot also shows the sum of all the forces and the sum of the LEFT
@@ -193,7 +193,6 @@ end
 end
 
 %% FIND AND PLOT LOAD CELL DERIVATIVE
-% this section finds the derivative of the filtered LOAD CELL strike
 
 if 0
 figure
@@ -307,7 +306,7 @@ end
 
 %% ACCEL FFT
 
-if 01
+if 0
 
 % calculate the FFT of a single footstirke on the Z Accel Axis
 FFT_ACCELZ = fft(AccelData.footStrikeZ(row, (1:endvaluenum)));
@@ -331,31 +330,44 @@ end
 
 if 01
 
-% calculate the FFT of a single footstrike 
-FFT_MIC_FL = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
-FFTValues_FL = numel(FFT_MIC_FL);
+% calculate the FFT of a single footstrike on the sum of all Mic data
+FFT_MIC = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
+FFTValues = numel(FFT_MIC);
 
 % frequency domain
-frequencyMic = 40000*(0:(FFTValues_FL/2))/FFTValues_FL;
+frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
+frequencyMic2 = 40000*(0:(FFTValues))/FFTValues;
 
 % single sided and two sided spectrum
-P2 = abs(FFT_MIC_FL/FFTValues_FL);
-P1 = P2(1:FFTValues_FL/2+1);
+P2 = abs(FFT_MIC/FFTValues);
+P1 = P2(1:FFTValues/2+1);
 P1(2:end-1) = 2*P1(2:end-1);
 
+% not sure why but I had to add a zero to the end of the two sided spectrum
+% also first value is always higher than the rest, so I got rid of it for
+% now
+P2(end+1) = 0;
+P1(1) = 0;
+P2(1) = 0;
+
+disp(P1)
+disp(P2)
 figure
-plot(frequencyMic,P1);title('P1 FRONT LEFT MIC FFT')
+plot(frequencyMic,P1);title('MIC P1 MIC FFT')
+figure
+plot(frequencyMic2,P2);title('P2 MIC FFT')
 
 
-%plot([1:endvaluenum], FFT_ACCEL);
 end
 
 %% clear intermediate mat files from target directory
+
 %D = dir(fullfile(Dname,'*.mat'));
 %delete(fullfile(Dname,'*.mat'));
 %return
 
 %% function to find x in y = mx+b
+
 function f = fact(m,b)
     f = (50-b)/m;
 end
