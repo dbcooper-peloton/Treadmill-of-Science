@@ -4,10 +4,10 @@ close all;clear;clc;
 %Dname is the folder that the dataset file is in
 
 % WINDOWS
-DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+%DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
 % LINUX
-%DataRootDir = '/home/daniel/Documents/MATLAB';
+DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
 %Dname = 'Andy-11.1.22';
@@ -18,7 +18,7 @@ Dname = fullfile(DataRootDir,Dname);
 disp(Dname)
 
 % select which footstrike to analyze
-row = 20;
+row = 15;
 
 %% NOTES
 
@@ -52,44 +52,6 @@ if 1
 MicData = load_MicData(fullfile(Dname,'mic_data.tdms'));
 end
 
-%% READ TACH DATA
-if 1
-TachData = load_TachData(fullfile(Dname,'Tach_Data.tdms'));
-
-vel = TachData.vel;
-M_vel = vel * 2.6; % [rad/s]
-B_r = 0.050/2; % [m]
-B_vel = vel/(2*pi) * (2*pi*B_r); % roller vel in [rad/s] to belt vel in [m/s]
-
-end
-
-%% GRAPH TACH DATA 
-
-if 1
-% B_vel is in mph
-
-%figure
-%subplot 311
-%plot(TachData.t,TachData.Tach);title('Tach')
-%ylim([-0.25 1.25])
-%subplot 312
-%plot(TachData.t,vel);title('Velocity m/s')
-%subplot 313
-%plot(TachData.t,B_vel);title('Velocity mph') % [m/s] to [mph] *2.23694
-
-% disp(B_vel);
-
-% average the whole vector to get the average speed
-% find B_vel then average B_vel
-
-%disp(TachData.B_vel)
-%disp(TachData.footStrikeVel)
-
-plot(TachData.footStrikeTime(row,:), TachData.footStrikeVel(row,:));
-
-
-end
-
 %% FOOTSTRIKE FINDING MAX
 
 % remove the zero padding in the footsrike to the end and to find the index of the end
@@ -103,6 +65,37 @@ maxTime = ForceData.footStrikeTime(row,ymax);
 
 % why is the scale 20?
 ymaxAccel = ymax*20;
+
+%% READ TACH DATA
+if 1
+TachData = load_TachData(fullfile(Dname,'Tach_Data.tdms'));
+
+vel = TachData.vel;
+M_vel = vel * 2.6; % [rad/s]
+B_r = 0.050/2; % [m]
+B_vel = vel/(2*pi) * (2*pi*B_r); % roller vel in [rad/s] to belt vel in [m/s]
+
+B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
+
+end
+
+%% GRAPH TACH DATA 
+
+if 0
+% B_vel is in mph
+
+%figure
+%subplot 311
+%plot(TachData.t,TachData.Tach);title('Tach')
+%ylim([-0.25 1.25])
+%subplot 312
+%plot(TachData.t,vel);title('Velocity m/s')
+%subplot 313
+%plot(TachData.t,B_vel);title('Velocity mph') % [m/s] to [mph] *2.23694
+
+plot(TachData.footStrikeTime(row,:), TachData.footStrikeVel(row,:));
+
+end
 
 
 %% PLOT SINGLE STRIKES FOR ACCEL, 
@@ -373,10 +366,7 @@ FFTValuesZ = numel(FFT_ACCELZ);
 % frequency domain
 frequencyZ = 5000*(0:(FFTValuesZ/2))/FFTValuesZ;
 
-% single sided and two sided spectrum
-P2 = abs(FFT_ACCELZ/FFTValuesZ);
-P1 = P2(1:FFTValuesZ/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
+P1 = FFT(FFT_MIC, FFTValues);
 
 figure
 plot(frequencyZ,P1);title('P1 Z AXIS ACCEL FFT')
@@ -386,7 +376,11 @@ end
 
 %% MIC FFT
 
-if 0
+% SINGLE 
+if 01
+ 
+% take the average of the B_vel vector
+B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
 
 % calculate the FFT of a single footstrike on the sum of all Mic data
 FFT_MIC = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
@@ -396,24 +390,93 @@ FFTValues = numel(FFT_MIC);
 frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
 frequencyMic2 = 40000*(0:(FFTValues))/FFTValues;
 
-% single sided and two sided spectrum
-P2 = abs(FFT_MIC/FFTValues);
-P1 = P2(1:FFTValues/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
+P1 = FFT(FFT_MIC, FFTValues);
 
-% not sure why but I had to add a zero to the end of the two sided spectrum
-% also first value is always higher than the rest, so I got rid of it for
-% now
-P2(end+1) = 0;
-P1(1) = 0;
-P2(1) = 0;
+% convert B_vel_avg to a string for labelling purposes
+averagespeed = 'Average Speed: ' + string(B_vel_avg);
 
 figure
 plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
-figure
-plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
+legend(averagespeed)
+%figure
+%plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
 
 end
+
+% LOOP
+if 01
+% loop through all footstrikes and plot the FFTs of each one
+figure()
+hold on
+startLoop = 27;
+endLoop = 29;
+%nLoops = length(ForceData.endTime);
+for j = startLoop:endLoop
+%for j = 1:length(ForceData.endTime)
+
+    % take the average of the B_vel vector
+    B_vel_avg = mean(TachData.footStrikeVel(j,1:endvaluenum), "all");
+    
+    % calculate the FFT of a single footstrike on the sum of all Mic data
+    FFT_MIC = fft(MicData.footStrikeSum(j, (1:endvaluenum)));
+    FFTValues = numel(FFT_MIC);
+    
+    % frequency domain
+    frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
+    frequencyMic2 = 40000*(0:(FFTValues))/FFTValues;
+    
+    P1 = FFT(FFT_MIC, FFTValues);
+    
+    % convert B_vel_avg to a string for labelling purposes
+    averagespeed = 'STRIKE ' + string(j) + ' Average Speed: ' + string(B_vel_avg);
+
+    %hold on
+    plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON');
+    legends{j-(startLoop-1)} = sprintf(averagespeed);
+    %plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
+    %legend(averagespeed)
+
+end
+disp(legends)
+legend(legends)
+
+end
+
+% DOUBLE 
+if 01
+
+row1 = 5;
+row2 = 25;
+ 
+% take the average of the B_vel vector
+B_vel_avg1 = mean(TachData.footStrikeVel(row1,1:endvaluenum), "all");
+B_vel_avg2 = mean(TachData.footStrikeVel(row2,1:endvaluenum), "all");
+
+% calculate the FFT of a single footstrike on the sum of all Mic data
+FFT_MIC1 = fft(MicData.footStrikeSum(row1, (1:endvaluenum)));
+FFTValues1 = numel(FFT_MIC1);
+FFT_MIC2 = fft(MicData.footStrikeSum(row2, (1:endvaluenum)));
+FFTValues2 = numel(FFT_MIC2);
+
+% frequency domain
+frequencyMic = 40000*(0:(FFTValues1/2))/FFTValues1;
+
+P1_1 = FFT(FFT_MIC1, FFTValues1);
+P1_2 = FFT(FFT_MIC2, FFTValues2);
+
+% convert B_vel_avg to a string for labelling purposes
+averagespeed1 = 'STRIKE ' + string(row1) + ' Average Speed: ' + string(B_vel_avg1);
+averagespeed2 = 'STRIKE ' + string(row2) + ' Average Speed: ' + string(B_vel_avg2);
+
+figure
+hold on
+plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON')
+%figure
+plot(frequencyMic,P1_2);
+legend(averagespeed1, averagespeed2)
+
+end
+
 
 %% clear intermediate mat files from target directory
 
@@ -421,8 +484,26 @@ end
 %delete(fullfile(Dname,'*.mat'));
 %return
 
-%% function to find x in y = mx+b
+%% FUNCTIONS
 
 function f = fact(m,b)
     f = (50-b)/m;
 end
+
+
+function f = FFT(FFT_MIC,FFTValues)
+    % single sided and two sided spectrum
+    P2 = abs(FFT_MIC/FFTValues);
+    P1 = P2(1:FFTValues/2+1);
+    P1(2:end-1) = 2*P1(2:end-1);
+    
+    % not sure why but I had to add a zero to the end of the two sided spectrum
+    % also first value is always higher than the rest, so I got rid of it for
+    % now
+    P2(end+1) = 0;
+    P1(1) = 0;
+    P2(1) = 0;
+
+    f = P1;
+end
+    

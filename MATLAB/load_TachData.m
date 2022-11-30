@@ -40,7 +40,7 @@ if ~exist(fullfname_mat,'file')
     TachData.vel = vel * (2*pi); % [rad/s]
 
     B_r = 0.050/2; % [m]
-    TachData.B_vel = (TachData.vel/(2*pi) * (2*pi*B_r))*2.23694; % roller vel in [rad/s] to belt vel in [m/s]
+    TachData.B_vel = (TachData.vel/(2*pi) * (2*pi*B_r))*2.23694; % roller vel in [rad/s] to belt vel in [mph]
 
     % assign accel start time vector to force start time vector
     TachData.accelTime = TachData.t;
