@@ -3,16 +3,39 @@ close all;clear;clc;
 %DataRootDir is the parent path of the dataset folder
 %Dname is the folder that the dataset file is in
 
-%DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
-DataRootDir = '/home/daniel/Documents/MATLAB';
+% WINDOWS
+DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+
+% LINUX
+%DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
 %Dname = 'Andy-11.1.22';
-%Dname = 'Chris_11.3.22';
-Dname = 'Emily_11.3.22';
+Dname = 'Chris_11.3.22';
+%Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
 disp(Dname)
+
+% select which footstrike to analyze
+row = 20;
+
+%% NOTES
+
+% relate runner sound pitch to speed
+% use footfall picture
+    % take the second half of the snapshot, after peak ground reaction
+    % force
+    % then run an FFT on that (mic channels)
+    % tag each footstep with speed
+        % tack on speed on to the end of each vector
+    % lay two different FFTs on top of each other and look for shifts in
+    % peaks
+
+    % modify snapshot algo to have a speed variable added on to footstrike
+    % vector
+    % use tach sensor to find speed inside the snapshot
+
 
 %% READ LOADCELL DATA
 if 1
@@ -29,10 +52,47 @@ if 1
 MicData = load_MicData(fullfile(Dname,'mic_data.tdms'));
 end
 
-%% FOOTSTRIKE ROW SELCTION AND FINDING MAX
+%% READ TACH DATA
+if 1
+TachData = load_TachData(fullfile(Dname,'Tach_Data.tdms'));
 
-% select which footstrike to analyze
-row = 15;
+vel = TachData.vel;
+M_vel = vel * 2.6; % [rad/s]
+B_r = 0.050/2; % [m]
+B_vel = vel/(2*pi) * (2*pi*B_r); % roller vel in [rad/s] to belt vel in [m/s]
+
+end
+
+%% GRAPH TACH DATA 
+
+if 1
+% B_vel is in mph
+
+%figure
+%subplot 311
+%plot(TachData.t,TachData.Tach);title('Tach')
+%ylim([-0.25 1.25])
+%subplot 312
+%plot(TachData.t,vel);title('Velocity m/s')
+%subplot 313
+%plot(TachData.t,B_vel);title('Velocity mph') % [m/s] to [mph] *2.23694
+
+% disp(B_vel);
+
+% average the whole vector to get the average speed
+% find B_vel then average B_vel
+
+footstrikeVel = TachData.footStrikeVel;
+footsrtikeB_vel = footstrikeVel/(2*pi) * (2*pi*B_r);
+
+display(f)
+
+%plot(TachData.footStrikeTime(row,:), TachData.footStrikeVel(row,:));
+
+
+end
+
+%% FOOTSTRIKE FINDING MAX
 
 % remove the zero padding in the footsrike to the end and to find the index of the end
 endvalue = rmmissing(ForceData.footStrikeTime(row,:));
@@ -328,7 +388,7 @@ end
 
 %% MIC FFT
 
-if 01
+if 0
 
 % calculate the FFT of a single footstrike on the sum of all Mic data
 FFT_MIC = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
@@ -350,13 +410,10 @@ P2(end+1) = 0;
 P1(1) = 0;
 P2(1) = 0;
 
-disp(P1)
-disp(P2)
 figure
-plot(frequencyMic,P1);title('MIC P1 MIC FFT')
+plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
 figure
-plot(frequencyMic2,P2);title('P2 MIC FFT')
-
+plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
 
 end
 
