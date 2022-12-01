@@ -34,77 +34,28 @@ if ~exist(fullfname_mat,'file')
     %freqz(b,a,[],fs)
     %subplot(2,1,1)
     %ylim([-100 20])
-
-    dataInFL = ForceData.Frnt_L;
-    dataInFML = ForceData.FMid_L;
-    dataInBML = ForceData.BMid_L;
-    dataInBL = ForceData.Back_L;
-    dataInFR = ForceData.Frnt_R;
-    dataInFMR = ForceData.FMid_R;
-    dataInBMR = ForceData.BMid_R;
-    dataInBR = ForceData.Back_R;
-
-    dataOutFL = filter(b,a,dataInFL);
-    dataOutFML = filter(b,a,dataInFML);
-    dataOutBML = filter(b,a,dataInBML);
-    dataOutBL = filter(b,a,dataInBL);
-    dataOutFR = filter(b,a,dataInFR);
-    dataOutFMR = filter(b,a,dataInFMR);
-    dataOutBMR = filter(b,a,dataInBMR);
-    dataOutBR = filter(b,a,dataInBR);
     
-    FL_smooth = dataOutFL;
-    FML_smooth = dataOutFML;
-    BML_smooth = dataOutBML;
-    BL_smooth = dataOutBL;
-    FR_smooth = dataOutFR;
-    FMR_smooth = dataOutFMR;
-    BMR_smooth = dataOutBMR;
-    BR_smooth = dataOutBR;
-
-    % smooth data 
-    %FL_smooth = smoothdata(ForceData.Frnt_L);
-    %FML_smooth = smoothdata(ForceData.FMid_L);
-    %BML_smooth = smoothdata(ForceData.BMid_L);
-    %BL_smooth = smoothdata(ForceData.Back_L);
-    %FR_smooth = smoothdata(ForceData.Frnt_R);
-    %FMR_smooth = smoothdata(ForceData.FMid_R);
-    %BMR_smooth = smoothdata(ForceData.BMid_R);
-    %BR_smooth = smoothdata(ForceData.Back_R);
-
-    % don't smooth data
-    %FL_smooth = ForceData.Frnt_L;
-    %FML_smooth = ForceData.FMid_L;
-    %BML_smooth = ForceData.BMid_L;
-    %BL_smooth = ForceData.Back_L;
-    %FR_smooth = ForceData.Frnt_R;
-    %FMR_smooth = ForceData.FMid_R;
-    %BMR_smooth = ForceData.BMid_R;
-    %BR_smooth = ForceData.Back_R;
-
+    % smooth out the data with the butterworth filter
+    FL_smooth = filter(b,a,ForceData.Frnt_L);
+    FML_smooth = filter(b,a,ForceData.FMid_L);
+    BML_smooth = filter(b,a,ForceData.BMid_L);
+    BL_smooth = filter(b,a,ForceData.Back_L);
+    FR_smooth = filter(b,a,ForceData.Frnt_R);
+    FMR_smooth = filter(b,a,ForceData.FMid_R);
+    BMR_smooth = filter(b,a,ForceData.BMid_R);
+    BR_smooth = filter(b,a,ForceData.Back_R);
 
     % 2khz = 2,000 cycles/second
     % 1 sec =  2,000 data points 
-    FL_short = FL_smooth(1:2000);
-    FML_short = FML_smooth(1:2000);
-    BML_short = BML_smooth(1:2000);
-    BL_short = BL_smooth(1:2000);
-    FR_short = FR_smooth(1:2000);
-    FMR_short = FMR_smooth(1:2000);
-    BMR_short = BMR_smooth(1:2000);
-    BR_short = BR_smooth(1:2000);
-
-
     % find average of each shortened data point using mean()
-    % ForceData.average = mean(ForceData.sum);
-    FL_av = mean(FL_short);
-    FML_av = mean(FML_short);
-    BML_av = mean(BML_short);
-    BL_av = mean(BL_short);
-    FR_av = mean(FR_short);
-    FMR_av = mean(FMR_short);
-    BMR_av = mean(BMR_short);
-    BR_av = mean(BR_short);
+    FL_av = mean(FL_smooth(1:2000));
+    FML_av = mean(FML_smooth(1:2000));
+    BML_av = mean(BML_smooth(1:2000));
+    BL_av = mean(BL_smooth(1:2000));
+    FR_av = mean(FR_smooth(1:2000));
+    FMR_av = mean(FMR_smooth(1:2000));
+    BMR_av = mean(BMR_smooth(1:2000));
+    BR_av = mean(BR_smooth(1:2000));
 
     % zero out forces by subtracting mean from each data point
     FL_zero = FL_smooth - FL_av;
@@ -115,12 +66,6 @@ if ~exist(fullfname_mat,'file')
     FMR_zero = FMR_smooth - FMR_av;
     BMR_zero = BMR_smooth - BMR_av;
     BR_zero = BR_smooth - BR_av;
-    
-    % test 
-    %display(ForceData.Frnt_L)
-    %display(FL_short)
-    %display(FL_av)
-    %display(FL_zero)
 
     % sum forces after being zeroed
     ForceData.sum = FL_zero+...
@@ -132,6 +77,7 @@ if ~exist(fullfname_mat,'file')
          BMR_zero+...
          BR_zero;
 
+    % find the sum of each zone
     ForceData.zone1 = FR_zero + FL_zero;
     ForceData.zone2 = FML_zero + FMR_zero;
     ForceData.zone3 = BMR_zero + BML_zero;
@@ -148,23 +94,19 @@ if ~exist(fullfname_mat,'file')
     % create empty vectors and matrices
     temp = [];
     timeTemp = [];
-
     mat = zeros(1,4000);
     timeMat = NaT(1,4000);
-
     tempzone1 = [];
     tempzone2 = [];
     tempzone3 = [];
     tempzone4 = [];
+    tempRIGHT = [];
+    tempLEFT = [];
 
     matzone1 = zeros(1,4000);
     matzone2 = zeros(1,4000);
     matzone3 = zeros(1,4000);
     matzone4 = zeros(1,4000);
-
-    tempRIGHT = [];
-    tempLEFT = [];
-
     matRIGHT = zeros(1,4000);
     matLEFT = zeros(1,4000);
 

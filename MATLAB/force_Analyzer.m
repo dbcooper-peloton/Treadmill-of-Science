@@ -3,14 +3,39 @@ close all;clear;clc;
 %DataRootDir is the parent path of the dataset folder
 %Dname is the folder that the dataset file is in
 
-DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+% WINDOWS
+%DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+
+% LINUX
+DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
-Dname = 'Andy-11.1.22';
-%Dname = 'Chris_11.3.22';
+%Dname = 'Andy-11.1.22';
+Dname = 'Chris_11.3.22';
 %Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
+disp(Dname)
+
+% select which footstrike to analyze
+row = 15;
+
+%% NOTES
+
+% relate runner sound pitch to speed
+% use footfall picture
+    % take the second half of the snapshot, after peak ground reaction
+    % force
+    % then run an FFT on that (mic channels)
+    % tag each footstep with speed
+        % tack on speed on to the end of each vector
+    % lay two different FFTs on top of each other and look for shifts in
+    % peaks
+
+    % modify snapshot algo to have a speed variable added on to footstrike
+    % vector
+    % use tach sensor to find speed inside the snapshot
+
 
 %% READ LOADCELL DATA
 if 1
@@ -27,10 +52,9 @@ if 1
 MicData = load_MicData(fullfile(Dname,'mic_data.tdms'));
 end
 
+%% FOOTSTRIKE FINDING MAX
 
-%% PLOT
-
-row = 2;
+% remove the zero padding in the footsrike to the end and to find the index of the end
 endvalue = rmmissing(ForceData.footStrikeTime(row,:));
 endvaluenum = numel(endvalue);
 
@@ -39,9 +63,42 @@ endvaluenum = numel(endvalue);
 maxStrike = xmax;
 maxTime = ForceData.footStrikeTime(row,ymax);
 
+% why is the scale 20?
 ymaxAccel = ymax*20;
 
-% PLOT SINGLE STRIKES
+%% READ TACH DATA
+if 1
+TachData = load_TachData(fullfile(Dname,'Tach_Data.tdms'));
+
+vel = TachData.vel;
+M_vel = vel * 2.6; % [rad/s]
+B_r = 0.050/2; % [m]
+B_vel = vel/(2*pi) * (2*pi*B_r); % roller vel in [rad/s] to belt vel in [m/s]
+
+B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
+
+end
+
+%% GRAPH TACH DATA 
+
+if 0
+% B_vel is in mph
+
+%figure
+%subplot 311
+%plot(TachData.t,TachData.Tach);title('Tach')
+%ylim([-0.25 1.25])
+%subplot 312
+%plot(TachData.t,vel);title('Velocity m/s')
+%subplot 313
+%plot(TachData.t,B_vel);title('Velocity mph') % [m/s] to [mph] *2.23694
+
+plot(TachData.footStrikeTime(row,:), TachData.footStrikeVel(row,:));
+
+end
+
+
+%% PLOT SINGLE STRIKES FOR ACCEL, 
 if 0
 %row = 17;
 figure
@@ -59,18 +116,17 @@ subplot 616
 plot(MicData.footStrikeTime(row,:),MicData.footStrikeBR(row,:));title('single strike back right mic')
 end
 
-% SINGLE FORCE 
+%% PLOT SINGLE FORCE FOOTSRIKE 
 if 0
 plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell');ylabel('Pounds (lbs)');xlabel('Time (Datetime)')
 end
 
-% FORCE STRIKE
+%% FORCE FOOTSRIKE ANALYZER
 if 0
-%row = 17;
 
-
-
-
+% plot the foot strike of each zone on a single graph
+% this plot also shows the sum of all the forces and the sum of the LEFT
+% and RIGHT forces
 figure
 hold on
 plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell');ylabel('Pounds (lbs)');xlabel('Time (Datetime)')
@@ -78,26 +134,8 @@ plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone1(row,:));
 plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone2(row,:));
 plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone3(row,:));
 plot(ForceData.footStrikeTime(row,:), ForceData.footStrikeZone4(row,:));
-
 plot(ForceData.footStrikeTime(row,:), ForceData.RIGHT(row,:));
 plot(ForceData.footStrikeTime(row,:), ForceData.LEFT(row,:));
-%hold off
-
-
-
-%hold off
-
-
-%display(ForceData.max)
-%display(ForceData.maxTime)
-
-
-
-
-
-%display(maxStrike)
-%display(maxTime)
-%plot(maxTime, maxStrike,'x',color='red');
 
 % calculate the percentages
 zone1_percent = ForceData.footStrikeZone1(row,ymax)/maxStrike * 100;
@@ -107,11 +145,7 @@ zone4_percent = ForceData.footStrikeZone4(row,ymax)/maxStrike * 100;
 RIGHT_percent = ForceData.RIGHT(row,ymax)/maxStrike;
 LEFT_percent = ForceData.LEFT(row,ymax)/maxStrike;
 
-
-
 FRONT_percent = (zone1_percent + zone2_percent)/100;
-
-
 
 % find the value of the zones at the max value
 zone1_value = ForceData.footStrikeZone1(row,ymax);
@@ -123,17 +157,12 @@ LEFT_value = ForceData.LEFT(row,ymax);
 
 right_left_placement = LEFT_percent * 25;
 
-
-
-
 % create vectors
 zonevectorpercentage = [zone1_percent,zone2_percent,zone3_percent,zone4_percent];
 zonevectorvalue = [zone1_value, zone2_value, zone3_value, zone4_value];
 deckvector = [8.3, 26.7, 28.3, 26.7, 10];
 
-%figure
-% plot the max
-%hold on
+% plot the max of each zone
 plot(ForceData.footStrikeTime(row,ymax), zone1_value,'x',color='magenta');
 plot(ForceData.footStrikeTime(row,ymax), zone2_value,'x',color='blue');
 plot(ForceData.footStrikeTime(row,ymax), zone3_value,'x',color='green');
@@ -164,12 +193,6 @@ while true
     ii = ii+1;
 end
 
-%display(zonevectorvalue(ii))
-%display(zonevectorvalue(ii-1))
-%display(sum2)
-%display(rise)
-%display(run)
-
 % calculate slope
 m = rise/run;
 
@@ -179,35 +202,38 @@ x = fact(m,b);
 % find distance travelled
 distance = ((x + sum2)/100) * 60;
 
-display(m)
-display(b)
-display(x)
-display(distance)
+%display(m)
+%display(b)
+%display(x)
+%display(distance)
 
-
-%legend('Front Percentage: '+ zone1_percent, 'Front Middle Percentage: '+zone2_percent,'Back Middle Percentage: '+zone3_percent,'Back Percentage: '+zone4_percent);
+% creating labels for the plot legend
 stringpercentage1 = 'Front: ' + string(zone1_percent);
 stringpercentage2 = 'Front Middle: ' + string(zone2_percent);
 stringpercentage3 = 'Back Middle: ' + string(zone3_percent);
 stringpercentage4 = 'Back: ' + string(zone4_percent);
 legend('Sum', 'Front Zone', 'Front Middle Zone', 'Back Middle Zone', 'Back Zone', 'RIGHT', 'LEFT', stringpercentage1, stringpercentage2, stringpercentage3, stringpercentage4);
 
+% find the distance from the front of deck where the footstirkes occur
 distanceFront = 60 -(60 * FRONT_percent);
 
-
+% This for loop will go through the 
 figure
-%disp(length(ForceData.footStrike));
 for j = 1:length(ForceData.endTime)
     
+    % find the percentages of the footstrikes in zone 1 and zone 2
     zone1_percentnextstrike = ForceData.footStrikeZone1(j,ymax)/maxStrike * 100;
     zone2_percentnextstrike = ForceData.footStrikeZone2(j,ymax)/maxStrike * 100;
+    % using the percentages find the percentage of the front zones and the
+    % left zones
     FRONT_percentnextstrike = (zone1_percentnextstrike + zone2_percentnextstrike)/100;
-    
     LEFT_percentnextstrike = ForceData.LEFT(j,ymax)/maxStrike;
     
+    % find the distance from the front of deck where the footstirkes occur
     distanceFrontnextstrike = 60 - (60*FRONT_percentnextstrike);
     right_left_placementnextstrike = LEFT_percentnextstrike * 25;
 
+    % plot the footstrikes on a treadmill deck
     hold on
     plot([0,distance,60], [0,12.5,25],'x',color='white');
     %plot(distanceFront,right_left_placement, 'x', color='blue');
@@ -215,24 +241,23 @@ for j = 1:length(ForceData.endTime)
     plot(12, 0:25,'.',color='blue');
 end
 
-
 end
 
-% LOAD CELL Derivative
+%% FIND AND PLOT LOAD CELL DERIVATIVE
+
 if 0
 figure
 %Calcuate derivative of filtered and combined GRF data
 GRF_Derivative = diff(ForceData.footStrike(row,(1:endvaluenum)));
 %GRF_2ndDerivative = diff(ForceData.GRF_Derivative);
 
-%display(length(GRF_Derivative));
-%display((endvaluenum));
-
+% find the lenght of the derivate and plot it
 XValues = numel(GRF_Derivative);
 plot([1:endvaluenum-1],GRF_Derivative);hold all;title(Dname,'GRF Derivative')
 end
 
-% SINGLE ACCEL
+%% PLOT SINGLE ACCEL FOOTSTRIKE
+
 if 0
 figure
 %subplot 211
@@ -243,15 +268,16 @@ plot(AccelData.footStrikeTime(row,1:ymaxAccel),AccelData.footStrikeZ(row,1:ymaxA
 
 end
 
-% INTEGRAL of ACCEL
+%% FIND AND PLOT INTEGRAL of ACCEL FOOTSTRIKE
+
 if 0
 figure
 dataAccel = cumtrapz(AccelData.footStrikeY(row,:));
 plot(AccelData.footStrikeTime(row,:),dataAccel);
 end
 
+%% PLOT SINGLE MIC FOOTSTRIKE
 
-% SINGEL MIC
 if 0
 figure
 hold on
@@ -263,19 +289,21 @@ subplot 413
 plot(MicData.footStrikeTime(row,1:ymaxAccel),MicData.footStrikeFR(row,1:ymaxAccel), color = 'blue');title('single strike front right mic')
 subplot 414
 plot(MicData.footStrikeTime(row,1:ymaxAccel),MicData.footStrikeBR(row,1:ymaxAccel),color = 'magenta');title('single strike back right mic')
+end
 
-% FIND SUM of ABS of MIC
+%% FIND SUM of ABS of MIC
+
+if 0
 disp(ymaxAccel)
 sum_Frnt_L = sum(abs(MicData.footStrikeFL(row,1:ymaxAccel)))
 sum_Back_L = sum(abs(MicData.footStrikeBL(row,1:ymaxAccel)))
 sum_Frnt_R = sum(abs(MicData.footStrikeFR(row,1:ymaxAccel)))
 sum_Back_R = sum(abs(MicData.footStrikeBR(row,1:ymaxAccel)))
-
-
 end
 
 
-% PLOT ACCEL DATA
+%% PLOT ACCEL DATA
+
 if 0
 figure
 subplot 311
@@ -286,9 +314,7 @@ subplot 313
 plot(AccelData.t, AccelData.Center_Z);
 end
 
-
-
-% PLOT LOAD CELL DATA
+%% PLOT LOAD CELL DATA
 if 0
 %plot forces individually
 %figure
@@ -318,11 +344,10 @@ plot(ForceData.t, ForceData.sum);title('Combined Force lbs')
                  %ForceData.BMid_R);title('Combined Force 2')
 end
 
-% PLOT MIC DATA
-if 0
-MicData = load_MicData(fullfile(Dname,'mic_data.tdms'));
+%% PLOT MIC DATA
 
-figure;
+if 0
+figure
 plot(MicData.t,MicData.Frnt_L);hold all;title('Mics')
 plot(MicData.t,MicData.Back_L);
 plot(MicData.t,MicData.Frnt_R);
@@ -330,75 +355,155 @@ plot(MicData.t,MicData.Back_R);
 legend('Frnt L','Back L','Frnt R','Back R')
 end
 
-
-
-
 %% ACCEL FFT
 
-% ACCEL
-if 01
-% Z
-%FFT_ACCELZ = fft(AccelData.Center_Z);
+if 0
+
+% calculate the FFT of a single footstirke on the Z Accel Axis
 FFT_ACCELZ = fft(AccelData.footStrikeZ(row, (1:endvaluenum)));
 FFTValuesZ = numel(FFT_ACCELZ);
 
 % frequency domain
 frequencyZ = 5000*(0:(FFTValuesZ/2))/FFTValuesZ;
 
-% single sided and two sided spectrum
-P2 = abs(FFT_ACCELZ/FFTValuesZ);
-P1 = P2(1:FFTValuesZ/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
+P1 = FFT(FFT_MIC, FFTValues);
 
 figure
 plot(frequencyZ,P1);title('P1 Z AXIS ACCEL FFT')
-%figure
 %plot(frequencyZ,P2);title('P2 Z AXIS ACCEL FFT')
 
-%plot(1:FFTValuesZ, FFT_ACCELZ);title('Z AXIS ACCEL FFT')
-
-% X
-%FFT_ACCELX = fft(AccelData.Center_X);
-%FFT_ACCELX = fft(AccelData.footStrikeX(row, (1:endvaluenum)));
-%FFTValuesX = numel(FFT_ACCELX);
-
-% Y
-%FFT_ACCELY = fft(AccelData.Center_Y);
-%FFT_ACCELY = fft(AccelData.footStrikeY(row, (1:endvaluenum)));
-%FFTValuesY = numel(FFT_ACCELY);
 end
 
 %% MIC FFT
 
+% SINGLE 
 if 01
-% MIC
-FFT_MIC_FL = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
-FFTValues_FL = numel(FFT_MIC_FL);
+ 
+% take the average of the B_vel vector
+B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
+
+% calculate the FFT of a single footstrike on the sum of all Mic data
+FFT_MIC = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
+FFTValues = numel(FFT_MIC);
 
 % frequency domain
-frequencyMic = 40000*(0:(FFTValues_FL/2))/FFTValues_FL;
+frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
+frequencyMic2 = 40000*(0:(FFTValues))/FFTValues;
 
-% single sided and two sided spectrum
-P2 = abs(FFT_MIC_FL/FFTValues_FL);
-P1 = P2(1:FFTValues_FL/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
+P1 = FFT(FFT_MIC, FFTValues);
+
+% convert B_vel_avg to a string for labelling purposes
+averagespeed = 'Average Speed: ' + string(B_vel_avg);
 
 figure
-plot(frequencyMic,P1);title('P1 FRONT LEFT MIC FFT')
+plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
+legend(averagespeed)
+%figure
+%plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
 
+end
 
-%plot([1:endvaluenum], FFT_ACCEL);
+% LOOP
+if 01
+% loop through all footstrikes and plot the FFTs of each one
+figure()
+hold on
+startLoop = 27;
+endLoop = 29;
+%nLoops = length(ForceData.endTime);
+for j = startLoop:endLoop
+%for j = 1:length(ForceData.endTime)
+
+    % take the average of the B_vel vector
+    B_vel_avg = mean(TachData.footStrikeVel(j,1:endvaluenum), "all");
+    
+    % calculate the FFT of a single footstrike on the sum of all Mic data
+    FFT_MIC = fft(MicData.footStrikeSum(j, (1:endvaluenum)));
+    FFTValues = numel(FFT_MIC);
+    
+    % frequency domain
+    frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
+    frequencyMic2 = 40000*(0:(FFTValues))/FFTValues;
+    
+    P1 = FFT(FFT_MIC, FFTValues);
+    
+    % convert B_vel_avg to a string for labelling purposes
+    averagespeed = 'STRIKE ' + string(j) + ' Average Speed: ' + string(B_vel_avg);
+
+    %hold on
+    plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON');
+    legends{j-(startLoop-1)} = sprintf(averagespeed);
+    %plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
+    %legend(averagespeed)
+
+end
+disp(legends)
+legend(legends)
+
+end
+
+% DOUBLE 
+if 01
+
+row1 = 5;
+row2 = 25;
+ 
+% take the average of the B_vel vector
+B_vel_avg1 = mean(TachData.footStrikeVel(row1,1:endvaluenum), "all");
+B_vel_avg2 = mean(TachData.footStrikeVel(row2,1:endvaluenum), "all");
+
+% calculate the FFT of a single footstrike on the sum of all Mic data
+FFT_MIC1 = fft(MicData.footStrikeSum(row1, (1:endvaluenum)));
+FFTValues1 = numel(FFT_MIC1);
+FFT_MIC2 = fft(MicData.footStrikeSum(row2, (1:endvaluenum)));
+FFTValues2 = numel(FFT_MIC2);
+
+% frequency domain
+frequencyMic = 40000*(0:(FFTValues1/2))/FFTValues1;
+
+P1_1 = FFT(FFT_MIC1, FFTValues1);
+P1_2 = FFT(FFT_MIC2, FFTValues2);
+
+% convert B_vel_avg to a string for labelling purposes
+averagespeed1 = 'STRIKE ' + string(row1) + ' Average Speed: ' + string(B_vel_avg1);
+averagespeed2 = 'STRIKE ' + string(row2) + ' Average Speed: ' + string(B_vel_avg2);
+
+figure
+hold on
+plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON')
+%figure
+plot(frequencyMic,P1_2);
+legend(averagespeed1, averagespeed2)
+
 end
 
 
 %% clear intermediate mat files from target directory
+
 %D = dir(fullfile(Dname,'*.mat'));
 %delete(fullfile(Dname,'*.mat'));
 %return
 
-% function to find x in y = mx+b
+%% FUNCTIONS
+
 function f = fact(m,b)
     f = (50-b)/m;
 end
 
 
+function f = FFT(FFT_MIC,FFTValues)
+    % single sided and two sided spectrum
+    P2 = abs(FFT_MIC/FFTValues);
+    P1 = P2(1:FFTValues/2+1);
+    P1(2:end-1) = 2*P1(2:end-1);
+    
+    % not sure why but I had to add a zero to the end of the two sided spectrum
+    % also first value is always higher than the rest, so I got rid of it for
+    % now
+    P2(end+1) = 0;
+    P1(1) = 0;
+    P2(1) = 0;
+
+    f = P1;
+end
+    

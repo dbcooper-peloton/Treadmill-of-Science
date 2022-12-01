@@ -6,6 +6,17 @@ function TachData = load_TachData(fullfname_tdms)
 [Dname,fname,~] = fileparts(fullfname_tdms);
 fullfname_mat = fullfile(Dname,[fname '.mat']);
 
+% creating the end and start time vector from ForceData
+ForceData = load_ForceData(fullfile(Dname,'load_cells_Data.tdms'));
+TachData.endTime = ForceData.endTime;
+startTime = ForceData.footStrikeTime(:,1);
+
+% remove empty cells
+startTime = rmmissing(startTime);
+
+% assign mic start time vector to force start time vector
+TachData.startTimeSec = (startTime);
+
 if ~exist(fullfname_mat,'file')
     Data = convertTDMS(0,fullfname_tdms);
 
@@ -27,6 +38,71 @@ if ~exist(fullfname_mat,'file')
     vel = [0;diff(intTach)./diff(tsec)];
     vel(isnan(vel))=0;
     TachData.vel = vel * (2*pi); % [rad/s]
+
+    B_r = 0.050/2; % [m]
+    TachData.B_vel = (TachData.vel/(2*pi) * (2*pi*B_r))*2.23694; % roller vel in [rad/s] to belt vel in [mph]
+
+    % assign accel start time vector to force start time vector
+    TachData.accelTime = TachData.t;
+
+    % creating empty vectors
+    tempTime = [];
+    tempVel = [];
+
+    % create empty matrixes
+    matVel = zeros(1,10000);
+    timeMat = NaT(1,10000);
+
+    % same timezone as time data
+    timeMat.TimeZone = 'America/Los_Angeles';
+     
+    % creating empty indices
+    j = 1;
+
+     % using the endtime and startime, create a snapshot of the accel data
+    if 1 == 1
+       for i=1:length(TachData.accelTime)
+            % if we hit the startime, start logging
+            if TachData.startTimeSec(j) <= TachData.accelTime(i)
+                % if we're less than end time, keep logging
+                if TachData.accelTime(i) <= TachData.endTime(j)
+                    % log into vector
+                    tempTime = [tempTime, [TachData.t(i)]];
+                    tempVel = [tempVel, [TachData.B_vel(i)]]; 
+                % else if we hit the end time, stop logging
+                else
+                    % if we reach the end of the index, stop logging
+                    if j == length(TachData.endTime)
+                        break;
+                    % if the vector is empty, then start loop again
+                    elseif isempty(tempTime)
+                        continue;
+                    end
+
+                    % log vector into X matrix
+                    tempVel(end+1:10000) = -1;
+                    matVel = [matVel; tempVel];
+                    
+                    % log vector into matrix
+                    %display(temp);
+                    tempTime(end+1:10000) = NaT;
+                    timeMat = [timeMat; tempTime]; 
+
+                    % flush
+                    tempVel = []; 
+                    tempTime = [];
+
+                    % increase index
+                    j = j+1;
+
+                end                               
+            end
+        end
+    end
+
+    % create workspace vector
+    TachData.footStrikeVel = matVel;
+    TachData.footStrikeTime = timeMat;
 
     save(fullfname_mat,'TachData');
 else
