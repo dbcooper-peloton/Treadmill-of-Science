@@ -4,15 +4,15 @@ close all;clear;clc;
 %Dname is the folder that the dataset file is in
 
 % WINDOWS
-%DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
 % LINUX
-DataRootDir = '/home/daniel/Documents/MATLAB';
+%DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
+%Dname = 'Chris_11.3.22';
+Dname = 'Emily_11.3.22';
 %Dname = 'Andy-11.1.22';
-Dname = 'Chris_11.3.22';
-%Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
 disp(Dname)
@@ -386,6 +386,30 @@ B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
 FFT_MIC = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
 FFTValues = numel(FFT_MIC);
 
+% calculate the FFT of the FFT
+FFT_MIC_PRIME = diff(FFT_MIC);
+%disp(FFT_MIC_PRIME)
+FFTValues_PRIME = numel(FFTValues);
+
+% where 0, is a peak or trough
+magnitude = abs(FFT_MIC_PRIME);
+
+%pks = findpeaks(real(FFT_MIC));
+[amp, freq] = findpeaks(real(FFT_MIC));
+%disp(amp)
+%disp(freq)
+
+% TODO
+% filter peaks by choosing a threshold - setup the architecture to allow
+% this
+% output should be in format (magnitude, Hz, speed)
+x = .2;
+FFT_PRIME_filter = find(amp < x);
+amp(FFT_PRIME_filter) = [];
+freq(FFT_PRIME_filter) = [];
+disp(amp);
+
+
 % frequency domain
 frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
 frequencyMic2 = 40000*(0:(FFTValues))/FFTValues;
@@ -396,15 +420,17 @@ P1 = FFT(FFT_MIC, FFTValues);
 averagespeed = 'Average Speed: ' + string(B_vel_avg);
 
 figure
-plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
-legend(averagespeed)
+hold on
+%plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
+plot(freq, amp)
+%legend(averagespeed)
 %figure
 %plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
 
 end
 
 % LOOP
-if 01
+if 0
 % loop through all footstrikes and plot the FFTs of each one
 figure()
 hold on
@@ -443,7 +469,7 @@ legend(legends)
 end
 
 % DOUBLE 
-if 01
+if 0
 
 row1 = 5;
 row2 = 25;

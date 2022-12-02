@@ -4,15 +4,15 @@ close all;clear;clc;
 %Dname is the folder that the dataset file is in
 
 % WINDOWS
-%DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
 % LINUX
-DataRootDir = '/home/daniel/Documents/MATLAB';
+%DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
+%Dname = 'Chris_11.3.22';
+Dname = 'Emily_11.3.22';
 %Dname = 'Andy-11.1.22';
-Dname = 'Chris_11.3.22';
-%Dname = 'Emily_11.3.22';
 
 Dname = fullfile(DataRootDir,Dname);
 disp(Dname)
@@ -377,7 +377,7 @@ end
 %% MIC FFT
 
 % SINGLE 
-if 0
+if 01
  
 % take the average of the B_vel vector
 B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
@@ -385,6 +385,17 @@ B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
 % calculate the FFT of a single footstrike on the sum of all Mic data
 FFT_MIC = fft(MicData.footStrikeSum(row, (1:endvaluenum)));
 FFTValues = numel(FFT_MIC);
+
+% calculate the FFT of the FFT
+FFT_MIC_PRIME = diff(FFT_MIC);
+%disp(FFT_MIC_PRIME)
+FFTValues_PRIME = numel(FFTValues);
+
+% where 0, is a peak or trough
+magnitude = abs(FFT_MIC_PRIME);
+phase = 
+
+% index*frequency step = frequency of the derivative
 
 % frequency domain
 frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
@@ -396,6 +407,7 @@ P1 = FFT(FFT_MIC, FFTValues);
 averagespeed = 'Average Speed: ' + string(B_vel_avg);
 
 figure
+hold on
 plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
 legend(averagespeed)
 %figure
@@ -428,10 +440,10 @@ for j = startLoop:endLoop
     P1 = FFT(FFT_MIC, FFTValues);
     
     % convert B_vel_avg to a string for labelling purposes
-    averagespeed = 'Average Speed: ' + string(B_vel_avg);
+    averagespeed = 'STRIKE ' + string(j) + ' Average Speed: ' + string(B_vel_avg);
 
     %hold on
-    plot(frequencyMic,P1);
+    plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON');
     legends{j-(startLoop-1)} = sprintf(averagespeed);
     %plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
     %legend(averagespeed)
@@ -443,7 +455,7 @@ legend(legends)
 end
 
 % DOUBLE 
-if 01
+if 0
 
 row1 = 5;
 row2 = 25;
@@ -462,15 +474,18 @@ FFTValues2 = numel(FFT_MIC2);
 frequencyMic = 40000*(0:(FFTValues1/2))/FFTValues1;
 
 P1_1 = FFT(FFT_MIC1, FFTValues1);
+P1_2 = FFT(FFT_MIC2, FFTValues2);
 
 % convert B_vel_avg to a string for labelling purposes
-averagespeed = 'Average Speed: ' + string(B_vel_avg);
+averagespeed1 = 'STRIKE ' + string(row1) + ' Average Speed: ' + string(B_vel_avg1);
+averagespeed2 = 'STRIKE ' + string(row2) + ' Average Speed: ' + string(B_vel_avg2);
 
 figure
-plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT')
-legend(averagespeed)
+hold on
+plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON')
 %figure
-%plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
+plot(frequencyMic,P1_2);
+legend(averagespeed1, averagespeed2)
 
 end
 
