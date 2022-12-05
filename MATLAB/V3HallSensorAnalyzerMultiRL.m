@@ -19,8 +19,8 @@ invertAxis = true; %invert the x/y axis
 %Categories. The categorie names don't have to match between files.
 %To compare files that have differ num of categories, save truncated versions
 PositionCategories = {'0', '5', '10', '15', '20', '25', '30'};
-activeSensor = [3, 4, 5];
-activeAxis = ['x', 'y', 'z'];
+activeSensor = 4;
+activeAxis = 'x';
 activeSide = ['R', 'L'];
 SnCell = 'B3:B3';
 
