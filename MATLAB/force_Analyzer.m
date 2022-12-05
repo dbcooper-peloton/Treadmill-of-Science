@@ -4,10 +4,10 @@ close all;clear;clc;
 %Dname is the folder that the dataset file is in
 
 % WINDOWS
-DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+%DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
 % LINUX
-%DataRootDir = '/home/daniel/Documents/MATLAB';
+DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
 %Dname = 'Chris_11.3.22';
@@ -377,7 +377,7 @@ end
 %% MIC FFT
 
 % SINGLE 
-if 01
+if 0
  
 % take the average of the B_vel vector
 B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
@@ -394,21 +394,22 @@ FFTValues_PRIME = numel(FFTValues);
 % where 0, is a peak or trough
 magnitude = abs(FFT_MIC_PRIME);
 
-%pks = findpeaks(real(FFT_MIC));
+% find amplitude and frequency of the peaks 
 [amp, freq] = findpeaks(real(FFT_MIC));
-%disp(amp)
-%disp(freq)
 
-% TODO
-% filter peaks by choosing a threshold - setup the architecture to allow
-% this
+% filter peaks by choosing a threshold for the amplitude 
 % output should be in format (magnitude, Hz, speed)
-x = .2;
-FFT_PRIME_filter = find(amp < x);
+filter = 0.2;
+
+% find where the amplitudes are below the filter
+FFT_PRIME_filter = find(amp < filter);
+FFTValues_filter = numel(FFT_PRIME_filter);
+
+% set the values to zero where the amplitude is below the filter
 amp(FFT_PRIME_filter) = [];
 freq(FFT_PRIME_filter) = [];
-disp(amp);
 
+%disp(FFT_PRIME_filter);
 
 % frequency domain
 frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
@@ -422,8 +423,9 @@ averagespeed = 'Average Speed: ' + string(B_vel_avg);
 figure
 hold on
 %plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
+%plot(frequencyMicFilter,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
 plot(freq, amp)
-%legend(averagespeed)
+legend(averagespeed)
 %figure
 %plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
 
@@ -435,7 +437,7 @@ if 0
 figure()
 hold on
 startLoop = 27;
-endLoop = 29;
+endLoop = 37;
 %nLoops = length(ForceData.endTime);
 for j = startLoop:endLoop
 %for j = 1:length(ForceData.endTime)
@@ -446,6 +448,21 @@ for j = startLoop:endLoop
     % calculate the FFT of a single footstrike on the sum of all Mic data
     FFT_MIC = fft(MicData.footStrikeSum(j, (1:endvaluenum)));
     FFTValues = numel(FFT_MIC);
+
+    % find amplitude and frequency of the peaks 
+    [amp, freq] = findpeaks(real(FFT_MIC));
+    
+    % filter peaks by choosing a threshold for the amplitude 
+    % output should be in format (magnitude, Hz, speed)
+    filter = 0.2;
+    
+    % find where the amplitudes are below the filter
+    FFT_PRIME_filter = find(amp < filter);
+    FFTValues_filter = numel(FFT_PRIME_filter);
+    
+    % set the values to zero where the amplitude is below the filter
+    amp(FFT_PRIME_filter) = [];
+    freq(FFT_PRIME_filter) = [];
     
     % frequency domain
     frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
@@ -456,23 +473,21 @@ for j = startLoop:endLoop
     % convert B_vel_avg to a string for labelling purposes
     averagespeed = 'STRIKE ' + string(j) + ' Average Speed: ' + string(B_vel_avg);
 
-    %hold on
-    plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON');
+    %plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON');
+    plot(freq, amp);
     legends{j-(startLoop-1)} = sprintf(averagespeed);
-    %plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
-    %legend(averagespeed)
 
 end
-disp(legends)
+%disp(legends)
 legend(legends)
 
 end
 
 % DOUBLE 
-if 0
+if 01
 
-row1 = 5;
-row2 = 25;
+row1 = 27;
+row2 = 33;
  
 % take the average of the B_vel vector
 B_vel_avg1 = mean(TachData.footStrikeVel(row1,1:endvaluenum), "all");
@@ -483,6 +498,26 @@ FFT_MIC1 = fft(MicData.footStrikeSum(row1, (1:endvaluenum)));
 FFTValues1 = numel(FFT_MIC1);
 FFT_MIC2 = fft(MicData.footStrikeSum(row2, (1:endvaluenum)));
 FFTValues2 = numel(FFT_MIC2);
+
+% find amplitude and frequency of the peaks 
+[amp1, freq1] = findpeaks(real(FFT_MIC1));
+[amp2, freq2] = findpeaks(real(FFT_MIC2));
+
+% filter peaks by choosing a threshold for the amplitude 
+% output should be in format (magnitude, Hz, speed)
+filter = 0.2;
+
+% find where the amplitudes are below the filter
+FFT_PRIME_filter1 = find(amp1 < filter);
+FFTValues_filter1 = numel(FFT_PRIME_filter1);
+FFT_PRIME_filter2 = find(amp2 < filter);
+FFTValues_filter2 = numel(FFT_PRIME_filter2);
+
+% set the values to zero where the amplitude is below the filter
+amp1(FFT_PRIME_filter1) = [];
+freq1(FFT_PRIME_filter1) = [];
+amp2(FFT_PRIME_filter2) = [];
+freq2(FFT_PRIME_filter2) = [];
 
 % frequency domain
 frequencyMic = 40000*(0:(FFTValues1/2))/FFTValues1;
@@ -496,9 +531,11 @@ averagespeed2 = 'STRIKE ' + string(row2) + ' Average Speed: ' + string(B_vel_avg
 
 figure
 hold on
-plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON')
+%plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON')
 %figure
-plot(frequencyMic,P1_2);
+%plot(frequencyMic,P1_2);
+plot(freq1, amp1);
+plot(freq2, amp2);
 legend(averagespeed1, averagespeed2)
 
 end
