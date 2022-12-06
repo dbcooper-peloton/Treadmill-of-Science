@@ -14,8 +14,8 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
     end
     
     %options
-    plt = false; %toggle plot
     invertAxis = true; %invert the x/y axis
+    pltD = false; %plot each board sensor and save the image. produces 12 images per board.
     
     %This script needs each file to have the same number of Position
     %Categories. The categorie names don't have to match between files.
@@ -23,7 +23,7 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
     PositionCategories = [0, 5, 10, 15, 20, 25, 30];
     activeSensor = [4, 5];
     activeAxis = ['x', 'y', 'z'];
-    activeSide = ['R', 'L'];
+    activeSide = ['R' 'L'];
     SnCell = 'B3:B3';
     
     fout = 'RheaHallSensorAnalysis_AllRL_V2.xlsx';
@@ -46,11 +46,11 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
 %-------------------------------------------------------------------------- 
     disp("Working...")
     pCounter = 1;
-    for lr=1:length(SnVector) %for every Board
+    for lr=1:length(SnVector) %for each Board
         for n = 1:length(activeSensor) % for each Board sensor
             for a = 1:length(activeAxis) % for each Board sensor Axis
                 for s = 1:length(activeSide) % for each Board sensor Axis side combo
-                    outTable = DS(activeSensor(n), activeAxis(a), activeSide(s), fnameVector(lr), SnVector(lr), invertAxis, outTable, pCounter);
+                    outTable = DS(activeSensor(n), activeAxis(a), activeSide(s), fnameVector(lr), SnVector(lr), invertAxis, pltD, outTable, pCounter);
                     pCounter = pCounter + length(PositionCategories);
                 end
             end
@@ -80,7 +80,12 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
 %-------------------------------------------------------------------------
 %                           Functions
 %-------------------------------------------------------------------------
-    function DataScience = DS(sensorNum, sensorAxis, sensorSide, FileName, SN, invertAx, tbl, tblPos)
+% This function takes in the sensor number, axis, and side; the filename
+% for the board, the Board SN, the invert axis and plot options, the table, and the
+% table row to start writting at. It will calculate the linear regression
+% model for each position, write them to the table and return the table
+
+    function DataScience = DS(sensorNum, sensorAxis, sensorSide, FileName, SN, invertAx, plt, tbl, tblPos)
         Data = readtable(FileName, "VariableNamingRule","preserve", NumHeaderLines=5); %Full file table
         posCat = unique(Data.('Target Resistance')); %Target position categories (Target Resistance)
         ResVector = Data.('Target Resistance'); %full Target Resistance column
@@ -88,6 +93,9 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
         Data.H = Data.(sensor); %data column from the input sensor
         Data.NormalizedH = -(Data.H - Data.H(1)); %normalize the data so 0 rpm value is 0 uT
         DataScience = tbl;
+        if plt
+            figure
+        end
         for i = 1:length(posCat) % for each position category
             pos_df = Data(ResVector == posCat(i), :); %get all the data for only that category
             x = pos_df.('Torque Dyno'); % linreg model
@@ -102,6 +110,31 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
             constant = mdl.Coefficients.Estimate(1);
             Rsquare = mdl.Rsquared.Ordinary;
             DataScience(tblPos + i - 1, :) = [posCat(i) SN {sensor} sensorNum sensorAxis sensorSide linReg constant Rsquare, 0];
+            if plt
+                hold on
+                pt = plot(mdl);
+                delete(pt(3:4));
+                delete(pt(1));
+                if invertAx
+                    scatter(y, x);
+                else
+                    scatter(x, y);
+                end
+            end
+        end
+        if plt
+            grid on
+            title(strcat(sensor, SN))
+            if invertAx
+                ylabel('Dyno Torque')
+                xlabel('Magnetic Field uT')
+            else
+                xlabel('Dyno Torque')
+                ylabel('Magnetic Field uT')
+            end
+            l = get(gca,'Children');
+            legend([l(1),l(3), l(5), l(7), l(9), l(11), l(13)],string(posCat));
+            exportgraphics(gcf,strcat(sensor, '.png'),'Resolution',300);
         end
     end
 end
