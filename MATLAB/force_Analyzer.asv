@@ -4,10 +4,10 @@ close all;clear;clc;
 %Dname is the folder that the dataset file is in
 
 % WINDOWS
-DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+%DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
 % LINUX
-%DataRootDir = '/home/daniel/Documents/MATLAB';
+DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
 %Dname = 'Chris_11.3.22';
@@ -393,9 +393,23 @@ FFTValues_PRIME = numel(FFTValues);
 
 % where 0, is a peak or trough
 magnitude = abs(FFT_MIC_PRIME);
-phase = 
 
-% index*frequency step = frequency of the derivative
+% find amplitude and frequency of the peaks 
+[amp, freq] = findpeaks(real(FFT_MIC));
+
+% filter peaks by choosing a threshold for the amplitude 
+% output should be in format (magnitude, Hz, speed)
+filter = 0.2;
+
+% find where the amplitudes are below the filter
+FFT_PRIME_filter = find(amp < filter);
+FFTValues_filter = numel(FFT_PRIME_filter);
+
+% set the values to zero where the amplitude is below the filter
+amp(FFT_PRIME_filter) = [];
+freq(FFT_PRIME_filter) = [];
+
+%disp(FFT_PRIME_filter);
 
 % frequency domain
 frequencyMic = 40000*(0:(FFTValues/2))/FFTValues;
@@ -408,8 +422,10 @@ averagespeed = 'Average Speed: ' + string(B_vel_avg);
 
 figure
 hold on
-plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
-legend(averagespeed)
+%plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
+%plot(frequencyMicFilter,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
+plot(freq, amp)
+%legend(averagespeed)
 %figure
 %plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
 
@@ -469,6 +485,22 @@ FFT_MIC1 = fft(MicData.footStrikeSum(row1, (1:endvaluenum)));
 FFTValues1 = numel(FFT_MIC1);
 FFT_MIC2 = fft(MicData.footStrikeSum(row2, (1:endvaluenum)));
 FFTValues2 = numel(FFT_MIC2);
+
+% find amplitude and frequency of the peaks 
+[amp1, freq1] = findpeaks(real(FFT_MIC1));
+[amp2, freq2] = findpeaks(real(FFT_MIC));
+
+% filter peaks by choosing a threshold for the amplitude 
+% output should be in format (magnitude, Hz, speed)
+filter = 0.2;
+
+% find where the amplitudes are below the filter
+FFT_PRIME_filter = find(amp < filter);
+FFTValues_filter = numel(FFT_PRIME_filter);
+
+% set the values to zero where the amplitude is below the filter
+amp(FFT_PRIME_filter) = [];
+freq(FFT_PRIME_filter) = [];
 
 % frequency domain
 frequencyMic = 40000*(0:(FFTValues1/2))/FFTValues1;
