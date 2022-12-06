@@ -11,8 +11,9 @@ DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
 %Dname = 'Chris_11.3.22';
-Dname = 'Emily_11.3.22';
+%Dname = 'Emily_11.3.22';
 %Dname = 'Andy-11.1.22';
+Dname = 'ChrisP_12_6_2022';
 
 Dname = fullfile(DataRootDir,Dname);
 disp(Dname)
@@ -377,7 +378,7 @@ end
 %% MIC FFT
 
 % SINGLE 
-if 0
+if 01
  
 % take the average of the B_vel vector
 B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
@@ -422,9 +423,8 @@ averagespeed = 'Average Speed: ' + string(B_vel_avg);
 
 figure
 hold on
-%plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
-%plot(frequencyMicFilter,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
-plot(freq, amp)
+plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
+%plot(freq, amp)
 legend(averagespeed)
 %figure
 %plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
@@ -432,7 +432,7 @@ legend(averagespeed)
 end
 
 % LOOP
-if 0
+if 01
 % loop through all footstrikes and plot the FFTs of each one
 figure()
 hold on
@@ -473,8 +473,8 @@ for j = startLoop:endLoop
     % convert B_vel_avg to a string for labelling purposes
     averagespeed = 'STRIKE ' + string(j) + ' Average Speed: ' + string(B_vel_avg);
 
-    %plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON');
-    plot(freq, amp);
+    plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON');
+    %plot(freq, amp);
     legends{j-(startLoop-1)} = sprintf(averagespeed);
 
 end
@@ -531,11 +531,11 @@ averagespeed2 = 'STRIKE ' + string(row2) + ' Average Speed: ' + string(B_vel_avg
 
 figure
 hold on
-%plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON')
+plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON')
 %figure
-%plot(frequencyMic,P1_2);
-plot(freq1, amp1);
-plot(freq2, amp2);
+plot(frequencyMic,P1_2);
+%plot(freq1, amp1);
+%plot(freq2, amp2);
 legend(averagespeed1, averagespeed2)
 
 end
