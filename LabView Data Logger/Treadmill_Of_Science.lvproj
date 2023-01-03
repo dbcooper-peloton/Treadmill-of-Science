@@ -10,49 +10,53 @@
 		<Property Name="server.vi.callsEnabled" Type="Bool">true</Property>
 		<Property Name="server.vi.propertiesEnabled" Type="Bool">true</Property>
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
-		<Item Name="Digital_Counter_w_External_Clock_V2.vi" Type="VI" URL="../Digital_Counter_w_External_Clock_V2.vi"/>
-		<Item Name="Doppler_Analog_Speed" Type="NI-DAQmx Scale">
-			<Property Name="Lin.Slope" Type="Str">150</Property>
-			<Property Name="Lin.YIntercept" Type="Str">0</Property>
-			<Property Name="Name" Type="Str">Doppler_Analog_Speed</Property>
-			<Property Name="PreScaledUnits" Type="Str">Volts</Property>
-			<Property Name="ScaledUnits" Type="Str">Feet/Min</Property>
-			<Property Name="ScaleType" Type="Str">Linear</Property>
+		<Item Name="Examples" Type="Folder">
+			<Item Name="Digital_Counter_w_External_Clock_V2.vi" Type="VI" URL="../Digital_Counter_w_External_Clock_V2.vi"/>
+			<Item Name="Main_ch.vi" Type="VI" URL="../Main_ch.vi"/>
+			<Item Name="NI_Accel_Analog.vi" Type="VI" URL="../NI_Accel_Analog.vi"/>
+			<Item Name="NI_Doppler_Digital.vi" Type="VI" URL="../NI_Doppler_Digital.vi"/>
+			<Item Name="NI_Mic_Analog.vi" Type="VI" URL="../NI_Mic_Analog.vi"/>
+			<Item Name="NI_Tach_Digital.vi" Type="VI" URL="../NI_Tach_Digital.vi"/>
+			<Item Name="NI_Torque_Analog.vi" Type="VI" URL="../NI_Torque_Analog.vi"/>
+			<Item Name="OMEGA_Load_Analog.vi" Type="VI" URL="../OMEGA_Load_Analog.vi"/>
+			<Item Name="OMEGA_Temp.vi" Type="VI" URL="../OMEGA_Temp.vi"/>
+			<Item Name="WaveBook516E Infinite Acquisition.vi" Type="VI" URL="../WaveBook516E Infinite Acquisition.vi"/>
 		</Item>
-		<Item Name="Futek787404" Type="NI-DAQmx Scale">
-			<Property Name="Lin.Slope" Type="Str">3.9123</Property>
-			<Property Name="Lin.YIntercept" Type="Str">0</Property>
-			<Property Name="Name" Type="Str">Futek787404</Property>
-			<Property Name="PreScaledUnits" Type="Str">Volts</Property>
-			<Property Name="ScaledUnits" Type="Str">N*m/V</Property>
-			<Property Name="ScaleType" Type="Str">Linear</Property>
+		<Item Name="Scales" Type="Folder">
+			<Item Name="Doppler_Analog_Speed" Type="NI-DAQmx Scale">
+				<Property Name="Lin.Slope" Type="Str">150</Property>
+				<Property Name="Lin.YIntercept" Type="Str">0</Property>
+				<Property Name="Name" Type="Str">Doppler_Analog_Speed</Property>
+				<Property Name="PreScaledUnits" Type="Str">Volts</Property>
+				<Property Name="ScaledUnits" Type="Str">Feet/Min</Property>
+				<Property Name="ScaleType" Type="Str">Linear</Property>
+			</Item>
+			<Item Name="Futek787404" Type="NI-DAQmx Scale">
+				<Property Name="Lin.Slope" Type="Str">3.9123</Property>
+				<Property Name="Lin.YIntercept" Type="Str">0</Property>
+				<Property Name="Name" Type="Str">Futek787404</Property>
+				<Property Name="PreScaledUnits" Type="Str">Volts</Property>
+				<Property Name="ScaledUnits" Type="Str">N*m/V</Property>
+				<Property Name="ScaleType" Type="Str">Linear</Property>
+			</Item>
+			<Item Name="MicSig Current Probe" Type="NI-DAQmx Scale">
+				<Property Name="Lin.Slope" Type="Str">100</Property>
+				<Property Name="Lin.YIntercept" Type="Str">0</Property>
+				<Property Name="Name" Type="Str">MicSig Current Probe</Property>
+				<Property Name="PreScaledUnits" Type="Str">Volts</Property>
+				<Property Name="ScaledUnits" Type="Str">Amps</Property>
+				<Property Name="ScaleType" Type="Str">Linear</Property>
+			</Item>
+			<Item Name="MicSig High Voltage Probe" Type="NI-DAQmx Scale">
+				<Property Name="Lin.Slope" Type="Str">100</Property>
+				<Property Name="Lin.YIntercept" Type="Str">0</Property>
+				<Property Name="Name" Type="Str">MicSig High Voltage Probe</Property>
+				<Property Name="PreScaledUnits" Type="Str">Volts</Property>
+				<Property Name="ScaledUnits" Type="Str">Volts</Property>
+				<Property Name="ScaleType" Type="Str">Linear</Property>
+			</Item>
 		</Item>
-		<Item Name="Main_ch.vi" Type="VI" URL="../Main_ch.vi"/>
-		<Item Name="Main_toggled_sensors.vi" Type="VI" URL="../Main_toggled_sensors.vi"/>
-		<Item Name="MicSig Current Probe" Type="NI-DAQmx Scale">
-			<Property Name="Lin.Slope" Type="Str">100</Property>
-			<Property Name="Lin.YIntercept" Type="Str">0</Property>
-			<Property Name="Name" Type="Str">MicSig Current Probe</Property>
-			<Property Name="PreScaledUnits" Type="Str">Volts</Property>
-			<Property Name="ScaledUnits" Type="Str">Amps</Property>
-			<Property Name="ScaleType" Type="Str">Linear</Property>
-		</Item>
-		<Item Name="MicSig High Voltage Probe" Type="NI-DAQmx Scale">
-			<Property Name="Lin.Slope" Type="Str">100</Property>
-			<Property Name="Lin.YIntercept" Type="Str">0</Property>
-			<Property Name="Name" Type="Str">MicSig High Voltage Probe</Property>
-			<Property Name="PreScaledUnits" Type="Str">Volts</Property>
-			<Property Name="ScaledUnits" Type="Str">Volts</Property>
-			<Property Name="ScaleType" Type="Str">Linear</Property>
-		</Item>
-		<Item Name="NI_Accel_Analog.vi" Type="VI" URL="../NI_Accel_Analog.vi"/>
-		<Item Name="NI_Doppler_Digital.vi" Type="VI" URL="../NI_Doppler_Digital.vi"/>
-		<Item Name="NI_Mic_Analog.vi" Type="VI" URL="../NI_Mic_Analog.vi"/>
-		<Item Name="NI_Tach_Digital.vi" Type="VI" URL="../NI_Tach_Digital.vi"/>
-		<Item Name="NI_Torque_Analog.vi" Type="VI" URL="../NI_Torque_Analog.vi"/>
-		<Item Name="OMEGA_Load_Analog.vi" Type="VI" URL="../OMEGA_Load_Analog.vi"/>
-		<Item Name="OMEGA_Temp.vi" Type="VI" URL="../OMEGA_Temp.vi"/>
-		<Item Name="WaveBook516E Infinite Acquisition.vi" Type="VI" URL="../WaveBook516E Infinite Acquisition.vi"/>
+		<Item Name="Main.vi" Type="VI" URL="../Main.vi"/>
 		<Item Name="Dependencies" Type="Dependencies">
 			<Item Name="vi.lib" Type="Folder">
 				<Item Name=" Write Waveform to File (Digital).vi" Type="VI" URL="/&lt;vilib&gt;/Waveform/WDTFileIO.llb/ Write Waveform to File (Digital).vi"/>
@@ -217,6 +221,7 @@
 				<Item Name="DAQmx Create Channel (CO-Pulse Generation-Time).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/create/channels.llb/DAQmx Create Channel (CO-Pulse Generation-Time).vi"/>
 				<Item Name="DAQmx Create Channel (DI-Digital Input).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/create/channels.llb/DAQmx Create Channel (DI-Digital Input).vi"/>
 				<Item Name="DAQmx Create Channel (DO-Digital Output).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/create/channels.llb/DAQmx Create Channel (DO-Digital Output).vi"/>
+				<Item Name="DAQmx Create Channel (Power).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/create/channels.llb/DAQmx Create Channel (Power).vi"/>
 				<Item Name="DAQmx Create Channel (TEDS-AI-Acceleration-Accelerometer).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/create/channels.llb/DAQmx Create Channel (TEDS-AI-Acceleration-Accelerometer).vi"/>
 				<Item Name="DAQmx Create Channel (TEDS-AI-Bridge).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/create/channels.llb/DAQmx Create Channel (TEDS-AI-Bridge).vi"/>
 				<Item Name="DAQmx Create Channel (TEDS-AI-Current-Basic).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/create/channels.llb/DAQmx Create Channel (TEDS-AI-Current-Basic).vi"/>
@@ -288,6 +293,13 @@
 				<Item Name="DAQmx Read (Digital Wfm 1Chan 1Samp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Digital Wfm 1Chan 1Samp).vi"/>
 				<Item Name="DAQmx Read (Digital Wfm 1Chan NSamp Duration).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Digital Wfm 1Chan NSamp Duration).vi"/>
 				<Item Name="DAQmx Read (Digital Wfm 1Chan NSamp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Digital Wfm 1Chan NSamp).vi"/>
+				<Item Name="DAQmx Read (Power 1D DBL 1Chan NSamp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Power 1D DBL 1Chan NSamp).vi"/>
+				<Item Name="DAQmx Read (Power 1D DBL NChan 1Samp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Power 1D DBL NChan 1Samp).vi"/>
+				<Item Name="DAQmx Read (Power 2D DBL NChan NSamp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Power 2D DBL NChan NSamp).vi"/>
+				<Item Name="DAQmx Read (Power 2D I16 NChan NSamp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Power 2D I16 NChan NSamp).vi"/>
+				<Item Name="DAQmx Read (Power DBL 1Chan 1Samp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Power DBL 1Chan 1Samp).vi"/>
+				<Item Name="DAQmx Read (Power Wfm 1Chan 1Samp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Power Wfm 1Chan 1Samp).vi"/>
+				<Item Name="DAQmx Read (Power Wfm 1Chan NSamp).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Power Wfm 1Chan NSamp).vi"/>
 				<Item Name="DAQmx Read (Raw 1D I8).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Raw 1D I8).vi"/>
 				<Item Name="DAQmx Read (Raw 1D I16).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Raw 1D I16).vi"/>
 				<Item Name="DAQmx Read (Raw 1D I32).vi" Type="VI" URL="/&lt;vilib&gt;/DAQmx/read.llb/DAQmx Read (Raw 1D I32).vi"/>
@@ -652,35 +664,22 @@
 				<Item Name="Write WDT Array Dlog File+.vi" Type="VI" URL="/&lt;vilib&gt;/Waveform/WDTFileIO.llb/Write WDT Array Dlog File+.vi"/>
 			</Item>
 			<Item Name="_ChannelSupport.lvlib" Type="Library" URL="/&lt;resource&gt;/ChannelSupport/_ChannelSupport/_ChannelSupport.lvlib"/>
-			<Item Name="Acquisition Arm.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Arm.vi"/>
-			<Item Name="Acquisition Close.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Close.vi"/>
-			<Item Name="Acquisition Initialize.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Initialize.vi"/>
-			<Item Name="Acquisition Read Scan.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Read Scan.vi"/>
-			<Item Name="Acquisition Scan Configuration.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Scan Configuration.vi"/>
-			<Item Name="Basic Trigger Configuration.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Triggering/Basic Trigger Configuration.vi"/>
+			<Item Name="Acquisition Arm.vi" Type="VI" URL="/Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Arm.vi"/>
+			<Item Name="Acquisition Close.vi" Type="VI" URL="/Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Close.vi"/>
+			<Item Name="Acquisition Initialize.vi" Type="VI" URL="/Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Initialize.vi"/>
+			<Item Name="Acquisition Read Scan.vi" Type="VI" URL="/Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Read Scan.vi"/>
+			<Item Name="Acquisition Scan Configuration.vi" Type="VI" URL="/Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Acquisition Control/Acquisition Scan Configuration.vi"/>
+			<Item Name="Basic Trigger Configuration.vi" Type="VI" URL="/Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Triggering/Basic Trigger Configuration.vi"/>
 			<Item Name="ChannelProbePositionAndTitle.vi" Type="VI" URL="/&lt;resource&gt;/ChannelSupport/_ChannelSupport/ChannelProbePositionAndTitle.vi"/>
 			<Item Name="ChannelProbeWindowStagger.vi" Type="VI" URL="/&lt;resource&gt;/ChannelSupport/_ChannelSupport/ChannelProbeWindowStagger.vi"/>
-			<Item Name="CloseCom.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/DaqCom Setup VI&apos;s/CloseCom.vi"/>
-			<Item Name="DaqIO Acquisition Trigger Config.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/Advanced Triggering/DaqIO Acquisition Trigger Config.vi"/>
-			<Item Name="DaqIO AI Buffer Config.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/Advanced Configuration/DaqIO AI Buffer Config.vi"/>
-			<Item Name="DaqIO AI Buffer Read.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/Advanced Configuration/DaqIO AI Buffer Read.vi"/>
-			<Item Name="DaqIO AI Clock Config.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/Advanced Configuration/DaqIO AI Clock Config.vi"/>
-			<Item Name="DaqIO AI Control.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/Advanced Configuration/DaqIO AI Control.vi"/>
-			<Item Name="DaqIO Device New-Append wReference.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/Advanced Configuration/DaqIO Device New-Append wReference.vi"/>
-			<Item Name="DaqIO PreTrigger Config.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/Advanced Triggering/DaqIO PreTrigger Config.vi"/>
-			<Item Name="GlobalReference.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/DaqCom Setup VI&apos;s/GlobalReference.vi"/>
 			<Item Name="lvStorage.dll" Type="Document" URL="lvStorage.dll">
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
 			</Item>
 			<Item Name="nilvaiu.dll" Type="Document" URL="nilvaiu.dll">
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
 			</Item>
-			<Item Name="sa_convert.dll" Type="Document" URL="sa_convert.dll">
-				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
-			</Item>
 			<Item Name="Tag-bool.lvlib" Type="Library" URL="/&lt;extravilib&gt;/ChannelInstances/Tag-bool.lvlib"/>
-			<Item Name="WaveBook516 Analog Input Config.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Acquisition Setup and Control VI&apos;s/Advanced/Advanced Analog Input/Wave516/WaveBook516 Analog Input Config.vi"/>
-			<Item Name="WaveBook516E Analog Channel Configuration.vi" Type="VI" URL="../../../../../../../../Program Files (x86)/DaqIO LabView Support/Wave Device and WBK Configuration VI&apos;s/Wave Device VI&apos;s/WaveBook 516E/WaveBook516E Analog Channel Configuration.vi"/>
+			<Item Name="WaveBook516E Analog Channel Configuration.vi" Type="VI" URL="/Program Files (x86)/DaqIO LabView Support/Wave Device and WBK Configuration VI&apos;s/Wave Device VI&apos;s/WaveBook 516E/WaveBook516E Analog Channel Configuration.vi"/>
 		</Item>
 		<Item Name="Build Specifications" Type="Build"/>
 	</Item>

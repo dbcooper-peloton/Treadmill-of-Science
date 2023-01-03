@@ -93,7 +93,7 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
         Data.H = Data.(sensor); %data column from the input sensor
         Data.NormalizedH = -(Data.H - Data.H(1)); %normalize the data so 0 rpm value is 0 uT
         DataScience = tbl;
-        if plt
+        if plt %for plot
             figure
         end
         for i = 1:length(posCat) % for each position category
@@ -110,7 +110,7 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
             constant = mdl.Coefficients.Estimate(1);
             Rsquare = mdl.Rsquared.Ordinary;
             DataScience(tblPos + i - 1, :) = [posCat(i) SN {sensor} sensorNum sensorAxis sensorSide linReg constant Rsquare, 0];
-            if plt
+            if plt %plot stuff
                 hold on
                 pt = plot(mdl);
                 delete(pt(3:4));
@@ -120,9 +120,9 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
                 else
                     scatter(x, y);
                 end
-            end
+            end %end plot stuff
         end
-        if plt
+        if plt %plot stuff
             grid on
             title(strcat(sensor, SN))
             if invertAx
@@ -135,6 +135,6 @@ function outTable = V3HallSensorAnalyzerAllRL_V2(~)
             l = get(gca,'Children');
             legend([l(1),l(3), l(5), l(7), l(9), l(11), l(13)],string(posCat));
             exportgraphics(gcf,strcat(sensor, '.png'),'Resolution',300);
-        end
+        end %end plot stuff
     end
 end
