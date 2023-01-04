@@ -437,6 +437,7 @@ if XSCore90.XS_OpenConnection(9000) == 1:
         # continuous data logger - this will only end with a keyboard interrupt
         print("starting")
         while True:
+            #!!!Start IMU collect
             # request the sample - this call blocks until the samples are buffered
             if XSCore90.XS_Sample() == 0:
                 # Error handling
@@ -494,6 +495,7 @@ if XSCore90.XS_OpenConnection(9000) == 1:
                              az.value, gx.value, gy.value, gz.value]
                 data_out3.loc[len(data_out3)] = IMUbuffer
                 # print(str(IMUbuffer))
+                ##!!End IMU Collect
                 print("logging")
 
     # stop the while loop with a keyboard press
