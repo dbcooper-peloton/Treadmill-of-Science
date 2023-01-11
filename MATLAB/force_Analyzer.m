@@ -4,22 +4,22 @@ close all;clear;clc;
 %Dname is the folder that the dataset file is in
 
 % WINDOWS
-%DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
+DataRootDir = 'C:\Users\cooper\Documents\MATLAB';
 
 % LINUX
-DataRootDir = '/home/daniel/Documents/MATLAB';
+%DataRootDir = '/home/daniel/Documents/MATLAB';
 
 %Dname = 'Sana_11.4.22';
 %Dname = 'Chris_11.3.22';
-%Dname = 'Emily_11.3.22';
+Dname = 'Emily_11.3.22';
 %Dname = 'Andy-11.1.22';
-Dname = 'ChrisP_12_6_2022';
+%Dname = 'ChrisP_12_6_2022';
 
 Dname = fullfile(DataRootDir,Dname);
 disp(Dname)
 
 % select which footstrike to analyze
-row = 15;
+row = 20;
 
 %% NOTES
 
@@ -68,7 +68,7 @@ maxTime = ForceData.footStrikeTime(row,ymax);
 ymaxAccel = ymax*20;
 
 %% READ TACH DATA
-if 1
+if 0
 TachData = load_TachData(fullfile(Dname,'Tach_Data.tdms'));
 
 vel = TachData.vel;
@@ -120,10 +120,11 @@ end
 %% PLOT SINGLE FORCE FOOTSRIKE 
 if 0
 plot(ForceData.footStrikeTime(row,:),ForceData.footStrike(row,:));title('single strike load cell');ylabel('Pounds (lbs)');xlabel('Time (Datetime)')
+%plot(ForceData.footStrikeTime, ForceData.footStrike);
 end
 
 %% FORCE FOOTSRIKE ANALYZER
-if 0
+if 01
 
 % plot the foot strike of each zone on a single graph
 % this plot also shows the sum of all the forces and the sum of the LEFT
@@ -219,6 +220,9 @@ legend('Sum', 'Front Zone', 'Front Middle Zone', 'Back Middle Zone', 'Back Zone'
 distanceFront = 60 -(60 * FRONT_percent);
 
 % This for loop will go through the 
+arrayX = [];
+arrayY = [];
+
 figure
 for j = 1:length(ForceData.endTime)
     
@@ -231,16 +235,24 @@ for j = 1:length(ForceData.endTime)
     LEFT_percentnextstrike = ForceData.LEFT(j,ymax)/maxStrike;
     
     % find the distance from the front of deck where the footstirkes occur
-    distanceFrontnextstrike = 60 - (60*FRONT_percentnextstrike);
-    right_left_placementnextstrike = LEFT_percentnextstrike * 25;
+    distanceX = 60 - (60*FRONT_percentnextstrike);
+    distanceY = LEFT_percentnextstrike * 25;
+
+    arrayX = [arrayX, distanceX];
+    arrayY = [arrayY, distanceY];
+    %display(distanceX)
+    %display(distanceY)
 
     % plot the footstrikes on a treadmill deck
     hold on
     plot([0,distance,60], [0,12.5,25],'x',color='white');
     %plot(distanceFront,right_left_placement, 'x', color='blue');
-    plot(distanceFrontnextstrike,right_left_placementnextstrike, 'x', color='red');
+    plot(distanceX,distanceY, 'x', color='red');
     plot(12, 0:25,'.',color='blue');
 end
+
+averageXdist = mean(arrayX);
+averageYdist = mean(arrayY);
 
 end
 
@@ -319,15 +331,15 @@ end
 if 0
 %plot forces individually
 %figure
-%plot(ForceData.t,ForceData.Frnt_L);hold all;title('Load Cells lbs')
-%plot(ForceData.t,ForceData.FMid_L);
-%plot(ForceData.t,ForceData.BMid_L);
-%plot(ForceData.t,ForceData.Back_L);
-%plot(ForceData.t,ForceData.Frnt_R);
-%plot(ForceData.t,ForceData.FMid_R);
-%plot(ForceData.t,ForceData.BMid_R);
-%plot(ForceData.t,ForceData.Back_R);
-%legend('Frnt L','FMid L','BMid L','Back L','Frnt R','FMid R','BMid R','Back R')
+% plot(ForceData.t,ForceData.Frnt_L);hold all;title('Load Cells lbs')
+% plot(ForceData.t,ForceData.FMid_L);
+% plot(ForceData.t,ForceData.BMid_L);
+% plot(ForceData.t,ForceData.Back_L);
+% plot(ForceData.t,ForceData.Frnt_R);
+% plot(ForceData.t,ForceData.FMid_R);
+% plot(ForceData.t,ForceData.BMid_R);
+% plot(ForceData.t,ForceData.Back_R);
+% legend('Frnt L','FMid L','BMid L','Back L','Frnt R','FMid R','BMid R','Back R')
 
 %plot of the summed up forces
 figure
@@ -376,9 +388,10 @@ plot(frequencyZ,P1);title('P1 Z AXIS ACCEL FFT')
 end
 
 %% MIC FFT
+filter = 0.0005;
 
 % SINGLE 
-if 01
+if 0
  
 % take the average of the B_vel vector
 B_vel_avg = mean(TachData.footStrikeVel(row,1:endvaluenum), "all");
@@ -397,10 +410,11 @@ magnitude = abs(FFT_MIC_PRIME);
 
 % find amplitude and frequency of the peaks 
 [amp, freq] = findpeaks(real(FFT_MIC));
+%disp(amp)
 
 % filter peaks by choosing a threshold for the amplitude 
 % output should be in format (magnitude, Hz, speed)
-filter = 0.2;
+%filter = 0.0005;
 
 % find where the amplitudes are below the filter
 FFT_PRIME_filter = find(amp < filter);
@@ -420,19 +434,22 @@ P1 = FFT(FFT_MIC, FFTValues);
 
 % convert B_vel_avg to a string for labelling purposes
 averagespeed = 'Average Speed: ' + string(B_vel_avg);
+filterstring = 'Filter: ' + string(filter);
 
 figure
-hold on
+%hold on
 plot(frequencyMic,P1);title('MIC SINGLE SIDED SPECTRUM FFT')
-%plot(freq, amp)
 legend(averagespeed)
-%figure
+
+figure
+plot(freq, amp);title('Filtered FFT')
+legend(filterstring)
 %plot(frequencyMic2,P2);title('MIC TWO SIDED SPECTRUM FFT')
 
 end
 
 % LOOP
-if 01
+if 0
 % loop through all footstrikes and plot the FFTs of each one
 figure()
 hold on
@@ -454,7 +471,7 @@ for j = startLoop:endLoop
     
     % filter peaks by choosing a threshold for the amplitude 
     % output should be in format (magnitude, Hz, speed)
-    filter = 0.2;
+    %filter = 0.2;
     
     % find where the amplitudes are below the filter
     FFT_PRIME_filter = find(amp < filter);
@@ -484,7 +501,7 @@ legend(legends)
 end
 
 % DOUBLE 
-if 01
+if 0
 
 row1 = 27;
 row2 = 33;
@@ -505,7 +522,7 @@ FFTValues2 = numel(FFT_MIC2);
 
 % filter peaks by choosing a threshold for the amplitude 
 % output should be in format (magnitude, Hz, speed)
-filter = 0.2;
+%filter = 0.2;
 
 % find where the amplitudes are below the filter
 FFT_PRIME_filter1 = find(amp1 < filter);
@@ -521,6 +538,7 @@ freq2(FFT_PRIME_filter2) = [];
 
 % frequency domain
 frequencyMic = 40000*(0:(FFTValues1/2))/FFTValues1;
+filterstring = 'Filter: ' + string(filter);
 
 P1_1 = FFT(FFT_MIC1, FFTValues1);
 P1_2 = FFT(FFT_MIC2, FFTValues2);
@@ -534,9 +552,15 @@ hold on
 plot(frequencyMic,P1_1);title('MIC SINGLE SIDED SPECTRUM FFT COMPARISON')
 %figure
 plot(frequencyMic,P1_2);
-%plot(freq1, amp1);
-%plot(freq2, amp2);
+
 legend(averagespeed1, averagespeed2)
+
+figure
+hold on
+plot(freq1, amp1);title('Filtered FFT');
+plot(freq2, amp2);
+legend(filterstring)
+
 
 end
 
